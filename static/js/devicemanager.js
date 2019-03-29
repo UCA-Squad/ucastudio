@@ -367,13 +367,19 @@ class Device extends EventEmitter {
     else {
       this.recorder.resume();
     }
-
+    setTimeout(() => {
+      this.recorder.ondataavailable = function(e) {
+        console.log(e.data);
+        this.emit("binarystream",e.data);
+      };
+    }, 1);
   }
 
   stopRecording() {
     if (this.recorder) {
       this.recorder.stop();
       this.emit('record.prepare', this.info.label);
+      comms.emit('stop');
     }
   }
 

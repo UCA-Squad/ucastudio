@@ -60,7 +60,7 @@ class Recorder extends EventEmitter {
     delay = delay || 0;
     if (!this.isRecording) {
       setTimeout(() => {
-        this.recorder.start();
+        this.recorder.start(2000);
       }, delay);
       this.isRecording = true;
     }
