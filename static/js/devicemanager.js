@@ -239,7 +239,6 @@ class Device extends EventEmitter {
 
   connect(opts) {
 
-    console.log('qsfd');
     if (this.deviceType === 'desktop' && 'getDisplayMedia' in navigator.mediaDevices) {
       return this.connectDisplayMedia();
     }

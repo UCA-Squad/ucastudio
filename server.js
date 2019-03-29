@@ -112,8 +112,16 @@ io.on('connection', function(socket){
 		}
 		feedStream(m);
 	});
+	socket.on('stop',function(m){
+		feedStream=false;
+		if(ffmpeg_process) {
+			try {
+				ffmpeg_process.stdin.end();
+				ffmpeg_process.kill('SIGINT');
+			} catch (e) {console.warn('killing ffmoeg process attempt failed...');}
+		}
+	});
 	socket.on('disconnect', function () {
-		console.log('ok disconnet');
 		feedStream=false;
 		if(ffmpeg_process)
 		try{
@@ -131,7 +139,7 @@ io.on('error',function(e){
 });
 
 server.listen(8888, function(){
-  console.log('http and websocket listening on *:8888');
+  console.log('https and websocket listening on *:8888');
 });
 
 

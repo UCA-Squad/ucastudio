@@ -185,7 +185,6 @@ App.prototype = {
     this[newView].checked = true;
   },
   toggleStream: function(e) {
-    console.log('connect');
 
     if (!e.target.checked) {
       return;
@@ -542,15 +541,6 @@ App.prototype = {
       );
     }
   },
-/*  attachChannelEvents: function(ch) {
-    ch.onopen = function(e) {
-      //add UI notification for data channel opened?
-    };
-
-    ch.onmessage = function(e) {
-      console.log('datachannel message', e);
-    };
-  },*/
   startRecord: function(e) {
 
     if (this.isRecording) {
@@ -575,14 +565,9 @@ App.prototype = {
     }
 
     this.isRecording = true;
-
-
-
-    comms.emit('start');
-
     deviceMgr.record();
     compositor.record();
-
+    comms.emit('start');
     for (let peer in peers) {
       try {
         peers[peer].record();
@@ -609,6 +594,7 @@ App.prototype = {
     this.isPaused = false;
     deviceMgr.stopRecording();
     compositor.stopRecording();
+    comms.emit('stop');
     for (let peer in peers) {
       peers[peer].stopRecording();
     }

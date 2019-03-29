@@ -1234,7 +1234,7 @@ svg {
 
 .modal {
   position: fixed;
-  top: 5rem;
+  top: 3.5rem;
   left: calc(50% - 320px);
   width: 640px;
   height: 480px;
@@ -1739,9 +1739,9 @@ input:focus {
 }
 
 .centreText {
-  font-size: 2rem;
+  font-size: 1rem;
   position: absolute;
-  top: 50%;
+  top: 60%;
   left: 50%;
   transform: translate(-50%, calc(-50% - 4rem));
   text-align: center;
