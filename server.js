@@ -65,23 +65,12 @@ io.on('connection', function(socket){
 			return;
 		}
 		var ops=[
-			'-vcodec', socket._vcodec,'-i','-',
-			'-c:v', 'libx264', '-preset', 'veryfast', '-tune', 'zerolatency',
-			//'-an', //TODO: give up audio for now...
-			//'-async', '1',
-			//'-filter_complex', 'aresample=44100', //necessary for trunked streaming?
-			//'-strict', 'experimental', '-c:a', 'aac', '-b:a', '128k',
-			'-bufsize', '1000',
-			'./records/'+Date.now()+'output.mp4'
-			// '-f', 'flv', socket._rtmpDestination
+			'-re', '-i','-',
+			'-c:v', 'copy', '-preset', 'veryfast',
+			'-b:a', '128k', '-strict', '-2',
+			'./records/'+Date.now()+'output.webm'
 		];
 
-
-		// var ops=[
-		// 	'-i','-',
-		// 	'-c:v', '-preset', 'ultrafast',
-		// 	'/tmp/'+Date.now()+'output.mp4'
-		// ];
 
 		ffmpeg_process=spawn('ffmpeg', ops);
 		feedStream=function(data){
@@ -118,17 +107,16 @@ io.on('connection', function(socket){
 		if(ffmpeg_process) {
 			try {
 				ffmpeg_process.stdin.end();
-				// ffmpeg_process.kill('SIGINT');
 			} catch (e) {console.warn('killing ffmoeg process attempt failed...');}
 		}
 	});
 	socket.on('disconnect', function () {
 		feedStream=false;
-		if(ffmpeg_process)
-		try{
-			ffmpeg_process.stdin.end();
-			// ffmpeg_process.kill('SIGINT');
-		}catch(e){console.warn('killing ffmoeg process attempt failed...');}
+		if(ffmpeg_process) {
+			try {
+				ffmpeg_process.stdin.end();
+			} catch (e) {console.warn('killing ffmoeg process attempt failed...');}
+		}
 	});
 	socket.on('error',function(e){
 		console.log('socket.io error:'+e);
