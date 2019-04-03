@@ -1274,7 +1274,6 @@ svg {
   padding: 0 0.5rem;
 }
 
-/*#toggleAddDeviceModal:checked ~ #addDeviceModal,*/
 #toggleSaveCreationModal:checked ~ #saveCreation,
 #toggleExtensionModal:checked ~ #extensionModal {
   transform: translateY(0);
@@ -1969,4 +1968,9 @@ input:focus {
 
 .tutorial span input:focus {
   box-shadow: none;
+}
+
+.quarterWidth::before {
+  content: "*";
+  color: red;
 }
