@@ -1,4 +1,6 @@
+
 class Recorder extends EventEmitter {
+
   constructor(stream, chosenCodec) {
     super();
 
@@ -28,7 +30,6 @@ class Recorder extends EventEmitter {
     };
 
     this.recorder.onerror = e => {
-      console.log(2);
       this.emit('record.error', e);
     };
 
@@ -41,9 +42,12 @@ class Recorder extends EventEmitter {
     this.recorder.onstop = e => {
       let mimeType = (this.deviceType == 'audio' ? 'audio' : 'video') + '/webm';
       this.result = new Blob(_recData, {type: mimeType});
-      let url = URL.createObjectURL(this.result);
-      this.emit('record.complete', {url: url, media: this.result});
-      this.recorder = null;
+      var self = this;
+      getSeekableBlob(this.result, function (seekableBlob) {
+        var url = URL.createObjectURL(seekableBlob);
+        self.emit('record.complete', {url: url, media: seekableBlob});
+        self.recorder = null;
+      });
     };
 
     Object.defineProperty(this, 'recData', {

@@ -207,21 +207,23 @@
     <h4 data-translate="PRODUCTION_HEADING">Production details</h4>
     <div class="modalBody">
         <ul>
-            <span class="quarterWidth" data-translate="PRODUCTION_TITLE">Title</span><span class="threeQuarterWidth"><input name="title" autocomplete="off" /></span>
-            <span class="quarterWidth" data-translate="PRODUCTION_PRESENTER">Presenter</span><span class="threeQuarterWidth"><input name="presenter" autocomplete="off" /></span>
-            <span class="quarterWidth" data-translate="PRODUCTION_LOCATION">Location</span><span class="threeQuarterWidth"><input name="location" autocomplete="off" /></span>
+            <span class="quarterWidth" data-translate="PRODUCTION_TITLE">Title</span><span class="threeQuarterWidth"><input name="title" id="titleUpload" autocomplete="off" /></span>
+            <span class="quarterWidth" data-translate="PRODUCTION_PRESENTER">Presenter</span><span class="threeQuarterWidth"><input name="presenter" id="presenterUpload" autocomplete="off" /></span>
+            <span class="quarterWidth" data-translate="PRODUCTION_LOCATION">Location</span><span class="threeQuarterWidth"><input name="location" id="locationUpload" autocomplete="off" /></span>
         </ul>
         <h4 data-translate="PRODUCTION_MEDIA">Media</h4>
         <div id="recordingList"></div>
     </div>
     <div class="modalFooter">
-        <button class="btn btn-action" id="editRecordings" data-translate="PRODUCTION_EDIT">Edit media</button>
+        <button class="btn btn-action" id="uploadRecordings" data-translate="PRODUCTION_UPLOAD">Upload media</button>
         <button class="btn btn-success" id="saveRecordings" data-translate="PRODUCTION_SAVE">Save media</button>
         <label for="toggleSaveCreationModal" class="btn btn-cancel" data-translate="PRODUCTION_DISCARD">Discard</label>
     </div>
 </div>
 
 
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>-->
+<!--<script src="js/script.js"></script>-->
 <script src="js/utils.js?version=%ver%"></script>
 <script src="js/eventemitter.js?version=%ver%"></script>
 <script src="js/translate.js?version=%ver%"></script>
@@ -234,5 +236,7 @@
 <script src="js/servercomms.js?version=%ver%"></script>
 <script src="js/app.js?version=%ver%"></script>
 <link href="https://fonts.googleapis.com/css?family=Comfortaa:300|Lobster+Two:400" rel="stylesheet">
+<script src="https://cdn.webrtc-experiment.com/RecordRTC.js"></script>      <!-- ../RecordRTC.js -->
+<script src="https://cdn.webrtc-experiment.com/EBML.js"></script>           <!-- ../libs/DBML.js -->
 </body>
 </html>

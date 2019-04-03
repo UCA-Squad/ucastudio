@@ -11,7 +11,7 @@ function Communications() {
     this.socket = io();
 
     this.socket.on('message',function(m){
-      console.log('recv Toto server message',m);
+      console.log('recv server message',m);
 
     });
 
