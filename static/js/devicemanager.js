@@ -228,6 +228,7 @@ class Device extends EventEmitter {
       enumerable: false
     });
 
+    //PAS DE ON DERRIERE SERT A QUELQUE CHOSE ????
     if (this.deviceType === 'desktop' && _browser === 'chrome') {
       window.addEventListener('message', e => {
         if (e.data.type && e.data.type == 'SS_DIALOG_SUCCESS') {
@@ -362,7 +363,7 @@ class Device extends EventEmitter {
         this.emit('record.complete', media);
         this.recorder = null;
       });
-      this.recorder.start(1000);
+      this.recorder.start();
     }
     else {
       this.recorder.resume();
@@ -379,7 +380,6 @@ class Device extends EventEmitter {
     if (this.recorder) {
       this.recorder.stop();
       this.emit('record.prepare', this.info.label);
-      comms.emit('stop');
     }
   }
 

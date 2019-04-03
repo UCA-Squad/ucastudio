@@ -30,10 +30,12 @@ class Recorder extends EventEmitter {
     };
 
     this.recorder.onerror = e => {
+      //Erreur A GERER !!! Pas de on derrière
       this.emit('record.error', e);
     };
 
     this.recorder.onstart = e => {
+      //A GERER !!! Pas de on derrière
       this.emit('record.start', true);
     };
 
@@ -64,7 +66,7 @@ class Recorder extends EventEmitter {
     delay = delay || 0;
     if (!this.isRecording) {
       setTimeout(() => {
-        this.recorder.start(2000);
+        this.recorder.start(500);
       }, delay);
       this.isRecording = true;
     }

@@ -486,9 +486,6 @@ App.prototype = {
       input.style.maxHeight = (([...input.querySelectorAll('li')].length + 1) * 2) + 'rem';
     });
   },
-  toggleAddDevice: function(e) {
-    comms.emit('initiatePair');
-  },
   togglePeerStream: function(e) {
     console.log(e.target.getAttribute('data-id'));
   },
@@ -567,14 +564,13 @@ App.prototype = {
     this.isRecording = true;
     deviceMgr.record();
     compositor.record();
-    comms.emit('start');
     for (let peer in peers) {
       try {
         peers[peer].record();
       } catch(e) {
       }
     }
-
+    comms.emit('start');
     [...document.querySelectorAll('#recordingList a')].forEach(anchor => anchor.parentNode.removeChild(anchor));
   },
   pauseRecord: function(e) {
@@ -594,15 +590,14 @@ App.prototype = {
     this.isPaused = false;
     deviceMgr.stopRecording();
     compositor.stopRecording();
-    comms.emit('stop');
     for (let peer in peers) {
       peers[peer].stopRecording();
     }
+    comms.emit('stop');
     document.getElementById('toggleSaveCreationModal').checked = true;
     rafLoop.unsubscribe(this.recTimeToken);
     this.recTimeToken = null;
     this.recTime = [];
-    comms.emit('disconnect');
   },
   logRecordingTime: function(timestamp) {
     if (this.logNextTick) {

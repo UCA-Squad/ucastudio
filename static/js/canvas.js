@@ -74,13 +74,11 @@ class Canvas extends EventEmitter {
           this.ctx.stroke();
           this.ctx.lineWidth = this.lineWidth;
         }
-        this.emit('strokePoints', this.streamPts);
         this.strokePts = [];
         this.streamPts = [];
         break;
       case 'touch':
         this.canvas.removeEventListener('touchmove', this.boundErase, false);
-        this.emit('erasePoints', this.erasePts);
         this.erasePts = [];
         break;
     }
