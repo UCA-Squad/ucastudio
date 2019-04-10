@@ -1974,3 +1974,35 @@ input:focus {
   content: "*";
   color: red;
 }
+
+.nextBtn::after {
+  position: absolute;
+  content: '';
+  width: 0.75rem;
+  height: 0.75rem;
+  border-bottom: 4px solid #888;
+  border-left: 4px solid #888;
+  transform: rotate(225deg);
+  top: 0.75rem;
+  left: 1rem
+}
+.nextBtn::before {
+  width: 1.5rem;
+  height: 4px;
+  border-radius: 2px;
+  top: calc(1.25rem - 2px);
+  left: 0.5rem;
+  background: #888;
+  position: absolute;
+  content: '';
+}
+
+.nextBtn {
+  position: absolute;
+  top: 80%;
+  right: 5%;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}

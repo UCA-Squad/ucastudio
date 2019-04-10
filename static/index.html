@@ -4,6 +4,7 @@
     <meta charset="utf8">
     <meta name="viewport" content="width=device-width">
     <title>UCAStudio</title>
+    <link rel="stylesheet" type="text/css" href="https://cdn.uca.fr/css/uca.min.last.css">
     <link rel="stylesheet" href="css/style.css">
     <link rel="chrome-webstore-item" href="https://chrome.google.com/webstore/detail/oghkihildgnkedhlolgjomnbfmjpmddm">
 </head>
@@ -41,9 +42,45 @@
         <input type="radio" id="create" class="hiddenCheck" name="view" autocomplete="off" />
         <section>
             <label class="backBtn" for="main" title="Back to main navigation" data-translatetitle="BACK_TO_MAIN"></label>
+            <div class="production" style="font-size: 1.2em">
+                <h1 data-translate="PRODUCTION_HEADING" style="margin-top: 0">Production details</h1>
+                <div id="alert" class="alert alert-orange card-60 hiddenCheck" style="text-align: center;">
+                    Merci de bien vouloir renseigner les informations demandées.
+                </div>
+                <div class="card card-60">
+                    <div class="form-input card-80">
+                        <label>Titre</label>
+                        <input type="text" id="titleUpload" name="title" placeholder="Titre de votre média">
+                    </div>
+                    <div class="form-input card-80">
+                        <label>Auteur</label>
+                        <input type="text" id="presenterUpload" name="presenter" placeholder="Nom/Prénom">
+                    </div>
+                    <div class="form-input card-80">
+                        <label>Localisation</label>
+                        <input type="text" id="locationUpload" name="location" placeholder="lieux de l'enregitrement">
+                    </div>
+                    <div class="form-input card-80">
+                        <div class="checkbox">
+                            <input type="checkbox" id="uploadMedia" name="uploadMedia" checked>
+                            <label for="uploadMedia">
+                                <span class="check"></span>
+                                <span class="box"></span>
+                                Transférer mon média
+                            </label>
+                        </div>
+                    </div>
+                    <label class="nextBtn" id="nextBtn" for="createTmp" title="Back to main navigation" data-translatetitle="BACK_TO_MAIN" ></label>
+                </div>
+            </div>
+
+        </section>
+        <input type="radio" id="createTmp" class="hiddenCheck" name="view" autocomplete="off" />
+        <section>
+            <label class="backBtn backToInfo" for="create" title="Back to main navigation" data-translatetitle="BACK_TO_MAIN"></label>
             <input type="checkbox" id="minimiseStreams" class="hiddenCheck" />
-            <input name="userView" type="radio" value="simple" class="hiddenCheck" checked id="simpleUserView" autocomplete="off" />
-            <input name="userView" type="radio" value="advanced" class="hiddenCheck" id="advancedUserView" autocomplete="off" />
+            <input name="userView" type="radio" value="simple" class="hiddenCheck" id="simpleUserView" autocomplete="off" />
+            <input name="userView" type="radio" value="advanced" class="hiddenCheck" checked id="advancedUserView" autocomplete="off" />
             <input type="radio" name="merge" class="hiddenCheck" id="mergestreams" value="composite" autocomplete="off" />
             <label for="mergestreams" class="mediadevice action" data-title="Merge streams" data-pseudotext="MERGE_STREAMS" data-id="composite" data-target="composite">
                 <video id="composite" autoplay muted data-id="composite"></video>
@@ -63,8 +100,8 @@
             <div id="videoView">
                 <div class="viewControls">
                     <span data-translate="VIEW">View</span>: <select name="createView" autocomplete="off">
-                    <option value="simple" data-translate="SIMPLE">Simple</option>
                     <option value="advanced" data-translate="ADVANCED">Advanced</option>
+                    <option value="simple" data-translate="SIMPLE">Simple</option>
                 </select>
                 </div>
                 <input type="radio" name="desktop" class="hiddenCheck streamToggle" id="desktopstream" autocomplete="off" />
@@ -206,24 +243,18 @@
 <div id="saveCreation" class="modal">
     <h4 data-translate="PRODUCTION_HEADING">Production details</h4>
     <div class="modalBody">
-        <ul>
-            <span class="quarterWidth" data-translate="PRODUCTION_TITLE">Title</span><span class="threeQuarterWidth"><input name="title" id="titleUpload" autocomplete="off" /></span>
-            <span class="quarterWidth" data-translate="PRODUCTION_PRESENTER">Presenter</span><span class="threeQuarterWidth"><input name="presenter" id="presenterUpload" autocomplete="off" /></span>
-            <span class="quarterWidth" data-translate="PRODUCTION_LOCATION">Location</span><span class="threeQuarterWidth"><input name="location" id="locationUpload" autocomplete="off" /></span>
-        </ul>
         <h4 data-translate="PRODUCTION_MEDIA">Media</h4>
         <div id="recordingList"></div>
     </div>
     <div class="modalFooter">
-        <button class="btn btn-action" id="uploadRecordings" data-translate="PRODUCTION_UPLOAD">Upload media</button>
         <button class="btn btn-success" id="saveRecordings" data-translate="PRODUCTION_SAVE">Save media</button>
         <label for="toggleSaveCreationModal" class="btn btn-cancel" data-translate="PRODUCTION_DISCARD">Discard</label>
     </div>
 </div>
 
 
-<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>-->
-<!--<script src="js/script.js"></script>-->
+<script src="js/jquery.min.js"></script>
+<script src="js/script.js"></script>
 <script src="js/utils.js?version=%ver%"></script>
 <script src="js/eventemitter.js?version=%ver%"></script>
 <script src="js/translate.js?version=%ver%"></script>
