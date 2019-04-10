@@ -29,7 +29,7 @@
             <circle r="82" cx="96" cy="96" fill="none" stroke="#00bdc4" stroke-width="8" stroke-dashoffset="0" stroke-dasharray="515"></circle>
             <circle r="82" cx="96" cy="96" fill="none" stroke="white" stroke-width="14" stroke-dashoffset="20" stroke-dasharray="515"></circle>
         </svg>
-        <span class="loaderText" data-translate="LOADING">Loading...</span>
+        <span class="loaderText" data-translate="LOADING">Chargement...</span>
     </div>
 </div>
 <div id="cover"></div>
@@ -43,7 +43,7 @@
         <section>
             <label class="backBtn" for="main" title="Back to main navigation" data-translatetitle="BACK_TO_MAIN"></label>
             <div class="production" style="font-size: 1.2em">
-                <h1 data-translate="PRODUCTION_HEADING" style="margin-top: 0">Production details</h1>
+                <h1 data-translate="PRODUCTION_HEADING" style="margin-top: 0">Détails de production</h1>
                 <div id="alert" class="alert alert-orange card-60 hiddenCheck" style="text-align: center;">
                     Merci de bien vouloir renseigner les informations demandées.
                 </div>
@@ -99,8 +99,8 @@
             </label>
             <div id="videoView">
                 <div class="viewControls">
-                    <span data-translate="VIEW">View</span>: <select name="createView" autocomplete="off">
-                    <option value="advanced" data-translate="ADVANCED">Advanced</option>
+                    <span data-translate="VIEW">Vue</span>: <select name="createView" autocomplete="off">
+                    <option value="advanced" data-translate="ADVANCED">Avancée</option>
                     <option value="simple" data-translate="SIMPLE">Simple</option>
                 </select>
                 </div>
@@ -232,23 +232,22 @@
     </defs>
 </svg>
 <div id="extensionModal" class="modal">
-    <h4 data-translate="HEADING_EXTENSION">Desktop capture requires extension</h4>
+    <h4 data-translate="HEADING_EXTENSION">La capture d'écran nécessite une extension</h4>
     <div class="modalBody">
-        <span data-translate="REQUIRE_EXTENSION">You need to install a chrome extension to enable desktop capture.</span>
+        <span data-translate="REQUIRE_EXTENSION">Vous devez installer une extension pour activer la capture d'écran..</span>
         <p>
-            <a href="https://chrome.google.com/webstore/detail/oghkihildgnkedhlolgjomnbfmjpmddm" target="_blank" id="installExtension" type="button" data-translate="INSTALL_EXTENSION">Install it via Chrome webstore</a>
+            <a href="https://chrome.google.com/webstore/detail/oghkihildgnkedhlolgjomnbfmjpmddm" target="_blank" id="installExtension" type="button" data-translate="INSTALL_EXTENSION">Installez-le</a>
         </p>
     </div>
 </div>
 <div id="saveCreation" class="modal">
-    <h4 data-translate="PRODUCTION_HEADING">Production details</h4>
     <div class="modalBody">
-        <h4 data-translate="PRODUCTION_MEDIA">Media</h4>
+        <h4 data-translate="PRODUCTION_MEDIA">Médias</h4>
         <div id="recordingList"></div>
     </div>
     <div class="modalFooter">
-        <button class="btn btn-success" id="saveRecordings" data-translate="PRODUCTION_SAVE">Save media</button>
-        <label for="toggleSaveCreationModal" class="btn btn-cancel" data-translate="PRODUCTION_DISCARD">Discard</label>
+        <button class="btn btn-success" id="saveRecordings" data-translate="PRODUCTION_SAVE">Enregistrer les médias</button>
+        <label for="toggleSaveCreationModal" class="btn btn-cancel" data-translate="PRODUCTION_DISCARD">Supprimer les médias</label>
     </div>
 </div>
 
