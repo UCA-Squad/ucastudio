@@ -7,6 +7,7 @@
 
   "session_secret_key" : "",
 
+  "opencast_authentication" : "",
   "opencast_events_url" : "",
   "opencast_cert" : ""
 }
