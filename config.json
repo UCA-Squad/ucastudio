@@ -5,5 +5,8 @@
   "path_cert_key" : "",
   "path_cert" : "",
 
-  "session_secret_key" : ""
+  "session_secret_key" : "",
+
+  "opencast_events_url" : "",
+  "opencast_cert" : ""
 }
