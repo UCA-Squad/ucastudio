@@ -9,5 +9,6 @@
 
   "opencast_authentication" : "",
   "opencast_events_url" : "",
-  "opencast_cert" : ""
+  "opencast_cert" : "",
+  "opencast_workflow" : ""
 }

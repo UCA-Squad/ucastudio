@@ -204,7 +204,7 @@ function uploadFile(socket)
 		']';
 
 	var processing = '{\n' +
-		'  "workflow": "obs"\n' +
+		'  "workflow": "'+config.workflow+'"\n' +
 		'}';
 
 	var options = {
