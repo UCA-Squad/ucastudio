@@ -105,11 +105,12 @@ function App() {
   this.presenter = '';
   this.location = '';
 
-  this.titleEl = document.querySelector('#saveCreation input[name=title]');
-  this.presenterEl = document.querySelector('#saveCreation input[name=presenter]');
-  this.locationEl = document.querySelector('#saveCreation input[name=location]');
+  this.titleEl = document.querySelector('input[name=title]');
+  this.presenterEl = document.querySelector('input[name=presenter]');
+  this.locationEl = document.querySelector('input[name=location]');
 
   this.saveRecordings = document.getElementById('saveRecordings');
+  this.nextBtn = document.getElementById('nextBtn');
   this.discardRecordings = document.querySelector('label[for=toggleSaveCreationModal]');
 
   this.socketId = null;
@@ -171,6 +172,7 @@ App.prototype = {
     this.locationEl.addEventListener('keyup', this.setLocation.bind(this), false);
 
     this.saveRecordings.addEventListener('click', this.saveMedia.bind(this), false);
+    this.nextBtn.addEventListener('click', this.uploadMedia.bind(this), false);
 
     document.getElementById('minimiseStreams').addEventListener('change', this.minimiseStreamView.bind(this), false);
 
@@ -691,6 +693,15 @@ App.prototype = {
   saveMedia: function(e) {
     [...document.querySelectorAll('#saveCreation a')].forEach(anchor => anchor.click());
     document.getElementById('toggleSaveCreationModal').checked = false;
+  },
+  uploadMedia: function(e) {
+    if(document.getElementById('uploadMedia').checked) {
+      var infos = {};
+      infos['titleUpload'] = document.getElementById('titleUpload').value;
+      infos['presenterUpload'] = document.getElementById('presenterUpload').value;
+      infos['locationUpload'] = document.getElementById('locationUpload').value;
+      comms.emit('infos', JSON.stringify(infos));
+    }
   },
   changeLanguage: function(e) {
     let btn = e.target.parentNode.querySelector('button');

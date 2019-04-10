@@ -118,6 +118,9 @@ io.on('connection', function(socket){
 		}
 		feedStream(m);
 	});
+	socket.on('infos',function(m){
+		socket.handshake.session.usermediadatas = m;
+	});
 	socket.on('stop',function(m){
 		feedStream=false;
 		if(ffmpeg_process) {
@@ -127,12 +130,8 @@ io.on('connection', function(socket){
 		}
 	});
 	socket.on('disconnect', function () {
-		feedStream=false;
-		if(ffmpeg_process) {
-			try {
-				ffmpeg_process.stdin.end();
-			} catch (e) {console.warn('killing ffmoeg process attempt failed...');}
-		}
+		if(socket.handshake.session.usermediadatas)
+			uploadFile(this);
 	});
 	socket.on('error',function(e){
 		console.log('socket.io error:'+e);
@@ -153,3 +152,111 @@ process.on('uncaughtException', function(err) {
     console.log(err)
     // Note: after client disconnect, the subprocess will cause an Error EPIPE, which can only be caught this way.
 })
+
+
+function uploadFile(socket)
+{
+	//on test si c'est pas undefined  ?
+	var usermediainfosToUpload = JSON.parse(socket.handshake.session.usermediadatas);
+
+	var request = require("request");
+	var d = new Date();
+	var startDate = d.getFullYear()+'-'+d.getMonth()+'-'+d.getDay();
+	var startTime = d.getHours()+':'+d.getMinutes();
+
+	var idFileUpload = socket.handshake.issued;
+	var uid = socket.handshake.session.cas_user;
+	var desc = 'N/R';
+	var idSerie = '931a98a4-55c1-4684-90c6-e9b10066168b';
+
+	var acl = '[\n' +
+		'  {\n' +
+		'    "allow": true,\n' +
+		'    "role": "ROLE_EXTERNAL_APPLICATION",\n' +
+		'    "action": "read"\n' +
+		'  },\n' +
+		'  {\n' +
+		'    "allow": true,\n' +
+		'    "role": "ROLE_EXTERNAL_APPLICATION",\n' +
+		'    "action": "write"\n' +
+		'  },\n' +
+		'  {\n' +
+		'    "allow": true,\n' +
+		'    "role": "ROLE_USER_LDAP_'+uid+'",\n' +
+		'    "action": "read"\n' +
+		'  },\n' +
+		'  {\n' +
+		'    "allow": true,\n' +
+		'    "role": "ROLE_USER_LDAP_'+uid+'",\n' +
+		'    "action": "write"\n' +
+		'  }\n' +
+		']';
+
+	var metadata = '[\n' +
+		'  {\n' +
+		'    "flavor": "dublincore/episode",\n' +
+		'    "fields": [\n' +
+		'      {\n' +
+		'        "id": "title",\n' +
+		'        "value": "'+usermediainfosToUpload.titleUpload+'"\n' +
+		'      },\n' +
+		'      {\n' +
+		'        "id": "description",\n' +
+		'        "value": "'+desc+'"\n' +
+		'      },\n' +
+		'      {\n' +
+		'        "id": "isPartOf",\n' +
+		'        "value": "'+idSerie+'"\n' +
+		'      },\n' +
+		'      {\n' +
+		'        "id": "startDate",\n' +
+		'        "value": "'+startDate+'"\n' +
+		'      },\n' +
+		'      {\n' +
+		'        "id": "startTime",\n' +
+		'        "value": "'+startTime+'"\n' +
+		'      },\n' +
+		'      {\n' +
+		'        "id": "location",\n' +
+		'        "value": "'+usermediainfosToUpload.locationUpload+'"\n' +
+		'      }\n' +
+		'    ]\n' +
+		'  }\n' +
+		']';
+
+	var processing = '{\n' +
+		'  "workflow": "obs"\n' +
+		'}';
+
+	var options = {
+		method: "POST",
+		url: config.opencast_events_url,
+		ca: fs.readFileSync(config.opencast_cert),
+		headers: {
+			'cache-control': 'no-cache',
+			Authorization: 'Basic '+config.opencast_authentication,
+			'content-type': 'multipart/form-data;'
+		},
+		formData:
+			{
+				presenter:
+					{
+						value: fs.createReadStream("records/"+idFileUpload+".webm"),
+						options:
+						{
+							filename: 'metadata/'+idFileUpload+'.webm'
+						}
+					},
+				processing,
+				metadata,
+				acl
+			}
+	};
+	request(options, function (error, response, body) {
+		if (error)
+			throw new Error(error);
+		else
+			var obj = JSON.parse(body);
+		console.log(obj.identifier);
+	});
+}
