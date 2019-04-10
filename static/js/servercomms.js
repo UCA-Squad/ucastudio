@@ -9,11 +9,6 @@ function Communications() {
 
   if (io) {
     this.socket = io();
-
-    this.socket.on('message',function(m){
-      console.log('recv server message',m);
-
-    });
   }
 
   this.transportOrder = ['SOCKET'];
