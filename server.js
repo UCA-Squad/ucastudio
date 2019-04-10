@@ -1,13 +1,14 @@
+const config = require('./config.json');
 var express = require('express');
 var app = express();
 var spawn = require('child_process').spawn;
 var session = require('express-session');
-var CASAuthentication = require('cas-authentication');
+var CASAuthentication = require('connect-cas-uca');
 
 var fs = require('fs');
 const server = require('https').createServer({
-	key: fs.readFileSync('cert/dev.uca.fr-key.pem'),
-	cert: fs.readFileSync('cert/dev.uca.fr.pem')
+	key: fs.readFileSync(config.path_cert_key),
+	cert: fs.readFileSync(config.path_cert)
 
 },app);
 var io = require('socket.io')(server);
@@ -18,20 +19,12 @@ spawn('ffmpeg',['-h']).on('error',function(m){
 });
 
 var cas = new CASAuthentication({
-	cas_url         : 'https://ent.uca.fr/cas',
-	service_url     : 'https://dev.uca.fr',
-	cas_version     : '3.0',
-	renew           : false,
-	is_dev_mode     : false,
-	dev_mode_user   : '',
-	dev_mode_info   : {},
-	session_name    : 'cas_user',
-	session_info    : 'cas_userinfo',
-	destroy_session : false
+	cas_url         : config.cas_url,
+	service_url     : config.service_url,
 });
 
 var session = require("express-session")({
-	secret: "super secret key",
+	secret: config.session_secret_key,
 	resave: true,
 	saveUninitialized: true
 });

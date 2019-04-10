@@ -1,0 +1,9 @@
+{
+  "cas_url" : "",
+  "service_url" : "",
+
+  "path_cert_key" : "",
+  "path_cert" : "",
+
+  "session_secret_key" : ""
+}

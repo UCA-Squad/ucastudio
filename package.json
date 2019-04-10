@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "mediarecorder -> websocket -> rtmp",
   "dependencies": {
-    "cas-authentication": "0.0.8",
+    "connect-cas-uca": "^1.0.3",
     "express": "^4.10.2",
     "express-session": "^1.15.6",
     "express-socket.io-session": "^1.3.5",
