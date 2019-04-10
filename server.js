@@ -84,7 +84,7 @@ io.on('connection', function(socket){
 			'-re', '-i','-',
 			'-c:v', 'copy', '-preset', 'veryfast',
 			'-b:a', '128k', '-strict', '-2',
-			'./records/'+Date.now()+'output.webm'
+			'./records/'+socket.handshake.issued+'.webm'
 		];
 
 
