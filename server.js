@@ -1,10 +1,8 @@
 var express = require('express');
 var app = express();
-// var server = require('http').Server(app);
-// var io = require('socket.io')(server);
-var ffmpeg = require('fluent-ffmpeg');
-//var stream = require('stream');
 var spawn = require('child_process').spawn;
+var session = require('express-session');
+var CASAuthentication = require('cas-authentication');
 
 var fs = require('fs');
 const server = require('https').createServer({
@@ -18,6 +16,31 @@ spawn('ffmpeg',['-h']).on('error',function(m){
 	console.error("FFMpeg not found in system cli; please install ffmpeg properly or make a softlink to ./!");
 	process.exit(-1);
 });
+
+var cas = new CASAuthentication({
+	cas_url         : 'https://ent.uca.fr/cas',
+	service_url     : 'https://dev.uca.fr',
+	cas_version     : '3.0',
+	renew           : false,
+	is_dev_mode     : false,
+	dev_mode_user   : '',
+	dev_mode_info   : {},
+	session_name    : 'cas_user',
+	session_info    : 'cas_userinfo',
+	destroy_session : false
+});
+
+var session = require("express-session")({
+	secret: "super secret key",
+	resave: true,
+	saveUninitialized: true
+});
+
+var sharedsession = require("express-socket.io-session");
+app.use(session);
+io.use(sharedsession(session));
+
+app.get( '/', cas.bounce );
 
 app.use(express.static(__dirname + "/static/"));
 
