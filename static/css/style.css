@@ -2006,3 +2006,11 @@ input:focus {
   border-radius: 50%;
   box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
+
+.checkbox check{
+  top:0.4em;
+}
+
+.checkbox box{
+  top:0.7em;
+}
