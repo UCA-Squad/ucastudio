@@ -39,23 +39,8 @@ app.use(express.static(__dirname + "/static/"));
 
 
 io.on('connection', function(socket){
-	socket.emit('message','Hello from mediarecorder-to-rtmp server!');
-	socket.emit('message','Please set rtmp destination before start streaming.');
 
 	var ffmpeg_process, feedStream=false;
-	socket.on('config_rtmpDestination',function(m){
-		if(typeof m != 'string'){
-			socket.emit('fatal','rtmp destination setup error.');
-			return;
-		}
-		var regexValidator=/^rtmp:\/\/[^\s]*$/;//TODO: should read config
-		if(!regexValidator.test(m)){
-			socket.emit('fatal','rtmp address rejected.');
-			return;
-		}
-		socket._rtmpDestination=m;
-		socket.emit('message','rtmp destination set to:'+m);
-	});
 	socket._vcodec='libvpx';//from firefox default encoder
 	socket.on('config_vcodec',function(m){
 		if(typeof m != 'string'){
@@ -69,15 +54,10 @@ io.on('connection', function(socket){
 		socket._vcodec=m;
 	});
 
-
 	socket.on('start',function(m){
 
 		if(ffmpeg_process || feedStream){
 			socket.emit('fatal','stream already started.');
-			return;
-		}
-		if(!socket._rtmpDestination){
-			socket.emit('fatal','no destination given.');
 			return;
 		}
 		var ops=[
@@ -86,7 +66,6 @@ io.on('connection', function(socket){
 			'-b:a', '128k', '-strict', '-2',
 			'./records/'+socket.handshake.issued+'.webm'
 		];
-
 
 		ffmpeg_process=spawn('ffmpeg', ops);
 		feedStream=function(data){
@@ -112,7 +91,7 @@ io.on('connection', function(socket){
 
 	socket.on('binarystream',function(m){
 		if(!feedStream){
-			socket.emit('fatal','rtmp not set yet.');
+			socket.emit('fatal','ffmpep not processing.');
 			ffmpeg_process.stdin.end();
 			return;
 		}
@@ -126,7 +105,7 @@ io.on('connection', function(socket){
 		if(ffmpeg_process) {
 			try {
 				ffmpeg_process.stdin.end();
-			} catch (e) {console.warn('killing ffmoeg process attempt failed...');}
+			} catch (e) {console.warn('killing ffmpeg process attempt failed...');}
 		}
 	});
 	socket.on('disconnect', function () {

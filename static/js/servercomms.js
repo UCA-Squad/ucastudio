@@ -14,8 +14,6 @@ function Communications() {
       console.log('recv server message',m);
 
     });
-
-    this.socket.emit('config_rtmpDestination','rtmp://openstream.dsi.uca.fr/app/live');
   }
 
   this.transportOrder = ['SOCKET'];
