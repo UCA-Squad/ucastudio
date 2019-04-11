@@ -2028,7 +2028,7 @@ input:focus {
 }
 
 .production{
-  font-size: 1.2em;
+  font-size: 1em;
 }
 
 #language ul li::before{
