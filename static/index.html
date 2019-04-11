@@ -32,17 +32,18 @@
         <span class="loaderText" data-translate="LOADING">Chargement...</span>
     </div>
 </div>
+<div id="uploadProgress" style="display: none"></div>
 <div id="cover"></div>
 <main>
     <div class="content">
         <input type="radio" id="main" class="hiddenCheck" name="view" checked autocomplete="off" />
         <section>
-            <label class="bigButton action" for="create"></label><label class="bigButton action" for="edit"></label>
+            <label class="bigButton action card card-hover" for="create"></label><label class="bigButton action card card-hover" for="edit"></label>
         </section>
         <input type="radio" id="create" class="hiddenCheck" name="view" autocomplete="off" />
         <section>
             <label class="backBtn" for="main" title="Back to main navigation" data-translatetitle="BACK_TO_MAIN"></label>
-            <div class="production" style="font-size: 1.2em">
+            <div class="production">
                 <h1 data-translate="PRODUCTION_HEADING" style="margin-top: 0">Détails de production</h1>
                 <div id="alert" class="alert alert-orange card-60 hiddenCheck" style="text-align: center;">
                     Merci de bien vouloir renseigner les informations demandées.
@@ -173,7 +174,7 @@
         <input type="radio" id="edit" class="hiddenCheck" name="view" autocomplete="off" />
         <section>
             <label class="backBtn" for="main" title="Back to main navigation" data-translatetitle="BACK_TO_MAIN"></label>
-            <div class="centreText">
+            <div class="card card-60" style="text-align: center">
 		        <h1>Enregistrement Depuis OBS Studio :</h1><br />
 		        <h4>Lien vers la version portable du logiciel</h4>
 		        <h4>Connection depuis OBS Studio</h4>

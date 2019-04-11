@@ -26,7 +26,7 @@ header {
   line-height: 3rem;
   display: block;
   width: 100%;
-  background: #333;
+  background: #178F96;
   box-shadow: 0 4px 4px -4px rgba(0,0,0,0.4);
 }
 
@@ -1145,7 +1145,7 @@ svg {
   opacity: 0;
 }
 
-#cover, #introCover {
+#cover, #introCover, #uploadProgress {
   position: absolute;
   top: 0;
   left: 0;
@@ -1163,6 +1163,21 @@ svg {
   opacity: 1;
   background: white;
   visibility: visible;
+}
+
+#uploadProgress{
+  z-index: 4;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: none
+}
+
+#uploadProgress .loaderText{
+  color:#F4ECE5;
+}
+
+#uploadProgress .loader{
+  top:30%;
 }
 
 .loader {
@@ -1221,7 +1236,8 @@ svg {
 }
 
 .loading .loader,
-.connecting .loader {
+.connecting .loader,
+#uploadProgress .loader{
   opacity: 1;
   visibility: visible;
 }
@@ -1244,11 +1260,6 @@ svg {
   box-shadow: 0 8px 16px rgba(0,0,0,0.2);
   transition: transform 0.25s ease-in;
 }
-
-/*#addDeviceModal {*/
-  /*height: auto;*/
-  /*transform: translateY(calc(-5rem - 540px));*/
-/*}*/
 
 #extensionModal {
   height: auto;
@@ -1305,7 +1316,7 @@ svg {
   left: 0;
   height: 4rem;
   padding: 1rem;
-  text-align: right;
+  text-align: center;
   width: 100%;
 }
 
@@ -1644,14 +1655,15 @@ input:focus {
 
 #recordingList {
   display: flex;
-  max-height: 6.5rem;
+  max-height: 15rem;
   overflow-y: auto;
   flex-wrap: wrap;
+  justify-content: center;
 }
 
 #recordingList a {
-  width: 8rem;
-  height: 6rem;
+  width: 10rem;
+  height: 8rem;
   position: relative;
   background: #ddd;
   text-align: center;
@@ -2013,4 +2025,12 @@ input:focus {
 
 .checkbox box{
   top:0.7em;
+}
+
+.production{
+  font-size: 1.2em;
+}
+
+#language ul li::before{
+  content: none;
 }

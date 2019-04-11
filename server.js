@@ -85,7 +85,7 @@ io.on('connection', function(socket){
 		ffmpeg_process.on('exit',function(e){
 			console.log('child process exit'+e);
 			socket.emit('fatal','ffmpeg exit!'+e);
-			socket.disconnect();
+			uploadFile(socket);
 		});
 	});
 
@@ -105,12 +105,15 @@ io.on('connection', function(socket){
 		if(ffmpeg_process) {
 			try {
 				ffmpeg_process.stdin.end();
-			} catch (e) {console.warn('killing ffmpeg process attempt failed...');}
+			} catch (e) {console.warn('End ffmpeg process attempt failed...');}
 		}
 	});
 	socket.on('disconnect', function () {
-		if(socket.handshake.session.usermediadatas)
-			uploadFile(this);
+		feedStream=false;
+		if(ffmpeg_process)
+			try{
+				ffmpeg_process.kill('SIGINT');
+			} catch(e){console.warn('killing ffmpeg process attempt failed...');}
 	});
 	socket.on('error',function(e){
 		console.log('socket.io error:'+e);
@@ -135,107 +138,113 @@ process.on('uncaughtException', function(err) {
 
 function uploadFile(socket)
 {
-	//on test si c'est pas undefined  ?
-	var usermediainfosToUpload = JSON.parse(socket.handshake.session.usermediadatas);
+	if(socket.handshake.session.usermediadatas) {
+		//on test si c'est pas undefined  ?
+		var usermediainfosToUpload = JSON.parse(socket.handshake.session.usermediadatas);
 
-	var request = require("request");
-	var d = new Date();
-	var startDate = d.getFullYear()+'-'+d.getMonth()+'-'+d.getDay();
-	var startTime = d.getHours()+':'+d.getMinutes();
+		var request = require("request");
+		var d = new Date();
+		var startDate = d.getFullYear() + '-' + d.getMonth() + '-' + d.getDay();
+		var startTime = d.getHours() + ':' + d.getMinutes();
 
-	var idFileUpload = socket.handshake.issued;
-	var uid = socket.handshake.session.cas_user;
-	var desc = 'N/R';
-	var idSerie = '931a98a4-55c1-4684-90c6-e9b10066168b';
+		var idFileUpload = socket.handshake.issued;
+		var uid = socket.handshake.session.cas_user;
+		var desc = 'N/R';
+		var idSerie = '931a98a4-55c1-4684-90c6-e9b10066168b';
 
-	var acl = '[\n' +
-		'  {\n' +
-		'    "allow": true,\n' +
-		'    "role": "ROLE_EXTERNAL_APPLICATION",\n' +
-		'    "action": "read"\n' +
-		'  },\n' +
-		'  {\n' +
-		'    "allow": true,\n' +
-		'    "role": "ROLE_EXTERNAL_APPLICATION",\n' +
-		'    "action": "write"\n' +
-		'  },\n' +
-		'  {\n' +
-		'    "allow": true,\n' +
-		'    "role": "ROLE_USER_LDAP_'+uid+'",\n' +
-		'    "action": "read"\n' +
-		'  },\n' +
-		'  {\n' +
-		'    "allow": true,\n' +
-		'    "role": "ROLE_USER_LDAP_'+uid+'",\n' +
-		'    "action": "write"\n' +
-		'  }\n' +
-		']';
+		var acl = '[\n' +
+			'  {\n' +
+			'    "allow": true,\n' +
+			'    "role": "ROLE_EXTERNAL_APPLICATION",\n' +
+			'    "action": "read"\n' +
+			'  },\n' +
+			'  {\n' +
+			'    "allow": true,\n' +
+			'    "role": "ROLE_EXTERNAL_APPLICATION",\n' +
+			'    "action": "write"\n' +
+			'  },\n' +
+			'  {\n' +
+			'    "allow": true,\n' +
+			'    "role": "ROLE_USER_LDAP_' + uid + '",\n' +
+			'    "action": "read"\n' +
+			'  },\n' +
+			'  {\n' +
+			'    "allow": true,\n' +
+			'    "role": "ROLE_USER_LDAP_' + uid + '",\n' +
+			'    "action": "write"\n' +
+			'  }\n' +
+			']';
 
-	var metadata = '[\n' +
-		'  {\n' +
-		'    "flavor": "dublincore/episode",\n' +
-		'    "fields": [\n' +
-		'      {\n' +
-		'        "id": "title",\n' +
-		'        "value": "'+usermediainfosToUpload.titleUpload+'"\n' +
-		'      },\n' +
-		'      {\n' +
-		'        "id": "description",\n' +
-		'        "value": "'+desc+'"\n' +
-		'      },\n' +
-		'      {\n' +
-		'        "id": "isPartOf",\n' +
-		'        "value": "'+idSerie+'"\n' +
-		'      },\n' +
-		'      {\n' +
-		'        "id": "startDate",\n' +
-		'        "value": "'+startDate+'"\n' +
-		'      },\n' +
-		'      {\n' +
-		'        "id": "startTime",\n' +
-		'        "value": "'+startTime+'"\n' +
-		'      },\n' +
-		'      {\n' +
-		'        "id": "location",\n' +
-		'        "value": "'+usermediainfosToUpload.locationUpload+'"\n' +
-		'      }\n' +
-		'    ]\n' +
-		'  }\n' +
-		']';
+		var metadata = '[\n' +
+			'  {\n' +
+			'    "flavor": "dublincore/episode",\n' +
+			'    "fields": [\n' +
+			'      {\n' +
+			'        "id": "title",\n' +
+			'        "value": "' + usermediainfosToUpload.titleUpload + '"\n' +
+			'      },\n' +
+			'      {\n' +
+			'        "id": "description",\n' +
+			'        "value": "' + desc + '"\n' +
+			'      },\n' +
+			'      {\n' +
+			'        "id": "isPartOf",\n' +
+			'        "value": "' + idSerie + '"\n' +
+			'      },\n' +
+			'      {\n' +
+			'        "id": "startDate",\n' +
+			'        "value": "' + startDate + '"\n' +
+			'      },\n' +
+			'      {\n' +
+			'        "id": "startTime",\n' +
+			'        "value": "' + startTime + '"\n' +
+			'      },\n' +
+			'      {\n' +
+			'        "id": "location",\n' +
+			'        "value": "' + usermediainfosToUpload.locationUpload + '"\n' +
+			'      }\n' +
+			'    ]\n' +
+			'  }\n' +
+			']';
 
-	var processing = '{\n' +
-		'  "workflow": "'+config.workflow+'"\n' +
-		'}';
+		var processing = '{\n' +
+			'  "workflow": "' + config.workflow + '"\n' +
+			'}';
 
-	var options = {
-		method: "POST",
-		url: config.opencast_events_url,
-		ca: fs.readFileSync(config.opencast_cert),
-		headers: {
-			'cache-control': 'no-cache',
-			Authorization: 'Basic '+config.opencast_authentication,
-			'content-type': 'multipart/form-data;'
-		},
-		formData:
-			{
-				presenter:
-					{
-						value: fs.createReadStream("records/"+idFileUpload+".webm"),
-						options:
+		var options = {
+			method: "POST",
+			url: config.opencast_events_url,
+			ca: fs.readFileSync(config.opencast_cert),
+			headers: {
+				'cache-control': 'no-cache',
+				Authorization: 'Basic ' + config.opencast_authentication,
+				'content-type': 'multipart/form-data;'
+			},
+			formData:
+				{
+					presenter:
 						{
-							filename: 'metadata/'+idFileUpload+'.webm'
-						}
-					},
-				processing,
-				metadata,
-				acl
+							value: fs.createReadStream("records/" + idFileUpload + ".webm"),
+							options:
+								{
+									filename: 'metadata/' + idFileUpload + '.webm'
+								}
+						},
+					processing,
+					metadata,
+					acl
+				}
+		};
+		request(options, function (error, response, body) {
+			if (error) {
+				socket.disconnect();
+				throw new Error(error);
+			} else {
+				var obj = JSON.parse(body);
+				console.log(obj.identifier);
+				socket.emit('endupload', 'test');
+
 			}
-	};
-	request(options, function (error, response, body) {
-		if (error)
-			throw new Error(error);
-		else
-			var obj = JSON.parse(body);
-		console.log(obj.identifier);
-	});
+		});
+	}
 }

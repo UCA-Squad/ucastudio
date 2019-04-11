@@ -11,6 +11,10 @@ function Communications() {
     this.socket = io();
   }
 
+  this.socket.on('endupload',function(m){
+    $('#uploadProgress').hide();
+  });
+
   this.transportOrder = ['SOCKET'];
   this.transportOrder.some(newTransport => {
     if (this[newTransport.toLowerCase()]) {

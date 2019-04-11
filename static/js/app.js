@@ -111,9 +111,7 @@ function App() {
 
   this.saveRecordings = document.getElementById('saveRecordings');
   this.nextBtn = document.getElementById('nextBtn');
-  this.discardRecordings = document.querySelector('label[for=toggleSaveCreationModal]');
 
-  this.socketId = null;
   this.listingPeer = [];
 
   this.attachEvents();
@@ -596,6 +594,11 @@ App.prototype = {
       peers[peer].stopRecording();
     }
     comms.emit('stop');
+    if(document.getElementById('uploadMedia').checked) {
+      $('#uploadProgress').show();
+      this.addLoader(document.getElementById('uploadProgress'), 'Transfert en cours...', {fontSize: '1.5rem'});
+    }
+
     document.getElementById('toggleSaveCreationModal').checked = true;
     rafLoop.unsubscribe(this.recTimeToken);
     this.recTimeToken = null;
