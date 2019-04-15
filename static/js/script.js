@@ -14,9 +14,9 @@ $(".backToInfo").on('click', function () {
 });
 
 $( document ).ready(function() {
-    $(document).on("keypress", function (event) {
-        if (event.keyCode == 9) {   //tab pressed
-            return false; // stops its action
+    $(document).keydown(function (e) {
+        if (e.keyCode == 9) {  //tab pressed
+            e.preventDefault(); // stops its action
         }
     });
 });
