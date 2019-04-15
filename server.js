@@ -180,6 +180,21 @@ function uploadFile(socket)
 			'  },\n' +
 			'  {\n' +
 			'    "allow": true,\n' +
+			'    "role": "ROLE_GROUP_MOODLE",\n' +
+			'    "action": "read"\n' +
+			'  },\n' +
+			'  {\n' +
+			'    "allow": true,\n' +
+			'    "role": "ROLE_GROUP_MOODLE",\n' +
+			'    "action": "write"\n' +
+			'  },\n' +
+			'  {\n' +
+			'    "allow": true,\n' +
+			'    "role": "ROLE_GROUP_MOODLE",\n' +
+			'    "action": "annotate"\n' +
+			'  },\n' +
+			'  {\n' +
+			'    "allow": true,\n' +
 			'    "role": "ROLE_USER_LDAP_' + uid + '",\n' +
 			'    "action": "read"\n' +
 			'  },\n' +
