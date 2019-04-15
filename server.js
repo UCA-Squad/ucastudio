@@ -203,6 +203,11 @@ function uploadFile(socket)
 			'    "role": "ROLE_USER_LDAP_' + uid + '",\n' +
 			'    "action": "write"\n' +
 			'  }\n' +
+			'  {\n' +
+			'    "allow": true,\n' +
+			'    "role": "ROLE_USER_LDAP_' + uid + '",\n' +
+			'    "action": "annotate-admin"\n' +
+			'  }\n' +
 			']';
 
 		var metadata = '[\n' +
