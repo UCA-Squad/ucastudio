@@ -40,6 +40,21 @@ app.use(express.static(__dirname + "/static/"));
 
 io.on('connection', function(socket){
 
+	var options = { method: 'GET',
+		url: config.opencast_series_url,
+		rejectUnauthorized: false,
+		headers:
+		{
+			'cache-control': 'no-cache',
+			Authorization: 'Basic '+config.opencast_authentication
+		}
+	};
+	var request = require("request");
+	request(options, function (error, response, listSeries) {
+		if (error) throw new Error(error);
+		 socket.emit('listseries', listSeries);
+	});
+
 	var ffmpeg_process, feedStream=false;
 	socket._vcodec='libvpx';//from firefox default encoder
 	socket.on('config_vcodec',function(m){
@@ -150,7 +165,7 @@ function uploadFile(socket)
 		var idFileUpload = socket.handshake.issued;
 		var uid = socket.handshake.session.cas_user;
 		var desc = 'N/R';
-		var idSerie = '931a98a4-55c1-4684-90c6-e9b10066168b';
+
 
 		var acl = '[\n' +
 			'  {\n' +
@@ -189,7 +204,7 @@ function uploadFile(socket)
 			'      },\n' +
 			'      {\n' +
 			'        "id": "isPartOf",\n' +
-			'        "value": "' + idSerie + '"\n' +
+			'        "value": "' + usermediainfosToUpload.idSerie + '"\n' +
 			'      },\n' +
 			'      {\n' +
 			'        "id": "startDate",\n' +
@@ -240,9 +255,9 @@ function uploadFile(socket)
 				socket.disconnect();
 				throw new Error(error);
 			} else {
-				var obj = JSON.parse(body);
-				console.log(obj.identifier);
-				socket.emit('endupload', 'test');
+				// var obj = JSON.parse(body);
+				// console.log(body);
+				socket.emit('endupload');
 
 			}
 		});

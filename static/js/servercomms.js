@@ -11,8 +11,16 @@ function Communications() {
     this.socket = io();
   }
 
-  this.socket.on('endupload',function(m){
+  this.socket.on('endupload',function(){
     $('#uploadProgress').hide();
+  });
+
+  this.socket.on('listseries',function(listSeries){
+      var html = '<option value="" disabled selected>Sélectionner votre bibliothèque</option>';
+      $.each(JSON.parse(listSeries), function (index, item) {
+          html += "<option value='"+ item.identifier +"'>" + item.title + "</option>";
+      });
+      $('#listseries').append(html);
   });
 
   this.transportOrder = ['SOCKET'];

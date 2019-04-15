@@ -703,6 +703,8 @@ App.prototype = {
       infos['titleUpload'] = document.getElementById('titleUpload').value;
       infos['presenterUpload'] = document.getElementById('presenterUpload').value;
       infos['locationUpload'] = document.getElementById('locationUpload').value;
+      var select = document.getElementById('listseries');
+      infos['idSerie'] = select.options[select.selectedIndex].value;
       comms.emit('infos', JSON.stringify(infos));
     }
   },
