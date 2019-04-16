@@ -142,8 +142,8 @@ io.on('connection', function(socket){
 		console.log('socket.io error:'+e);
 	});
 
-	getLdapInfos(socket.handshake.session.cas_user, function(infoUser){
-		socket.emit('displayName', infoUser[0].displayName);
+	getLdapInfos(socket.handshake.session.cas_user, function(displayName){
+		socket.emit('displayName', displayName);
 	})
 });
 
@@ -320,12 +320,10 @@ function getLdapInfos(uid, callback)
 		attributes: ['sn', 'cn', 'displayName']
 	};
 
-	let r = null;
-	let entries = [];
+	let displayName = '';
 	client.search('ou=people, dc=uca,dc=fr', opts, function(err, res) {
 		res.on('searchEntry', function(entry) {
-			var r = entry.object;
-			entries.push(r);
+			displayName = entry.object.displayName;
 		});
 		res.on('searchReference', function(referral) {
 			console.log('referral: ' + referral.uris.join());
@@ -334,7 +332,7 @@ function getLdapInfos(uid, callback)
 			console.error('error: ' + err.message);
 		});
 		res.on('end', function(result) {
-			callback(entries);
+			callback(displayName);
 		});
 	});
 }
