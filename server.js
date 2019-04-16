@@ -40,6 +40,14 @@ app.use(express.static(__dirname + "/static/"));
 
 io.on('connection', function(socket){
 
+	var today = new Date();
+	today.setHours(today.getHours() - 2);
+	var startTime = today.getHours() + ':' + today.getMinutes();
+	var dd = String(today.getDate()).padStart(2, '0');
+	var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+	var yyyy = today.getFullYear();
+	var startDate = yyyy + '-' + mm + '-' + dd;
+
 	var options = { method: 'GET',
 		url: config.opencast_series_url,
 		rejectUnauthorized: false,
@@ -113,6 +121,9 @@ io.on('connection', function(socket){
 		feedStream(m);
 	});
 	socket.on('infos',function(m){
+		getLdapInfos(socket.handshake.session.cas_user, function(infoUser){
+			socket.handshake.session.cn = infoUser[0].cn;
+		})
 		socket.handshake.session.usermediadatas = m;
 	});
 	socket.on('stop',function(m){
@@ -148,9 +159,13 @@ process.on('uncaughtException', function(err) {
     // handle the error safely
     console.log(err)
     // Note: after client disconnect, the subprocess will cause an Error EPIPE, which can only be caught this way.
-})
+});
 
 
+/**
+ * Permet d'uploader un média
+ * @param socket
+ */
 function uploadFile(socket)
 {
 	if(socket.handshake.session.usermediadatas) {
@@ -223,6 +238,10 @@ function uploadFile(socket)
 			'        "value": "' + desc + '"\n' +
 			'      },\n' +
 			'      {\n' +
+			'        "id": "creator",\n' +
+			'        "value": "[' + socket.handshake.session.cn + ']"\n' +
+			'      },\n' +
+			'      {\n' +
 			'        "id": "isPartOf",\n' +
 			'        "value": "' + usermediainfosToUpload.idSerie + '"\n' +
 			'      },\n' +
@@ -282,4 +301,39 @@ function uploadFile(socket)
 			}
 		});
 	}
+}
+
+/**
+ * Permet de récupérer des infos ldap en fonction d'un uid
+ * @param uid
+ */
+function getLdapInfos(uid, callback)
+{
+	var ldap = require('ldapjs');
+	var client = ldap.createClient({
+		url: 'ldaps://ldap.uca.fr:636'
+	});
+	var opts = {
+		filter: '(&(clfdstatus=9)(uid='+uid+'))',
+		scope: 'sub',
+		attributes: ['sn', 'cn']
+	};
+
+	let r = null;
+	let entries = [];
+	client.search('ou=people, dc=uca,dc=fr', opts, function(err, res) {
+		res.on('searchEntry', function(entry) {
+			var r = entry.object;
+			entries.push(r);
+		});
+		res.on('searchReference', function(referral) {
+			console.log('referral: ' + referral.uris.join());
+		});
+		res.on('error', function(err) {
+			console.error('error: ' + err.message);
+		});
+		res.on('end', function(result) {
+			callback(entries);
+		});
+	});
 }

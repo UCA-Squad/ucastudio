@@ -11,5 +11,7 @@
   "opencast_events_url" : "",
   "opencast_series_url" : "",
   "opencast_cert" : "",
-  "opencast_workflow" : ""
+  "opencast_workflow" : "",
+
+  "path_ldap_uca": ""
 }
