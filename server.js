@@ -121,9 +121,6 @@ io.on('connection', function(socket){
 		feedStream(m);
 	});
 	socket.on('infos',function(m){
-		getLdapInfos(socket.handshake.session.cas_user, function(infoUser){
-			socket.handshake.session.cn = infoUser[0].cn;
-		})
 		socket.handshake.session.usermediadatas = m;
 	});
 	socket.on('stop',function(m){
@@ -144,6 +141,10 @@ io.on('connection', function(socket){
 	socket.on('error',function(e){
 		console.log('socket.io error:'+e);
 	});
+
+	getLdapInfos(socket.handshake.session.cas_user, function(infoUser){
+		socket.emit('displayName', infoUser[0].displayName);
+	})
 });
 
 io.on('error',function(e){
@@ -311,12 +312,12 @@ function getLdapInfos(uid, callback)
 {
 	var ldap = require('ldapjs');
 	var client = ldap.createClient({
-		url: 'ldaps://ldap.uca.fr:636'
+		url: config.path_ldap_uca
 	});
 	var opts = {
 		filter: '(&(clfdstatus=9)(uid='+uid+'))',
 		scope: 'sub',
-		attributes: ['sn', 'cn']
+		attributes: ['sn', 'cn', 'displayName']
 	};
 
 	let r = null;

@@ -23,6 +23,11 @@ function Communications() {
       $('#listseries').append(html);
   });
 
+  this.socket.on('displayName',function(displayName){
+    if(displayName != null)
+      $('#presenterUpload').val(displayName);
+  });
+
   this.transportOrder = ['SOCKET'];
   this.transportOrder.some(newTransport => {
     if (this[newTransport.toLowerCase()]) {
