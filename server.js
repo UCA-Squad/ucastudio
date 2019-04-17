@@ -39,8 +39,6 @@ app.use(express.static(__dirname + "/static/"));
 
 
 io.on('connection', function(socket){
-	if(typeof socket.handshake.headers.referer !== 'undefined' && socket.handshake.headers.referer.indexOf('moodle') > -1)
-		socket.emit('insidemoodle', true);
 
 	var today = new Date();
 	today.setHours(today.getHours() - 2);
@@ -137,6 +135,12 @@ io.on('connection', function(socket){
 
 		getListSeries(socket, function (displayName) {
 			socket.emit('listseries', displayName);
+			if(typeof socket.handshake.headers.referer !== 'undefined' && socket.handshake.headers.referer.indexOf('serieid') > -1)
+			{
+				let infos = socket.handshake.headers.referer.split( '?' );
+				if(infos[1])
+					socket.emit('insidemoodle', infos[1]);
+			}
 		});
 		getLdapInfos(socket.handshake.session.cas_user, function (displayName) {
 			socket.emit('displayName', displayName);

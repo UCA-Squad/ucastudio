@@ -28,8 +28,13 @@ function Communications() {
       $('#presenterUpload').val(displayName);
   });
 
-  this.socket.on('insidemoodle',function(displayName) {
-    $('#dropdownlistserie').hide();
+  this.socket.on('insidemoodle',function(idSerieToselectTmp) {
+    idSerieToselect = idSerieToselectTmp.split( '=' );
+    if(idSerieToselect[1])
+    {
+      $('#listseries option[value="'+idSerieToselect+'"]').attr('selected','selected');
+      $('#dropdownlistserie').hide();
+    }
   });
 
   this.transportOrder = ['SOCKET'];
