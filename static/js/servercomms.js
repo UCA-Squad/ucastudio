@@ -17,7 +17,7 @@ function Communications() {
 
   this.socket.on('listseries',function(listSeries){
       var html = '<option value="" disabled selected>Sélectionner votre bibliothèque</option>';
-      $.each(JSON.parse(listSeries), function (index, item) {
+      $.each(listSeries, function (index, item) {
           html += "<option value='"+ item.identifier +"'>" + item.title + "</option>";
       });
       $('#listseries').append(html);

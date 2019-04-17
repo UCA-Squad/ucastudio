@@ -48,21 +48,6 @@ io.on('connection', function(socket){
 	var yyyy = today.getFullYear();
 	var startDate = yyyy + '-' + mm + '-' + dd;
 
-	var options = { method: 'GET',
-		url: config.opencast_series_url,
-		rejectUnauthorized: false,
-		headers:
-		{
-			'cache-control': 'no-cache',
-			Authorization: 'Basic '+config.opencast_authentication
-		}
-	};
-	var request = require("request");
-	request(options, function (error, response, listSeries) {
-		if (error) throw new Error(error);
-		 socket.emit('listseries', listSeries);
-	});
-
 	var ffmpeg_process, feedStream=false;
 	socket._vcodec='libvpx';//from firefox default encoder
 	socket.on('config_vcodec',function(m){
@@ -77,74 +62,84 @@ io.on('connection', function(socket){
 		socket._vcodec=m;
 	});
 
-	socket.on('start',function(m){
+	if(typeof socket.handshake.session.cas_user !== 'undefined' ) {
 
-		if(ffmpeg_process || feedStream){
-			socket.emit('fatal','stream already started.');
-			return;
-		}
-		var ops=[
-			'-re', '-i','-',
-			'-c:v', 'copy', '-preset', 'veryfast',
-			'-b:a', '128k', '-strict', '-2',
-			'./records/'+socket.handshake.issued+'.webm'
-		];
+		socket.on('start', function (m) {
 
-		ffmpeg_process=spawn('ffmpeg', ops);
-		feedStream=function(data){
-			ffmpeg_process.stdin.write(data);
-			//write exception cannot be caught here.
-		}
+			if (ffmpeg_process || feedStream) {
+				socket.emit('fatal', 'stream already started.');
+				return;
+			}
+			var ops = [
+				'-re', '-i', '-',
+				'-c:v', 'copy', '-preset', 'veryfast',
+				'-b:a', '128k', '-strict', '-2',
+				'./records/' + socket.handshake.issued + '.webm'
+			];
 
-		ffmpeg_process.stderr.on('data',function(d){
-			socket.emit('ffmpeg_stderr',''+d);
+			ffmpeg_process = spawn('ffmpeg', ops);
+			feedStream = function (data) {
+				ffmpeg_process.stdin.write(data);
+				//write exception cannot be caught here.
+			}
+
+			ffmpeg_process.stderr.on('data', function (d) {
+				socket.emit('ffmpeg_stderr', '' + d);
+			});
+			ffmpeg_process.on('error', function (e) {
+				console.log('child process error' + e);
+				socket.emit('fatal', 'ffmpeg error!' + e);
+				feedStream = false;
+				socket.disconnect();
+			});
+			ffmpeg_process.on('exit', function (e) {
+				console.log('child process exit' + e);
+				socket.emit('fatal', 'ffmpeg exit!' + e);
+				uploadFile(socket);
+			});
 		});
-		ffmpeg_process.on('error',function(e){
-			console.log('child process error'+e);
-			socket.emit('fatal','ffmpeg error!'+e);
-			feedStream=false;
-			socket.disconnect();
-		});
-		ffmpeg_process.on('exit',function(e){
-			console.log('child process exit'+e);
-			socket.emit('fatal','ffmpeg exit!'+e);
-			uploadFile(socket);
-		});
-	});
 
-	socket.on('binarystream',function(m){
-		if(!feedStream){
-			socket.emit('fatal','ffmpep not processing.');
-			ffmpeg_process.stdin.end();
-			return;
-		}
-		feedStream(m);
-	});
-	socket.on('infos',function(m){
-		socket.handshake.session.usermediadatas = m;
-	});
-	socket.on('stop',function(m){
-		feedStream=false;
-		if(ffmpeg_process) {
-			try {
+		socket.on('binarystream', function (m) {
+			if (!feedStream) {
+				socket.emit('fatal', 'ffmpep not processing.');
 				ffmpeg_process.stdin.end();
-			} catch (e) {console.warn('End ffmpeg process attempt failed...');}
-		}
-	});
-	socket.on('disconnect', function () {
-		feedStream=false;
-		if(ffmpeg_process)
-			try{
-				ffmpeg_process.kill('SIGINT');
-			} catch(e){console.warn('killing ffmpeg process attempt failed...');}
-	});
-	socket.on('error',function(e){
-		console.log('socket.io error:'+e);
-	});
+				return;
+			}
+			feedStream(m);
+		});
+		socket.on('infos', function (m) {
+			socket.handshake.session.usermediadatas = m;
+		});
+		socket.on('stop', function (m) {
+			feedStream = false;
+			if (ffmpeg_process) {
+				try {
+					ffmpeg_process.stdin.end();
+				} catch (e) {
+					console.warn('End ffmpeg process attempt failed...');
+				}
+			}
+		});
+		socket.on('disconnect', function () {
+			feedStream = false;
+			if (ffmpeg_process)
+				try {
+					ffmpeg_process.kill('SIGINT');
+				} catch (e) {
+					console.warn('killing ffmpeg process attempt failed...');
+				}
+		});
+		socket.on('error', function (e) {
+			console.log('socket.io error:' + e);
+		});
 
-	getLdapInfos(socket.handshake.session.cas_user, function(displayName){
-		socket.emit('displayName', displayName);
-	})
+		getListSeries(socket, function (displayName) {
+			socket.emit('listseries', displayName);
+		});
+		getLdapInfos(socket.handshake.session.cas_user, function (displayName) {
+			socket.emit('displayName', displayName);
+		});
+	}
 });
 
 io.on('error',function(e){
@@ -169,7 +164,7 @@ process.on('uncaughtException', function(err) {
  */
 function uploadFile(socket)
 {
-	if(socket.handshake.session.usermediadatas) {
+	if(socket.handshake.session.usermediadatas !== 'undefined') {
 		//on test si c'est pas undefined  ?
 		var usermediainfosToUpload = JSON.parse(socket.handshake.session.usermediadatas);
 
@@ -292,7 +287,7 @@ function uploadFile(socket)
 		};
 		request(options, function (error, response, body) {
 			if (error) {
-				socket.disconnect();
+				socket.disconnect(); //?? à set ailleur ?
 				throw new Error(error);
 			} else {
 				// var obj = JSON.parse(body);
@@ -333,6 +328,78 @@ function getLdapInfos(uid, callback)
 		});
 		res.on('end', function(result) {
 			callback(displayName);
+		});
+	});
+}
+
+/**
+ * @param socket
+ * @param callback
+ */
+function getListSeries(socket, callback)
+{
+	var options = {
+		method: 'GET',
+		url: config.opencast_series_url,
+		rejectUnauthorized: false,
+		headers: {
+			'cache-control': 'no-cache',
+			Authorization: 'Basic '+config.opencast_authentication
+		}
+	};
+	var request = require("request");
+	request(options, function (error, response, listSeriesTmp) {
+		var listSeries = JSON.parse(listSeriesTmp);
+		getListSeriresWritable(socket.handshake.session.cas_user, listSeries).then(function(result) {
+			callback(result);
+		}, function(err) {
+			console.log(err);
+		})
+	});
+}
+
+/**
+ * P
+ * @param uid
+ * @param listSeries
+ * @returns {Promise<Array>}
+ */
+async function getListSeriresWritable (uid, listSeries)
+{
+	let result = [];
+	for (var i = 0, len = listSeries.length; i < len; i++) {
+		rst = await checkSerieAcl(uid, listSeries[i]);
+		if(typeof rst !== 'undefined')
+			result.push(rst);
+	}
+	return  result;
+}
+
+/**
+ *
+ * @param uid
+ * @param serieinfo
+ * @returns {Promise<any>}
+ */
+function checkSerieAcl(uid, serieinfo)
+{
+	return new Promise(function (resolve, reject) {
+		var options = {
+			method: 'GET',
+			url: config.opencast_series_url + '/' + serieinfo.identifier + '/acl',
+			rejectUnauthorized: false,
+			headers: {
+				'cache-control': 'no-cache',
+				Authorization: 'Basic ' + config.opencast_authentication
+			}
+		};
+		var request = require("request");
+		request(options, function (error, response, listSeries2) {
+			serieInfo = JSON.parse(listSeries2);
+			for (var j = 0, len = serieInfo.length; j < len; j++)
+				if (serieInfo[j].allow == true && serieInfo[j].role.toLocaleLowerCase().indexOf(uid) > -1)
+					resolve(serieinfo);
+			resolve();
 		});
 	});
 }
