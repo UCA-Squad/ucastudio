@@ -28,6 +28,10 @@ function Communications() {
       $('#presenterUpload').val(displayName);
   });
 
+  this.socket.on('insidemoodle',function(displayName) {
+    $('#dropdownlistseries').hide();
+  });
+
   this.transportOrder = ['SOCKET'];
   this.transportOrder.some(newTransport => {
     if (this[newTransport.toLowerCase()]) {
