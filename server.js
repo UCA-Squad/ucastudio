@@ -39,7 +39,7 @@ app.use(express.static(__dirname + "/static/"));
 
 
 io.on('connection', function(socket){
-	if(typeof socket.handshake.headers.referer !== 'undefined' && typeof socket.handshake.headers.referer.indexOf('moodle'))
+	if(typeof socket.handshake.headers.referer !== 'undefined' && socket.handshake.headers.referer.indexOf('moodle') > -1)
 		socket.emit('insidemoodle', true);
 
 	var today = new Date();

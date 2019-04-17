@@ -1767,6 +1767,7 @@ input:focus {
   height: 2.5rem;
   border-radius: 50%;
   box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  z-index: 5;
 }
 
 .backBtn::before {
@@ -2011,8 +2012,7 @@ input:focus {
 
 .nextBtn {
   position: absolute;
-  top: 97%;
-  right: 5%;
+  right: 2em;
   width: 2.5rem;
   height: 2.5rem;
   border-radius: 50%;
