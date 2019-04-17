@@ -29,7 +29,7 @@ function Communications() {
   });
 
   this.socket.on('insidemoodle',function(displayName) {
-    $('#dropdownlistseries').hide();
+    $('#dropdownlistserie').hide();
   });
 
   this.transportOrder = ['SOCKET'];
