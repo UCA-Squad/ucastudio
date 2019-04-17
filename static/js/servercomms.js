@@ -32,7 +32,7 @@ function Communications() {
     idSerieToselect = idSerieToselectTmp.split( '=' );
     if(idSerieToselect[1])
     {
-      $('#listseries option[value="'+idSerieToselect+'"]').attr('selected','selected');
+      $('#listseries option[value="'+idSerieToselect[1]+'"]').attr('selected','selected');
       $('#dropdownlistserie').hide();
     }
   });
