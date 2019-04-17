@@ -2011,7 +2011,7 @@ input:focus {
 
 .nextBtn {
   position: absolute;
-  top: 80%;
+  top: 97%;
   right: 5%;
   width: 2.5rem;
   height: 2.5rem;
@@ -2028,7 +2028,8 @@ input:focus {
 }
 
 .production{
-  font-size: 1em;
+  position:relative;
+  top:-2.5em;
 }
 
 #language ul li::before{
