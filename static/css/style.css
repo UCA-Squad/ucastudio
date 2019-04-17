@@ -2035,3 +2035,8 @@ input:focus {
 #language ul li::before{
   content: none;
 }
+
+.required-field::after {
+  content: " *";
+  color: red;
+}
