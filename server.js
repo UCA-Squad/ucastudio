@@ -143,6 +143,7 @@ io.on('connection', function(socket){
 			}
 		});
 		getLdapInfos(socket.handshake.session.cas_user, function (displayName) {
+			socket.handshake.session.cn = displayName;
 			socket.emit('displayName', displayName);
 		});
 	}
@@ -176,8 +177,8 @@ function uploadFile(socket)
 
 		var request = require("request");
 		var d = new Date();
-		var startDate = d.getFullYear() + '-' + d.getMonth() + '-' + d.getDay();
-		var startTime = d.getHours() + ':' + d.getMinutes();
+		var startDate = d.getFullYear() + '-' + ("0" + (d.getMonth() + 1)).slice(-2) + '-' + ("0" + d.getDate()).slice(-2);
+		var startTime = d.getUTCHours() + ':' + d.getMinutes();
 
 		var idFileUpload = socket.handshake.issued;
 		var uid = socket.handshake.session.cas_user;
@@ -241,7 +242,7 @@ function uploadFile(socket)
 			'      },\n' +
 			'      {\n' +
 			'        "id": "creator",\n' +
-			'        "value": "[' + socket.handshake.session.cn + ']"\n' +
+			'        "value": ["'+socket.handshake.session.cn+'"]\n' +
 			'      },\n' +
 			'      {\n' +
 			'        "id": "isPartOf",\n' +
@@ -264,7 +265,7 @@ function uploadFile(socket)
 			']';
 
 		var processing = '{\n' +
-			'  "workflow": "' + config.workflow + '"\n' +
+			'  "workflow": "' + config.opencast_workflow + '"\n' +
 			'}';
 
 		var options = {
