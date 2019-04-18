@@ -171,7 +171,7 @@ process.on('uncaughtException', function(err) {
  */
 function uploadFile(socket)
 {
-	if(socket.handshake.session.usermediadatas !== 'undefined') {
+	if(typeof socket.handshake.session.usermediadatas !== 'undefined') {
 		//on test si c'est pas undefined  ?
 		var usermediainfosToUpload = JSON.parse(socket.handshake.session.usermediadatas);
 
