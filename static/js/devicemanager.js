@@ -358,7 +358,7 @@ class Device extends EventEmitter {
         throw new Error("Can't record as stream is not active");
       }
 
-      this.recorder = new Recorder(this.stream);
+      this.recorder = new Recorder(this.stream, this.deviceType);
       this.recorder.on('record.complete', media => {
         this.emit('record.complete', media);
         this.recorder = null;
@@ -368,12 +368,6 @@ class Device extends EventEmitter {
     else {
       this.recorder.resume();
     }
-    setTimeout(() => {
-      this.recorder.ondataavailable = function(e) {
-        console.log(e.data);
-        this.emit("binarystream",e.data);
-      };
-    }, 1);
   }
 
   stopRecording() {

@@ -1,7 +1,7 @@
 
 class Recorder extends EventEmitter {
 
-  constructor(stream, chosenCodec) {
+  constructor(stream, typeDevice) {
     super();
 
     let _vidCodecs = [
@@ -19,13 +19,13 @@ class Recorder extends EventEmitter {
 
     let _recData = [];
 
-    chosenCodec = chosenCodec || stream.getVideoTracks().length ? _vidCodecs[0] : _audioCodecs[0];
+    let chosenCodec = stream.getVideoTracks().length ? _vidCodecs[0] : _audioCodecs[0];
     this.recorder = new MediaRecorder(stream, {mimeType: chosenCodec});
     this.recorder.ondataavailable = function(e) {
       // console.log(e.data);
-       if (e.data.size > 0) {
+      if (e.data.size > 0) {
          _recData.push(e.data);
-         comms.emit("binarystream",e.data);
+          comms.emit("binarystream"+typeDevice,e.data);
        }
     };
 
