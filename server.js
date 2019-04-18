@@ -49,24 +49,14 @@ io.on('connection', function(socket){
 	var startDate = yyyy + '-' + mm + '-' + dd;
 
 	var ffmpeg_process, feedStream=false;
+	var ffmpeg_process2, feedStream2=false;
 	socket._vcodec='libvpx';//from firefox default encoder
-	socket.on('config_vcodec',function(m){
-		if(typeof m != 'string'){
-			socket.emit('fatal','input codec setup error.');
-			return;
-		}
-		if(!/^[0-9a-z]{2,}$/.test(m)){
-			socket.emit('fatal','input codec contains illegal character?.');
-			return;
-		}//for safety
-		socket._vcodec=m;
-	});
 
 	if(typeof socket.handshake.session.cas_user !== 'undefined' ) {
 
 		socket.on('start', function (m) {
 
-			if (ffmpeg_process || feedStream) {
+			if (ffmpeg_process || feedStream || ffmpeg_process2 || feedStream2) {
 				socket.emit('fatal', 'stream already started.');
 				return;
 			}
@@ -76,13 +66,23 @@ io.on('connection', function(socket){
 				'-b:a', '128k', '-strict', '-2',
 				'./records/' + socket.handshake.issued + '.webm'
 			];
+			var ops2 = [
+				'-re', '-i', '-',
+				'-c:v', 'copy', '-preset', 'veryfast',
+				'-b:a', '128k', '-strict', '-2',
+				'./records/' + socket.handshake.issued + 'screen.webm'
+			];
 
 			ffmpeg_process = spawn('ffmpeg', ops);
+			ffmpeg_process2 = spawn('ffmpeg', ops2);
 			feedStream = function (data) {
 				ffmpeg_process.stdin.write(data);
 				//write exception cannot be caught here.
 			}
-
+			feedStream2 = function (data) {
+				ffmpeg_process2.stdin.write(data);
+				//write exception cannot be caught here.
+			}
 			ffmpeg_process.stderr.on('data', function (d) {
 				socket.emit('ffmpeg_stderr', '' + d);
 			});
@@ -93,13 +93,28 @@ io.on('connection', function(socket){
 				socket.disconnect();
 			});
 			ffmpeg_process.on('exit', function (e) {
-				console.log('child process exit' + e);
+				console.log('child process video exit' + e);
 				socket.emit('fatal', 'ffmpeg exit!' + e);
 				uploadFile(socket);
 			});
+
+			ffmpeg_process2.stderr.on('data', function (d) {
+				socket.emit('ffmpeg_stderr', '' + d);
+			});
+			ffmpeg_process2.on('error', function (e) {
+				console.log('child process error' + e);
+				socket.emit('fatal', 'ffmpeg error!' + e);
+				feedStream = false;
+				socket.disconnect();
+			});
+			ffmpeg_process2.on('exit', function (e) {
+				console.log('child process desktop exit' + e);
+				socket.emit('fatal', 'ffmpeg exit!' + e);
+				// uploadFile(socket);
+			});
 		});
 
-		socket.on('binarystream', function (m) {
+		socket.on('binarystreamvideo', function (m) {
 			if (!feedStream) {
 				socket.emit('fatal', 'ffmpep not processing.');
 				ffmpeg_process.stdin.end();
@@ -107,11 +122,20 @@ io.on('connection', function(socket){
 			}
 			feedStream(m);
 		});
+
+		socket.on('binarystreamdesktop', function (m) {
+			if (!feedStream2) {
+				socket.emit('fatal', 'ffmpep not processing.');
+				ffmpeg_process2.stdin.end();
+				return;
+			}
+			feedStream2(m);
+		});
 		socket.on('infos', function (m) {
 			socket.handshake.session.usermediadatas = m;
 		});
 		socket.on('stop', function (m) {
-			feedStream = false;
+			feedStream = false,feedStream2 = false;
 			if (ffmpeg_process) {
 				try {
 					ffmpeg_process.stdin.end();
@@ -119,14 +143,27 @@ io.on('connection', function(socket){
 					console.warn('End ffmpeg process attempt failed...');
 				}
 			}
+			if (ffmpeg_process2) {
+				try {
+					ffmpeg_process2.stdin.end();
+				} catch (e) {
+					console.warn('End ffmpeg process attempt failed...');
+				}
+			}
 		});
 		socket.on('disconnect', function () {
-			feedStream = false;
+			feedStream = false,feedStream2 = false;
 			if (ffmpeg_process)
 				try {
 					ffmpeg_process.kill('SIGINT');
 				} catch (e) {
 					console.warn('killing ffmpeg process attempt failed...');
+				}
+			if (ffmpeg_process2)
+				try {
+					ffmpeg_process2.kill('SIGINT');
+				} catch (e) {
+					console.warn('killing ffmpeg2 process attempt failed...');
 				}
 		});
 		socket.on('error', function (e) {
@@ -272,25 +309,34 @@ function uploadFile(socket)
 			method: "POST",
 			url: config.opencast_events_url,
 			ca: fs.readFileSync(config.opencast_cert),
-			headers: {
+			headers:
+			{
 				'cache-control': 'no-cache',
-				Authorization: 'Basic ' + config.opencast_authentication,
+				'Authorization': 'Basic ' + config.opencast_authentication,
 				'content-type': 'multipart/form-data;'
 			},
 			formData:
+			{
+				presenter:
 				{
-					presenter:
-						{
-							value: fs.createReadStream("records/" + idFileUpload + ".webm"),
-							options:
-								{
-									filename: 'metadata/' + idFileUpload + '.webm'
-								}
-						},
-					processing,
-					metadata,
-					acl
-				}
+					value: fs.createReadStream("records/" + idFileUpload + ".webm"),
+					options:
+					{
+						filename: 'metadata/' + idFileUpload + '.webm'
+					}
+				},
+				presentation:
+				{
+					value: fs.createReadStream("records/" + idFileUpload + "screen.webm"),
+					options:
+					{
+						filename: 'metadata/' + idFileUpload + 'screen.webm'
+					}
+				},
+				processing,
+				metadata,
+				acl
+			}
 		};
 		request(options, function (error, response, body) {
 			if (error) {
