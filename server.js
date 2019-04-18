@@ -95,7 +95,10 @@ io.on('connection', function(socket){
 			ffmpeg_process.on('exit', function (e) {
 				console.log('child process video exit' + e);
 				socket.emit('fatal', 'ffmpeg exit!' + e);
-				uploadFile(socket);
+				if(feedStream2 != false)
+					uploadFile(socket, true);
+				else
+					uploadFile(socket, false);
 			});
 
 			ffmpeg_process2.stderr.on('data', function (d) {
@@ -206,7 +209,7 @@ process.on('uncaughtException', function(err) {
  * Permet d'uploader un média
  * @param socket
  */
-function uploadFile(socket)
+function uploadFile(socket, hasSecondStream)
 {
 	if(typeof socket.handshake.session.usermediadatas !== 'undefined') {
 		//on test si c'est pas undefined  ?
@@ -305,39 +308,70 @@ function uploadFile(socket)
 			'  "workflow": "' + config.opencast_workflow + '"\n' +
 			'}';
 
-		var options = {
-			method: "POST",
-			url: config.opencast_events_url,
-			ca: fs.readFileSync(config.opencast_cert),
-			headers:
-			{
-				'cache-control': 'no-cache',
-				'Authorization': 'Basic ' + config.opencast_authentication,
-				'content-type': 'multipart/form-data;'
-			},
-			formData:
-			{
-				presenter:
+		if(hasSecondStream) {
+			var options = {
+				method: "POST",
+				url: config.opencast_events_url,
+				ca: fs.readFileSync(config.opencast_cert),
+				headers:
 				{
-					value: fs.createReadStream("records/" + idFileUpload + ".webm"),
-					options:
-					{
-						filename: 'metadata/' + idFileUpload + '.webm'
-					}
+					'cache-control': 'no-cache',
+					'Authorization': 'Basic ' + config.opencast_authentication,
+					'content-type': 'multipart/form-data;'
 				},
-				presentation:
+				formData:
 				{
-					value: fs.createReadStream("records/" + idFileUpload + "screen.webm"),
-					options:
+					presenter:
 					{
-						filename: 'metadata/' + idFileUpload + 'screen.webm'
-					}
+						value: fs.createReadStream("records/" + idFileUpload + ".webm"),
+						options:
+						{
+							filename: 'metadata/' + idFileUpload + '.webm'
+						}
+					},
+					presentation:
+					{
+						value: fs.createReadStream("records/" + idFileUpload + "screen.webm"),
+						options:
+						{
+							filename: 'metadata/' + idFileUpload + 'screen.webm'
+						}
+					},
+					processing,
+					metadata,
+					acl
+				}
+			};
+		}
+		else
+		{
+			var options = {
+				method: "POST",
+				url: config.opencast_events_url,
+				ca: fs.readFileSync(config.opencast_cert),
+				headers:
+				{
+					'cache-control': 'no-cache',
+					'Authorization': 'Basic ' + config.opencast_authentication,
+					'content-type': 'multipart/form-data;'
 				},
-				processing,
-				metadata,
-				acl
-			}
-		};
+				formData:
+				{
+					presenter:
+					{
+						value: fs.createReadStream("records/" + idFileUpload + ".webm"),
+						options:
+						{
+							filename: 'metadata/' + idFileUpload + '.webm'
+						}
+					},
+					processing,
+					metadata,
+					acl
+				}
+			};
+		}
+
 		request(options, function (error, response, body) {
 			if (error) {
 				socket.disconnect(); //?? à set ailleur ?
