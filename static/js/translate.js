@@ -24,7 +24,7 @@ class TranslationService extends EventEmitter {
             localStorage.setItem('language', newLang);
             let emitObj = JSON.parse(JSON.stringify(_chosen));
             emitObj.language = _lang;
-            emitObj.translation = this[_lang] || this.en;
+            emitObj.translation = this[_lang] || this.fr;
             this.emit('translations.set', emitObj);
           }
         }
@@ -46,7 +46,7 @@ class TranslationService extends EventEmitter {
                         .reduce((chosen, check) => chosen = check, {});
             let emitObj = JSON.parse(JSON.stringify(_chosen));
             emitObj.language = _lang;
-            emitObj.translation = this[_lang] || this.en;
+            emitObj.translation = this[_lang] || this.fr;
             localStorage.setItem('languagePacks', JSON.stringify(langs));
             this.emit('translations.set', emitObj);
           }
@@ -108,7 +108,7 @@ class TranslationService extends EventEmitter {
   }
 
   translate(phrase) {
-    return this[this.language][phrase] || this.en[phrase] || "";
+    return this[this.language][phrase] || this.fr[phrase] || "";
   }
 }
 
