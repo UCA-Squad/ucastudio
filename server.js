@@ -66,12 +66,24 @@ io.on('connection', function(socket){
 				'-b:a', '128k', '-strict', '-2',
 				'./records/' + socket.handshake.issued + '.webm'
 			];
-			var ops2 = [
-				'-re', '-i', '-',
-				'-c:v', 'copy', '-preset', 'veryfast',
-				'-b:a', '128k', '-strict', '-2',
-				'./records/' + socket.handshake.issued + 'screen.webm'
-			];
+
+			if(m == 'video-and-desktop') {
+				var ops2 = [
+					'-re', '-i', '-',
+					'-c:v', 'copy', '-preset', 'veryfast',
+					'-an',
+					'./records/' + socket.handshake.issued + 'screen.webm'
+				];
+			}
+			else
+			{
+				var ops2 = [
+					'-re', '-i', '-',
+					'-c:v', 'copy', '-preset', 'veryfast',
+					'-b:a', '128k', '-strict', '-2',
+					'./records/' + socket.handshake.issued + 'screen.webm'
+				];
+			}
 
 			if(m == 'video-and-desktop' || m == 'onlyaudio' || m == 'onlydesktop') {
 				ffmpeg_process2 = spawn('ffmpeg', ops2);
