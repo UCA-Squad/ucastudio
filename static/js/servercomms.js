@@ -13,6 +13,7 @@ function Communications() {
 
   this.socket.on('endupload',function(){
     $('#uploadProgress').hide();
+    alert('Votre média a bien été tranféré');
   });
 
   this.socket.on('listseries',function(listSeries){
