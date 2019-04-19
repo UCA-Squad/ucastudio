@@ -738,7 +738,7 @@ App.prototype = {
     if (!document.head.querySelector(`link[data-lang=${langObj.language}`)) {
       let link = document.createElement('link');
       link.rel = "stylesheet";
-      link.href = `/css/translations_${langObj.language}.css`;
+      link.href = `css/translations_${langObj.short}.css`;
       document.head.appendChild(link);
     }
 
