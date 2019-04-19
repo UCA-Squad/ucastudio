@@ -30,7 +30,7 @@ header {
   box-shadow: 0 4px 4px -4px rgba(0,0,0,0.4);
 }
 
-body:not(#code) header a span {
+body:not(#code) header span {
   color: white;
 }
 
@@ -1302,6 +1302,7 @@ svg {
 
 .modalBody h4 {
   padding: 0;
+  text-align: center;
 }
 
 .modalClose {
@@ -1497,7 +1498,6 @@ label[for=mergestreams]::before {
 
 #recordingControls {
   text-align: center;
-  margin: 2rem 0;
   position: relative;
 }
 
