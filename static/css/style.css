@@ -30,17 +30,17 @@ header {
   box-shadow: 0 4px 4px -4px rgba(0,0,0,0.4);
 }
 
-body:not(#code) header span {
+body:not(#code) header a span {
   color: white;
 }
 
-body:not(#code) header > span:nth-child(1) {
+body:not(#code) header > a > span:nth-child(1) {
   font-family: "Lobster", cursive;
   font-size: 1.6rem;
   margin-left: 2rem;
 }
 
-body:not(#code) header > span:nth-child(2) {
+body:not(#code) header > a > span:nth-child(2) {
   font-family: "Comfortaa", cursive;
   text-transform: uppercase;
   font-size: 1.2rem;
@@ -716,7 +716,8 @@ input[id^=inputSource]:not(:checked) ~ label[for^=inputSource] ul {
 }
 
 #advancedUserView:checked ~ #videoView .mediadevice.audioDevice {
-  bottom: 0;
+  /*bottom: 0;*/
+  top:25%;
 }
 
 #streams::before {
@@ -1465,7 +1466,7 @@ label.mediadevice[for=mergestreams] {
 
 label[for=audiostream]::before,
 label[for=mergestreams]::before {
-  margin-top: calc(37.5% - 1rem);
+  /*margin-top: calc(37.5% - 1rem);*/
   transition: margin-top 1s;
 }
 
