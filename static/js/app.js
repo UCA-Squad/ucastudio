@@ -25,7 +25,6 @@ function App() {
   this.deviceList = document.querySelector('#streams .list');
   this.audioCanvas = document.querySelector('#audio ~ canvas');
 
-  this.userView = document.querySelector('select[name=createView]');
   this.simpleUserView = document.getElementById('simpleUserView');
   this.advancedUserView = document.getElementById('advancedUserView');
 
@@ -157,9 +156,7 @@ App.prototype = {
     });
 
     document.getElementById('installExtension').addEventListener('click', this.chromeInstall.bind(this), false);
-    document.getElementById('mergestreams').addEventListener('change', this.mergeStreams.bind(this), false);
     document.body.addEventListener('keyup', this.handleKeys.bind(this), false);
-    this.userView.addEventListener('change', this.switchCreateView.bind(this), false);
 
     this.recordButton.addEventListener('click', this.startRecord.bind(this), false);
     this.pauseButton.addEventListener('click', this.pauseRecord.bind(this), false);
@@ -178,11 +175,6 @@ App.prototype = {
       btn.addEventListener('click', this.chooseResolution.bind(this), false);
     });
 
-    document.getElementById('unmerge').addEventListener('click', this.unmergeStreams.bind(this), false);
-  },
-  switchCreateView: function(e) {
-    let newView = `${e.target.value}UserView`;
-    this[newView].checked = true;
   },
   toggleStream: function(e) {
 
@@ -489,22 +481,6 @@ App.prototype = {
   togglePeerStream: function(e) {
     console.log(e.target.getAttribute('data-id'));
   },
-
-  mergeStreams: function(e) {
-    if (e.target.checked) {
-      compositor.start();
-      audAnalyser.switchDraw('drawMerged');
-    }
-    else {
-      compositor.stop();
-      audAnalyser.switchDraw('draw');
-    }
-  },
-  unmergeStreams: function(e) {
-    let mergeRadio = document.getElementById('mergestreams');
-    mergeRadio.checked = false;
-    mergeRadio.dispatchEvent(new Event('change'));
-  },
   minimiseStreamView: function(e) {
     let title = e.target.checked ? 'Maximise' : 'Minimise';
     document.querySelector('label[for=minimiseStreams]').setAttribute('title', title);
@@ -570,7 +546,20 @@ App.prototype = {
       } catch(e) {
       }
     }
-    comms.emit('start');
+
+    if ($(".videoDevice").hasClass('active') && $(".desktopDevice").hasClass('active'))
+      comms.emit('start', 'video-and-desktop');
+
+    if($(".audioDevice").hasClass('active') && !$(".videoDevice").hasClass('active') && !$(".desktopDevice").hasClass('active'))
+      comms.emit('start', 'onlyaudio');
+
+    //on check quel stream on share
+    if($(".audioDevice").hasClass('active') && $(".desktopDevice").hasClass('active') && !$(".videoDevice").hasClass('active'))
+      comms.emit('start', 'onlydesktop');
+
+    if($(".audioDevice").hasClass('active') && $(".videoDevice").hasClass('active') && !$(".desktopDevice").hasClass('active'))
+      comms.emit('start', 'onlyvideo');
+
     [...document.querySelectorAll('#recordingList a')].forEach(anchor => anchor.parentNode.removeChild(anchor));
   },
   pauseRecord: function(e) {
@@ -593,7 +582,20 @@ App.prototype = {
     for (let peer in peers) {
       peers[peer].stopRecording();
     }
-    comms.emit('stop');
+
+    if ($(".videoDevice").hasClass('active') && $(".desktopDevice").hasClass('active'))
+      comms.emit('stop', 'video-and-desktop');
+
+    if($(".audioDevice").hasClass('active') && !$(".videoDevice").hasClass('active') && !$(".desktopDevice").hasClass('active'))
+      comms.emit('stop', 'onlyaudio');
+
+    //on check quel stream on share
+    if($(".audioDevice").hasClass('active') && $(".desktopDevice").hasClass('active') && !$(".videoDevice").hasClass('active'))
+      comms.emit('stop', 'onlydesktop');
+
+    if($(".audioDevice").hasClass('active') && $(".videoDevice").hasClass('active') && !$(".desktopDevice").hasClass('active'))
+      comms.emit('stop', 'onlyvideo');
+
     if(document.getElementById('uploadMedia').checked) {
       $('#uploadProgress').show();
       this.addLoader(document.getElementById('uploadProgress'), 'Transfert en cours...', {fontSize: '1.5rem'});

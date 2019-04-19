@@ -73,48 +73,56 @@ io.on('connection', function(socket){
 				'./records/' + socket.handshake.issued + 'screen.webm'
 			];
 
-			ffmpeg_process = spawn('ffmpeg', ops);
-			ffmpeg_process2 = spawn('ffmpeg', ops2);
-			feedStream = function (data) {
-				ffmpeg_process.stdin.write(data);
-				//write exception cannot be caught here.
+			if(m == 'video-and-desktop' || m == 'onlyaudio' || m == 'onlydesktop') {
+				ffmpeg_process2 = spawn('ffmpeg', ops2);
+				feedStream2 = function (data) {
+					ffmpeg_process2.stdin.write(data);
+					//write exception cannot be caught here.
+				}
+				ffmpeg_process2.stderr.on('data', function (d) {
+					socket.emit('ffmpeg_stderr', '' + d);
+				});
+				ffmpeg_process2.on('error', function (e) {
+					console.log('child process error' + e);
+					socket.emit('fatal', 'ffmpeg error!' + e);
+					feedStream = false;
+					socket.disconnect();
+				});
+				ffmpeg_process2.on('exit', function (e) {
+					console.log('child process desktop exit' + e);
+					socket.emit('fatal', 'ffmpeg exit!' + e);
+					if(m == 'onlyaudio' || m == 'onlydesktop')
+						uploadFile(socket, false, true);
+				});
 			}
-			feedStream2 = function (data) {
-				ffmpeg_process2.stdin.write(data);
-				//write exception cannot be caught here.
-			}
-			ffmpeg_process.stderr.on('data', function (d) {
-				socket.emit('ffmpeg_stderr', '' + d);
-			});
-			ffmpeg_process.on('error', function (e) {
-				console.log('child process error' + e);
-				socket.emit('fatal', 'ffmpeg error!' + e);
-				feedStream = false;
-				socket.disconnect();
-			});
-			ffmpeg_process.on('exit', function (e) {
-				console.log('child process video exit' + e);
-				socket.emit('fatal', 'ffmpeg exit!' + e);
-				if(feedStream2 != false)
-					uploadFile(socket, true);
-				else
-					uploadFile(socket, false);
-			});
 
-			ffmpeg_process2.stderr.on('data', function (d) {
-				socket.emit('ffmpeg_stderr', '' + d);
-			});
-			ffmpeg_process2.on('error', function (e) {
-				console.log('child process error' + e);
-				socket.emit('fatal', 'ffmpeg error!' + e);
-				feedStream = false;
-				socket.disconnect();
-			});
-			ffmpeg_process2.on('exit', function (e) {
-				console.log('child process desktop exit' + e);
-				socket.emit('fatal', 'ffmpeg exit!' + e);
-				// uploadFile(socket);
-			});
+			if(m == 'video-and-desktop' || m == 'onlyvideo') {
+				ffmpeg_process = spawn('ffmpeg', ops);
+
+				feedStream = function (data) {
+					ffmpeg_process.stdin.write(data);
+					//write exception cannot be caught here.
+				}
+				ffmpeg_process.stderr.on('data', function (d) {
+					socket.emit('ffmpeg_stderr', '' + d);
+				});
+				ffmpeg_process.on('error', function (e) {
+					console.log('child process error' + e);
+					socket.emit('fatal', 'ffmpeg error!' + e);
+					feedStream = false;
+					socket.disconnect();
+				});
+				ffmpeg_process.on('exit', function (e) {
+					console.log('child process video exit' + e);
+					socket.emit('fatal', 'ffmpeg exit!' + e);
+					if(m == 'video-and-desktop')
+						uploadFile(socket, true);
+					else
+						uploadFile(socket, false);
+				});
+			}
+
+
 		});
 
 		socket.on('binarystreamvideo', function (m) {
@@ -138,19 +146,24 @@ io.on('connection', function(socket){
 			socket.handshake.session.usermediadatas = m;
 		});
 		socket.on('stop', function (m) {
-			feedStream = false,feedStream2 = false;
-			if (ffmpeg_process) {
-				try {
-					ffmpeg_process.stdin.end();
-				} catch (e) {
-					console.warn('End ffmpeg process attempt failed...');
+			if(m == 'video-and-desktop' || m == 'onlyvideo') {
+				feedStream = false;
+				if (ffmpeg_process) {
+					try {
+						ffmpeg_process.stdin.end();
+					} catch (e) {
+						console.warn('End ffmpeg process attempt failed...');
+					}
 				}
 			}
-			if (ffmpeg_process2) {
-				try {
-					ffmpeg_process2.stdin.end();
-				} catch (e) {
-					console.warn('End ffmpeg process attempt failed...');
+			if(m == 'video-and-desktop' || m == 'onlyaudio' || m == 'onlydesktop') {
+				feedStream2 = false;
+				if (ffmpeg_process2) {
+					try {
+						ffmpeg_process2.stdin.end();
+					} catch (e) {
+						console.warn('End ffmpeg process attempt failed...');
+					}
 				}
 			}
 		});
@@ -209,7 +222,7 @@ process.on('uncaughtException', function(err) {
  * Permet d'uploader un média
  * @param socket
  */
-function uploadFile(socket, hasSecondStream)
+function uploadFile(socket, hasSecondStream, onlySecondStream = false)
 {
 	if(typeof socket.handshake.session.usermediadatas !== 'undefined') {
 		//on test si c'est pas undefined  ?
@@ -345,6 +358,11 @@ function uploadFile(socket, hasSecondStream)
 		}
 		else
 		{
+			var nameFile = idFileUpload + ".webm";
+
+			if(onlySecondStream)
+				var nameFile = idFileUpload + "screen.webm";
+
 			var options = {
 				method: "POST",
 				url: config.opencast_events_url,
@@ -359,10 +377,10 @@ function uploadFile(socket, hasSecondStream)
 				{
 					presenter:
 					{
-						value: fs.createReadStream("records/" + idFileUpload + ".webm"),
+						value: fs.createReadStream("records/" +nameFile ),
 						options:
 						{
-							filename: 'metadata/' + idFileUpload + '.webm'
+							filename: 'metadata/' + nameFile
 						}
 					},
 					processing,
