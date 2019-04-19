@@ -10,7 +10,7 @@
 </head>
 <body class="loading translating">
 <header>
-    <span>UCA</span><span>Studio</span>
+    <a href="index.html"><span>UCA</span><span>Studio</span></a>
     <div id="language">
         <input type="checkbox" class="hiddenCheck" id="chooseLanguage" />
         <label id="chosenLanguage" for="chooseLanguage">
@@ -46,7 +46,7 @@
             <div class="production">
                 <h1 data-translate="PRODUCTION_HEADING" style="margin-top: 0;font-size: 1.8em">Détails de production</h1>
                 <div id="alert" class="alert alert-orange card-60 hiddenCheck" style="text-align: center;">
-                    Merci de bien vouloir renseigner les informations demandées.
+                        Merci de bien vouloir renseigner les informations demandées.
                 </div>
                 <div class="card card-60">
                     <div class="form-input card-80" id="dropdownlistserie">
@@ -86,29 +86,30 @@
             <input type="checkbox" id="minimiseStreams" class="hiddenCheck" />
             <input name="userView" type="radio" value="simple" class="hiddenCheck" id="simpleUserView" autocomplete="off" />
             <input name="userView" type="radio" value="advanced" class="hiddenCheck" checked id="advancedUserView" autocomplete="off" />
-            <input type="radio" name="merge" class="hiddenCheck" id="mergestreams" value="composite" autocomplete="off" />
-            <label for="mergestreams" class="mediadevice action" data-title="Merge streams" data-pseudotext="MERGE_STREAMS" data-id="composite" data-target="composite">
-                <video id="composite" autoplay muted data-id="composite"></video>
-                <div class="streamControls">
-                    <input type="checkbox" id="compositeResolution" class="hiddenCheck" />
-                    <label for="compositeResolution">
-                        <span>720p</span>
-                        <ul>
-                            <li><button type="button" value="480p">480p</button></li>
-                            <li><button type="button" value="720p">720p</button></li>
-                            <li><button type="button" value="1080p">1080p</button></li>
-                        </ul>
-                    </label>
-                    <label class="close pull-left" title="Remove composite stream" id="unmerge" data-translatetitle="STOP_COMPOSITE"></label>
-                </div>
-            </label>
+            <!--<input type="radio" name="merge" class="hiddenCheck" id="mergestreams" value="composite" autocomplete="off" />-->
+            <!--<label for="mergestreams" class="mediadevice action" data-title="Merge streams" data-pseudotext="MERGE_STREAMS" data-id="composite" data-target="composite">-->
+                <!--<video id="composite" autoplay muted data-id="composite"></video>-->
+                <!--<div class="streamControls">-->
+                    <!--<input type="checkbox" id="compositeResolution" class="hiddenCheck" />-->
+                    <!--<label for="compositeResolution">-->
+                        <!--<span>720p</span>-->
+                        <!--<ul>-->
+                            <!--<li><button type="button" value="480p">480p</button></li>-->
+                            <!--<li><button type="button" value="720p">720p</button></li>-->
+                            <!--<li><button type="button" value="1080p">1080p</button></li>-->
+                        <!--</ul>-->
+                    <!--</label>-->
+                    <!--<label class="close pull-left" title="Remove composite stream" id="unmerge" data-translatetitle="STOP_COMPOSITE"></label>-->
+                <!--</div>-->
+            <!--</label>-->
             <div id="videoView">
-                <div class="viewControls">
-                    <span data-translate="VIEW">Vue</span>: <select name="createView" autocomplete="off">
-                    <option value="advanced" data-translate="ADVANCED">Avancée</option>
-                    <option value="simple" data-translate="SIMPLE">Simple</option>
-                </select>
-                </div>
+                <!--<div class="viewControls">-->
+                    <!--<span data-translate="VIEW">Vue</span>: -->
+                    <!--<select name="createView" autocomplete="off">-->
+                        <!--<option value="advanced" data-translate="ADVANCED">Avancée</option>-->
+                        <!--<option value="simple" data-translate="SIMPLE">Simple</option>-->
+                    <!--</select>-->
+                <!--</div>-->
                 <input type="radio" name="desktop" class="hiddenCheck streamToggle" id="desktopstream" autocomplete="off" />
                 <label for="desktopstream" class="mediadevice action desktopDevice" data-title="Share desktop" data-pseudotext="SHARE_DESKTOP" data-target="desktop">
                     <video id="desktop" autoplay muted></video>
