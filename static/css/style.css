@@ -1466,7 +1466,7 @@ label.mediadevice[for=mergestreams] {
 
 label[for=audiostream]::before,
 label[for=mergestreams]::before {
-  /*margin-top: calc(37.5% - 1rem);*/
+  margin-top: calc(37.5% - 1rem);
   transition: margin-top 1s;
 }
 
