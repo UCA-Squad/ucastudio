@@ -222,11 +222,11 @@ input:checked + section {
 }
 
 .bigButton[for=create]::after {
-  content: 'Create a video';
+  content: 'Créer une vidéo depuis son navigateur';
 }
 
 .bigButton[for=edit]::after {
-  content: 'Edit a video';  
+  content: 'Créer une vidéo via l\'application OBS';
 }
 
 .action {

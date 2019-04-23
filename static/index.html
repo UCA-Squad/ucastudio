@@ -88,7 +88,7 @@
             <input name="userView" type="radio" value="advanced" class="hiddenCheck" checked id="advancedUserView" autocomplete="off" />
             <div id="videoView">
                 <input type="radio" name="desktop" class="hiddenCheck streamToggle" id="desktopstream" autocomplete="off" />
-                <label for="desktopstream" class="mediadevice action desktopDevice" data-title="Share desktop" data-pseudotext="SHARE_DESKTOP" data-target="desktop">
+                <label for="desktopstream" class="mediadevice action desktopDevice" data-title="Partager l'écran" data-pseudotext="SHARE_DESKTOP" data-target="desktop">
                     <video id="desktop" autoplay muted></video>
                     <span class="placeholder"></span>
                     <div class="streamControls">
@@ -110,15 +110,17 @@
                         </label>
                     </div>
                 </label>
-                <input type="radio" name="audio" class="hiddenCheck streamToggle" id="audiostream" autocomplete="off" />
-                <label for="audiostream" class="mediadevice action audioDevice" data-title="Share microphone" data-pseudotext="SHARE_MICROPHONE" data-target="audio">
-                    <audio id="audio" autoplay muted></audio>
-                    <span class="placeholder"></span>
-                    <span class="shadow"></span>
-                    <canvas></canvas>
-                </label>
+                <div class="microphoneButton">
+                    <input type="radio" name="audio" class="hiddenCheck streamToggle" id="audiostream" autocomplete="off" />
+                    <label for="audiostream" class="mediadevice action audioDevice" data-title="Partager microphone" data-pseudotext="SHARE_MICROPHONE" data-target="audio">
+                        <audio id="audio" autoplay muted></audio>
+                        <span class="placeholder"></span>
+                        <span class="shadow"></span>
+                        <canvas></canvas>
+                    </label>
+                </div>
                 <input type="radio" name="video" class="hiddenCheck streamToggle" id="webcamstream" autocomplete="off" />
-                <label for="webcamstream" class="mediadevice action videoDevice" data-title="Share webcam" data-pseudotext="SHARE_WEBCAM" data-target="video">
+                <label for="webcamstream" class="mediadevice action videoDevice" data-title="Partager webcam" data-pseudotext="SHARE_WEBCAM" data-target="video">
                     <video id="video" autoplay muted></video>
                     <span class="placeholder"></span>
                     <span class="shadow"></span>
