@@ -1170,7 +1170,7 @@ svg {
   z-index: 4;
   opacity: 1;
   visibility: visible;
-  pointer-events: none
+  pointer-events: auto;
 }
 
 #uploadProgress .loaderText{
@@ -1292,51 +1292,18 @@ svg {
   transition: transform 0.25s ease-out;
 }
 
-.modal h4 {
-  margin: 0;
-  padding: 0 1rem;
-  font-weight: 300;
-  font-size: 1.5rem;
-  line-height: 4rem;
-}
-
-.modalBody h4 {
-  padding: 0;
-  text-align: center;
-}
-
 .modalClose {
-}
-
-.modalBody {
-  padding: 1rem;
 }
 
 .modalFooter {
   position: absolute;
   bottom: 0;
   left: 0;
-  height: 4rem;
+  height: 5rem;
   padding: 1rem;
   text-align: center;
   width: 100%;
 }
-
-.modalFooter .btn {
-  border: none;
-  margin-left: 0.5rem;
-  border-radius: 0.125rem;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
-  font-family: Ubuntu, Roboto, "Open Sans", "Segoe UI", "Helvetica Neue", Verdana, sans-serif;
-  height: 2rem;
-  line-height: 2rem;
-  padding: 0 0.5rem;
-  display: inline-block;
-  vertical-align: top;
-  font-size: 0.9rem;
-  font-weight: 300;
-}
-
 
 #host {
   padding: 0 0.25rem;

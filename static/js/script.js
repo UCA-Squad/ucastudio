@@ -15,8 +15,15 @@ $(".backToInfo").on('click', function () {
 
 $( document ).ready(function() {
     $(document).keydown(function (e) {
-        if (e.keyCode == 9) {  //tab pressed
+        var charCode = e.charCode || e.keyCode || e.which;
+        if (charCode == 9) {  //tab pressed
             e.preventDefault(); // stops its action
         }
     });
+
+    $('.modalFooter .button-amber').on('click',  function (e) {
+        e.preventDefault(); // stops its action
+        window.location = window.location.href;
+    });
+
 });
