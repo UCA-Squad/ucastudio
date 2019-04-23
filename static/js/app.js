@@ -553,7 +553,6 @@ App.prototype = {
     if($(".audioDevice").hasClass('active') && !$(".videoDevice").hasClass('active') && !$(".desktopDevice").hasClass('active'))
       comms.emit('start', 'onlyaudio');
 
-    //on check quel stream on share
     if($(".desktopDevice").hasClass('active') && !$(".videoDevice").hasClass('active'))
       comms.emit('start', 'onlydesktop');
 
@@ -590,7 +589,7 @@ App.prototype = {
       comms.emit('stop', 'onlyaudio');
 
     //on check quel stream on share
-    if($(".audioDevice").hasClass('active') && $(".desktopDevice").hasClass('active') && !$(".videoDevice").hasClass('active'))
+    if($(".desktopDevice").hasClass('active') && !$(".videoDevice").hasClass('active'))
       comms.emit('stop', 'onlydesktop');
 
     if($(".audioDevice").hasClass('active') && $(".videoDevice").hasClass('active') && !$(".desktopDevice").hasClass('active'))
