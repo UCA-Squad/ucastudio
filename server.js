@@ -40,14 +40,6 @@ app.use(express.static(__dirname + "/static/"));
 
 io.on('connection', function(socket){
 
-	var today = new Date();
-	today.setHours(today.getHours() - 2);
-	var startTime = today.getHours() + ':' + today.getMinutes();
-	var dd = String(today.getDate()).padStart(2, '0');
-	var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
-	var yyyy = today.getFullYear();
-	var startDate = yyyy + '-' + mm + '-' + dd;
-
 	var ffmpeg_process, feedStream=false;
 	var ffmpeg_process2, feedStream2=false;
 	socket._vcodec='libvpx';//from firefox default encoder
