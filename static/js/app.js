@@ -554,7 +554,7 @@ App.prototype = {
       comms.emit('start', 'onlyaudio');
 
     //on check quel stream on share
-    if($(".audioDevice").hasClass('active') && $(".desktopDevice").hasClass('active') && !$(".videoDevice").hasClass('active'))
+    if($(".desktopDevice").hasClass('active') && !$(".videoDevice").hasClass('active'))
       comms.emit('start', 'onlydesktop');
 
     if($(".audioDevice").hasClass('active') && $(".videoDevice").hasClass('active') && !$(".desktopDevice").hasClass('active'))
