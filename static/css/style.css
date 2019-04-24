@@ -270,7 +270,7 @@ input:checked + section {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  width: calc((100% - 4rem)*0.3) !important;
+  width: calc((100% - 4rem)*0.35) !important;
 }
 
 .mediadevice::before {
@@ -466,7 +466,7 @@ input[id^=inputSource]:not(:checked) ~ label[for^=inputSource] ul {
   left: 0;
   width: 100%;
   text-align: center;
-  line-height: 3rem;
+  line-height: 2rem;
   font-size: 1.5rem;
   font-weight: 300;
   transition: opacity 0.5s;
@@ -512,7 +512,7 @@ input[id^=inputSource]:not(:checked) ~ label[for^=inputSource] ul {
 .desktopDevice .placeholder::before {
   content: '';
   width: 100%;
-  height: calc(100% - 3rem);
+  height: calc(90% - 3rem);
   border: 0px solid white;
   border-bottom-width: 2rem;
   border-top-width: 1rem;
@@ -530,7 +530,7 @@ input[id^=inputSource]:not(:checked) ~ label[for^=inputSource] ul {
   width: 3rem;
   height: 0;
   position: absolute;
-  bottom: -3rem;
+  bottom: -2rem;
   left: 50%;
   transform: translate(-50%, -50%);
   border-bottom: 2rem solid white;
