@@ -79,7 +79,7 @@ class DeviceManager extends EventEmitter {
             this.emit('record.prepare', {
                label: label,
                   id: dev,
-              flavor: dev === 'desktop' ? 'Presentation' : 'Presenter'
+              flavor: dev === 'desktop' ? 'Écran' : 'Orateur'
             })
           );
           this.devices[dev].on('record.complete', obj =>
