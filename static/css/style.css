@@ -1623,15 +1623,15 @@ input:focus {
 
 #recordingList {
   display: flex;
-  max-height: 15rem;
-  overflow-y: auto;
+  max-height: 17rem;
+  overflow-y: hidden;
   flex-wrap: wrap;
   justify-content: center;
 }
 
 #recordingList a {
-  width: 12rem;
-  height: 8rem;
+  width: 16rem;
+  height: 10rem;
   position: relative;
   background: #ddd;
   text-align: center;
@@ -1641,8 +1641,7 @@ input:focus {
 
 #recordingList a video {
   position: absolute;
-  max-width: 100%;
-  max-height: 100%;
+  width:100%;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -2033,4 +2032,10 @@ input:focus {
 
 .content .audioDevice.disabled:hover .tooltiptext{
   visibility: visible;
+}
+
+.downloadVideo{
+  position:absolute;
+  bottom:-7px;
+  right:2px;
 }
