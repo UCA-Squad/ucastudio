@@ -110,15 +110,14 @@
                         </label>
                     </div>
                 </label>
-                <div class="microphoneButton">
-                    <input type="radio" name="audio" class="hiddenCheck streamToggle" id="audiostream" autocomplete="off" />
-                    <label for="audiostream" class="mediadevice action audioDevice" data-title="Partager microphone" data-pseudotext="SHARE_MICROPHONE" data-target="audio">
-                        <audio id="audio" autoplay muted></audio>
-                        <span class="placeholder"></span>
-                        <span class="shadow"></span>
-                        <canvas></canvas>
-                    </label>
-                </div>
+                <input type="radio" name="audio" class="hiddenCheck streamToggle" id="audiostream" autocomplete="off"/>
+                <label for="audiostream" class="mediadevice action audioDevice" data-title="Partager microphone" data-pseudotext="SHARE_MICROPHONE" data-target="audio">
+                    <audio id="audio" autoplay muted></audio>
+                    <span class="placeholder"></span>
+                    <span class="shadow"></span>
+                    <canvas></canvas>
+                    <span class="tooltiptext">Cette fonctionnalitée n'est pas disponible avec google Chrome, merci de bien vouloir utiliser le navigateur Firefox.</span>
+                </label>
                 <input type="radio" name="video" class="hiddenCheck streamToggle" id="webcamstream" autocomplete="off" />
                 <label for="webcamstream" class="mediadevice action videoDevice" data-title="Partager webcam" data-pseudotext="SHARE_WEBCAM" data-target="video">
                     <video id="video" autoplay muted></video>

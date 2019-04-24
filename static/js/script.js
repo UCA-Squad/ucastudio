@@ -26,4 +26,10 @@ $( document ).ready(function() {
         window.location = window.location.href;
     });
 
+    var sUsrAg = navigator.userAgent;
+    if (sUsrAg.indexOf("Chrome") > -1) {
+        $('.audioDevice').addClass("disabled");
+        $('#audiostream').attr("disabled", true);
+    }
+
 });
