@@ -27,7 +27,7 @@
     "RAW_FOOTAGE": "Request Raw footage",
     "BACK_TO_MAIN": "Back to main navigation",
     "STOP_COMPOSITE": "Remove composite stream",
-    "PAUSE_RECORDING": "Pause recording",
+    "PAUSE_RECORDING": "Pause or resume recording",
     "START_RECORDING": "Start/resume recording",
     "STOP_RECORDING": "Stop recording",
     "ADD_DEVICE": "Add device"
@@ -197,8 +197,8 @@
     "MINIMISE": "Minimiser",
     "BACK_TO_MAIN": "Retour à la navigation principale",
     "STOP_COMPOSITE": "Arrêter la vidéo fusionnée",
-    "PAUSE_RECORDING": "Mettre l'enregistrement en pause",
-    "START_RECORDING": "Démarrer / reprendre l'enregistrement",
+    "PAUSE_RECORDING": "Mettre l'enregistrement en pause ou redémarrer l'enregistrement",
+    "START_RECORDING": "Démarrer l'enregistrement",
     "STOP_RECORDING": "Arrête d'enregistrer",
     "ADD_DEVICE": "Ajouter un depositif"
   }
