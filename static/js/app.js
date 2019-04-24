@@ -651,7 +651,7 @@ App.prototype = {
         vid.addEventListener('ended', e => vid.currentTime = 0, false);
 
         anchor.appendChild(vid);
-        anchor.insertAdjacentHTML('beforeend', '<i class="fas fa-download fa-2x downloadVideo"></i>');
+        anchor.insertAdjacentHTML('beforeend', '<i class="fas fa-download fa-2x downloadVideo" title="Télécharger"></i>');
       }
       else {
         anchor.download = anchor.getAttribute('data-flavor') + ' audio - ' + this.title + '.webm';
