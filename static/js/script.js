@@ -16,9 +16,17 @@ $(".backToInfo").on('click', function () {
 $( document ).ready(function() {
     $(document).keydown(function (e) {
         var charCode = e.charCode || e.keyCode || e.which;
+
         if (charCode == 9) {  //tab pressed
-            e.preventDefault(); // stops its action
+            e.preventDefault();
         }
+
+        //escape
+        if(charCode == 27 && document.getElementById('toggleSaveCreationModal').checked) {
+            e.preventDefault();
+            $('.modalFooter .button-amber').trigger('click');
+        }
+
     });
 
     $('.modalFooter .button-amber').on('click',  function (e) {

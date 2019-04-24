@@ -166,6 +166,8 @@ App.prototype = {
     this.presenterEl.addEventListener('keyup', this.setPresenter.bind(this), false);
     this.locationEl.addEventListener('keyup', this.setLocation.bind(this), false);
 
+    document.getElementById('nextBtn').addEventListener('click', this.setDetails.bind(this), false);
+
     this.saveRecordings.addEventListener('click', this.saveMedia.bind(this), false);
     this.nextBtn.addEventListener('click', this.uploadMedia.bind(this), false);
 
@@ -516,20 +518,6 @@ App.prototype = {
   },
   startRecord: function(e) {
 
-    if (this.isRecording) {
-
-      this.isPaused = false;
-      deviceMgr.record();
-      compositor.record();
-      for (let peer in peers) {
-        try {
-          peers[peer].record();
-        } catch (e) {
-        }
-      }
-      return;
-    }
-
     let numStreams = Object.keys(deviceMgr.devices)
                        .map(key => deviceMgr.devices[key].stream)
                        .filter(stream => stream).length;
@@ -663,6 +651,7 @@ App.prototype = {
         vid.addEventListener('ended', e => vid.currentTime = 0, false);
 
         anchor.appendChild(vid);
+        anchor.insertAdjacentHTML('beforeend', '<i class="fas fa-download fa-2x downloadVideo"></i>');
       }
       else {
         anchor.download = anchor.getAttribute('data-flavor') + ' audio - ' + this.title + '.webm';
@@ -696,7 +685,12 @@ App.prototype = {
   },
   saveMedia: function(e) {
     [...document.querySelectorAll('#saveCreation a')].forEach(anchor => anchor.click());
-    document.getElementById('toggleSaveCreationModal').checked = false;
+  },
+  setDetails: function(e) {
+    let keyupEvent = new Event('keyup');
+    this.titleEl.dispatchEvent(keyupEvent)
+    this.presenterEl.dispatchEvent(keyupEvent)
+    this.locationEl.dispatchEvent(keyupEvent)
   },
   uploadMedia: function(e) {
     if(document.getElementById('uploadMedia').checked) {

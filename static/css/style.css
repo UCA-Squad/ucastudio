@@ -2039,3 +2039,7 @@ input:focus {
   bottom:-7px;
   right:2px;
 }
+
+#saveRecordings{
+  display:none;
+}
