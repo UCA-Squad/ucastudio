@@ -15,7 +15,7 @@ class Recorder extends EventEmitter {
     let _audioCodecs = [
                          'audio/ogg;codecs=opus',
                          'audio/webm;codecs=opus'
-                       ]
+                       ].filter(codec => MediaRecorder.isTypeSupported(codec));
 
     let _recData = [];
 
@@ -25,6 +25,8 @@ class Recorder extends EventEmitter {
       // console.log(e.data);
       if (e.data.size > 0) {
          _recData.push(e.data);
+          if(typeDevice == 'audio')
+            typeDevice = 'desktop';
           comms.emit("binarystream"+typeDevice,e.data);
        }
     };
