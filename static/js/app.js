@@ -650,6 +650,9 @@ App.prototype = {
         vid.addEventListener('mouseout', e => vid.pause(), false);
         vid.addEventListener('ended', e => vid.currentTime = 0, false);
 
+        if($(".audioDevice").hasClass('active') && !$(".videoDevice").hasClass('active') && !$(".desktopDevice").hasClass('active'))
+          vid.classList.add('onlyAudio');
+
         anchor.appendChild(vid);
         anchor.insertAdjacentHTML('beforeend', '<i class="fas fa-download fa-2x downloadVideo" title="Télécharger"></i>');
       }
@@ -672,7 +675,7 @@ App.prototype = {
     e.target.parentNode.classList.add('transfer');
   },
   setTitle: function(e) {
-    this.title = e.target.value || 'Recording';
+    this.title = e.target.value || 'Enregistrement';
     [...document.querySelectorAll('#recordingList a')].forEach(anchor => {
       anchor.download = anchor.getAttribute('data-flavor') + ' ' + anchor.getAttribute('data-type') + ' - ' + this.title + '.webm';
     });

@@ -1552,7 +1552,7 @@ label, button {
 }
 
 .recording #recordingTime::before {
-  content: 'Recording';
+  content: 'Enregistrememnt';
   font-style: italic;
   color: #fe0001;
 }
@@ -2036,8 +2036,12 @@ input:focus {
 
 .downloadVideo{
   position:absolute;
-  bottom:-7px;
+  bottom:0px;
   right:2px;
+}
+
+.onlyAudio{
+  background: url('/img/onlyaudio.jpg');
 }
 
 #saveRecordings{
