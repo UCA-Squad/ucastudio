@@ -177,6 +177,8 @@ App.prototype = {
       btn.addEventListener('click', this.chooseResolution.bind(this), false);
     });
 
+    document.getElementById('switchDevice').addEventListener('click',this.chooseResolution.bind(this), false);
+
   },
   toggleStream: function(e) {
 
@@ -612,7 +614,7 @@ App.prototype = {
   listRecording: function(details) {
     let anchor = document.createElement('a');
     anchor.target = '_blank';
-    anchor.textContent = details.label;
+    // anchor.textContent = details.label; //vraiment nécessaire ?
     anchor.setAttribute('data-id', details.id);
     anchor.setAttribute('data-flavor', details.flavor);
     document.getElementById('recordingList').appendChild(anchor);

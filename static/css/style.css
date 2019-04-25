@@ -314,7 +314,7 @@ input:checked + section {
 }
 
 .streamControls label {
-  width: 2rem;
+  width: 2.5rem;
   height: 2rem;
   line-height: 2rem;
   display: inline-block;
@@ -435,8 +435,8 @@ input[id^=inputSource]:not(:checked) ~ label[for^=inputSource] ul {
   background: white;
 }
 
-#advancedUserView:checked ~ .mediadevice.active:hover .streamControls,
-#advancedUserView:checked ~ #videoView .mediadevice.active:hover .streamControls {
+#advancedUserView:checked ~ .mediadevice.active .streamControls,
+#advancedUserView:checked ~ #videoView .mediadevice.active .streamControls {
   opacity: 1;
   visibility: visible;
   transition: opacity 0.3s, visibility 0s;
@@ -2020,4 +2020,14 @@ input:focus {
 
 #saveRecordings{
   display:none;
+}
+
+.labelVideoResolution ul li::before, .labelDesktopResolution ul li::before, .labelDesktop ul li::before {
+  content: '';
+  content: '';
+}
+
+.labelWebcam:hover, .labelDesktop:hover{
+  background: none !important;
+  color: white !important;
 }

@@ -94,7 +94,7 @@
                     <span class="placeholder"></span>
                     <div class="streamControls">
                         <input type="checkbox" id="desktopResolution" class="hiddenCheck" />
-                        <label for="desktopResolution">
+                        <label for="desktopResolution" class="labelDesktopResolution">
                             <span></span>
                             <ul>
                                 <li><button type="button" value="360p">360p</button></li>
@@ -104,10 +104,9 @@
                             </ul>
                         </label>
                         <input type="checkbox" id="inputSource1" class="hiddenCheck" />
-                        <label for="inputSource1" class="pull-left inputSource">
-                            <span>Desktop</span>
-                            <ul>
-                            </ul>
+                        <label for="inputSource1" class="pull-left inputSource labelDesktop">
+                            <span>Écran <i id="switchDevice" class="fas fa-retweet switchDevice"></i> </span>
+                            <ul style="display: none"></ul>
                         </label>
                     </div>
                 </label>
@@ -125,7 +124,7 @@
                     <span class="shadow"></span>
                     <div class="streamControls">
                         <input type="checkbox" id="videoResolution" class="hiddenCheck" />
-                        <label for="videoResolution">
+                        <label for="videoResolution" class="labelVideoResolution">
                             <span></span>
                             <ul>
                                 <li><button type="button" value="360p">360p</button></li>
@@ -135,9 +134,9 @@
                             </ul>
                         </label>
                         <input type="checkbox" id="inputSource2" class="hiddenCheck" />
-                        <label for="inputSource2" class="pull-left inputSource">
+                        <label for="inputSource2" class="pull-left inputSource labelWebcam">
                             <span>Webcam</span>
-                            <ul></ul>
+                            <ul style="display: none"></ul>
                         </label>
                     </div>
                 </label>
