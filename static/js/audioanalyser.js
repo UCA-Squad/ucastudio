@@ -38,6 +38,9 @@ AudioAnalyser.prototype = {
   init: function() {
     this.analyser.fftSize = 128;
   },
+  resume: function() {
+    this.audioCtx.resume();
+  },
   attachCanvas: function(canvas) {
     canvas = canvas[0] || canvas;
 

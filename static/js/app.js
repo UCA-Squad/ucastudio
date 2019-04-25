@@ -194,6 +194,7 @@ App.prototype = {
       .catch(err => console.log(err));
   },
   displayStream: function(stream, value) {
+    audAnalyser.resume();
     let mediaContainer = null;
 
     [...document.querySelectorAll(`video[data-id="${value}"],audio[data-id="${value}"]`)]
