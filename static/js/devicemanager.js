@@ -131,6 +131,10 @@ class DeviceManager extends EventEmitter {
     for (var dev in this.devices) {
       if (this.devices[dev].stream) {
         this.devices[dev].stopRecording();
+        let tracks = this.devices[dev].stream.getTracks();
+        tracks.forEach(function(track) {
+          track.stop();
+        });
       }
     }
     this.isRecording = false;
