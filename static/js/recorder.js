@@ -47,7 +47,7 @@ class Recorder extends EventEmitter {
       let mimeType = (this.deviceType == 'audio' ? 'audio' : 'video') + '/webm';
       this.result = new Blob(_recData, {type: mimeType});
       var self = this;
-      if (navigator.userAgent.indexOf("Mozilla") > -1 && $(".audioDevice").hasClass('active') && !$(".videoDevice").hasClass('active') && !$(".desktopDevice").hasClass('active')) {
+      if (navigator.userAgent.indexOf("Firefox") > -1 && $(".audioDevice").hasClass('active') && !$(".videoDevice").hasClass('active') && !$(".desktopDevice").hasClass('active')) {
         var url = URL.createObjectURL(this.result);
         self.emit('record.complete', {url: url, media: this.result});
       }
