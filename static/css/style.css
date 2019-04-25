@@ -2008,32 +2008,6 @@ input:focus {
   color: red;
 }
 
-
-.audioDevice.disabled{
-  opacity: 0.4 !important;
-  pointer-events: none !important;
-}
-
-.audioDevice .tooltiptext {
-  visibility: hidden;
-  width: 25em;
-  background-color: black;
-  color: #fff;
-  text-align: center;
-  border-radius: 6px;
-  padding: 5px 0;
-  position: absolute;
-  z-index: 4;
-  left: 50%;
-  margin-left: -12.5em;
-  top:2em;
-  pointer-events: none !important;
-}
-
-.content .audioDevice.disabled:hover .tooltiptext{
-  visibility: visible;
-}
-
 .downloadVideo{
   position:absolute;
   bottom:0px;
