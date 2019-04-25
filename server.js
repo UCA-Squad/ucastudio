@@ -42,7 +42,6 @@ io.on('connection', function(socket){
 
 	var ffmpeg_process, feedStream=false;
 	var ffmpeg_process2, feedStream2=false;
-	socket._vcodec='libvpx';//from firefox default encoder
 
 	if(typeof socket.handshake.session.cas_user !== 'undefined' ) {
 
@@ -95,8 +94,12 @@ io.on('connection', function(socket){
 				ffmpeg_process2.on('exit', function (e) {
 					console.log('child process desktop exit' + e);
 					socket.emit('fatal', 'ffmpeg exit!' + e);
-					if(m == 'onlyaudio' || m == 'onlydesktop')
-						uploadFile(socket, false, true);
+					if(m == 'onlyaudio' || m == 'onlydesktop') {
+                        if(m == 'onlyaudio')
+                            encodeAudioToMp4(socket)
+					    else
+                            uploadFile(socket, false, true);
+                    }
 				});
 			}
 
@@ -223,10 +226,29 @@ process.on('uncaughtException', function(err) {
 
 
 /**
+ * Réencode les fichiers audio en mp4 pour ingest opencast
+ * @param socket
+ */
+function encodeAudioToMp4(socket)
+{
+    var ops = [
+        '-y', '-loop', '1', '-t', '1',
+        '-i', './static/img/onlyaudio_ffmpeg.jpg',
+        '-i',
+        './records/'+socket.handshake.issued+'screen.webm', './records/'+socket.handshake.issued+'screen.mp4'
+    ];
+
+    ffmpeg_process = spawn('ffmpeg', ops);
+    ffmpeg_process.on('exit', function (e) {
+        uploadFile(socket, false, true, true);
+    });
+}
+
+/**
  * Permet d'uploader un média
  * @param socket
  */
-function uploadFile(socket, hasSecondStream, onlySecondStream = false)
+function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFile = false)
 {
 	if(typeof socket.handshake.session.usermediadatas !== 'undefined') {
 		//on test si c'est pas undefined  ?
@@ -321,9 +343,17 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false)
 			'  }\n' +
 			']';
 
-		var processing = '{\n' +
-			'  "workflow": "' + config.opencast_workflow + '"\n' +
-			'}';
+		if(isAudioFile){
+            var processing = '{\n' +
+                '  "workflow": "' + config.opencast_workflow_audio + '"\n' +
+                '}';
+        }
+		else{
+            var processing = '{\n' +
+                '  "workflow": "' + config.opencast_workflow + '"\n' +
+                '}';
+        }
+
 
 		if(hasSecondStream) {
 			var options = {
@@ -366,6 +396,9 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false)
 
 			if(onlySecondStream)
 				var nameFile = idFileUpload + "screen.webm";
+
+			if(isAudioFile)
+                var nameFile = idFileUpload + "screen.mp4";
 
 			var options = {
 				method: "POST",

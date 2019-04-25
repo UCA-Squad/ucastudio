@@ -12,6 +12,6 @@
   "opencast_series_url" : "",
   "opencast_cert" : "",
   "opencast_workflow" : "",
-
+  "opencast_workflow_audio" :  "",
   "path_ldap_uca": ""
 }
