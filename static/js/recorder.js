@@ -47,11 +47,18 @@ class Recorder extends EventEmitter {
       let mimeType = (this.deviceType == 'audio' ? 'audio' : 'video') + '/webm';
       this.result = new Blob(_recData, {type: mimeType});
       var self = this;
-      getSeekableBlob(this.result, function (seekableBlob) {
-        var url = URL.createObjectURL(seekableBlob);
-        self.emit('record.complete', {url: url, media: seekableBlob});
+      if (navigator.userAgent.indexOf("Mozilla") > -1 && $(".audioDevice").hasClass('active') && !$(".videoDevice").hasClass('active') && !$(".desktopDevice").hasClass('active')) {
+        var url = URL.createObjectURL(this.result);
+        self.emit('record.complete', {url: url, media: this.result});
+      }
+      else
+      {
+          getSeekableBlob(this.result, function (seekableBlob) {
+            var url = URL.createObjectURL(seekableBlob);
+            self.emit('record.complete', {url: url, media: seekableBlob});
+          });
+      }
         self.recorder = null;
-      });
     };
 
     Object.defineProperty(this, 'recData', {
