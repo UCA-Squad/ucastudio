@@ -172,7 +172,7 @@
     "SIMPLE": "Simple",
     "ADVANCED": "Avancée",
     "LOADING": "Chargement",
-    "SHARE_WEBCAM": "Partager webcam",
+    "SHARE_WEBCAM": "Partager la webcam",
     "SHARE_DESKTOP": "Partager l'écran",
     "SHARE_MICROPHONE": "Partager le microphone",
     "VIEW": "Vue",
@@ -197,9 +197,9 @@
     "MINIMISE": "Minimiser",
     "BACK_TO_MAIN": "Retour à la navigation principale",
     "STOP_COMPOSITE": "Arrêter la vidéo fusionnée",
-    "PAUSE_RECORDING": "Mettre l'enregistrement en pause ou redémarrer l'enregistrement",
+    "PAUSE_RECORDING": "Mettre l'enregistrement en pause",
     "START_RECORDING": "Démarrer l'enregistrement",
-    "STOP_RECORDING": "Arrête d'enregistrer",
-    "ADD_DEVICE": "Ajouter un depositif"
+    "STOP_RECORDING": "Arrêter l'enregistrement",
+    "ADD_DEVICE": "Ajouter un dispositif"
   }
 }
