@@ -54,7 +54,7 @@ io.on('connection', function(socket){
 			var ops = [
 				'-re', '-i', '-',
 				'-c:v', 'copy', '-preset', 'veryfast',
-				'-b:a', '128k', '-strict', '-2',
+				'-b:a', '192k', '-strict', '-2',
 				'./records/' + socket.handshake.issued + '.webm'
 			];
 
@@ -71,12 +71,12 @@ io.on('connection', function(socket){
 				var ops2 = [
 					'-re', '-i', '-',
 					'-c:v', 'copy', '-preset', 'veryfast',
-					'-b:a', '128k', '-strict', '-2',
+					'-b:a', '192k', '-strict', '-2',
 					'./records/' + socket.handshake.issued + 'screen.webm'
 				];
 			}
 
-			if(m == 'video-and-desktop' || m == 'onlyaudio' || m == 'onlydesktop') {
+			if(m == 'video-and-desktop' || m == 'audio-and-desktop' || m == 'onlyaudio' || m == 'onlydesktop') {
 				ffmpeg_process2 = spawn('ffmpeg', ops2);
 				feedStream2 = function (data) {
 					ffmpeg_process2.stdin.write(data);
@@ -163,7 +163,7 @@ io.on('connection', function(socket){
 					}
 				}
 			}
-			if(m == 'video-and-desktop' || m == 'onlyaudio' || m == 'onlydesktop') {
+			if(m == 'video-and-desktop' || m == 'audio-and-desktop' || m == 'onlyaudio' || m == 'onlydesktop') {
 				feedStream2 = false;
 				if (ffmpeg_process2) {
 					try {
@@ -437,8 +437,11 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 				socket.emit('endupload');
 
 			}
+			socket.disconnect();
 		});
 	}
+	else
+		socket.disconnect();
 }
 
 /**
