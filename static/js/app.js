@@ -544,7 +544,10 @@ App.prototype = {
     if($(".audioDevice").hasClass('active') && !$(".videoDevice").hasClass('active') && !$(".desktopDevice").hasClass('active'))
       comms.emit('start', 'onlyaudio');
 
-    if($(".desktopDevice").hasClass('active') && !$(".videoDevice").hasClass('active'))
+    if($(".desktopDevice").hasClass('active') && $(".audioDevice").hasClass('active') && !$(".videoDevice").hasClass('active'))
+      comms.emit('start', 'audio-and-desktop');
+
+    if($(".desktopDevice").hasClass('active') && !$(".audioDevice").hasClass('active') && !$(".videoDevice").hasClass('active'))
       comms.emit('start', 'onlydesktop');
 
     if($(".audioDevice").hasClass('active') && $(".videoDevice").hasClass('active') && !$(".desktopDevice").hasClass('active'))
@@ -573,19 +576,6 @@ App.prototype = {
       peers[peer].stopRecording();
     }
 
-    if ($(".videoDevice").hasClass('active') && $(".desktopDevice").hasClass('active'))
-      comms.emit('stop', 'video-and-desktop');
-
-    if($(".audioDevice").hasClass('active') && !$(".videoDevice").hasClass('active') && !$(".desktopDevice").hasClass('active'))
-      comms.emit('stop', 'onlyaudio');
-
-    //on check quel stream on share
-    if($(".desktopDevice").hasClass('active') && !$(".videoDevice").hasClass('active'))
-      comms.emit('stop', 'onlydesktop');
-
-    if($(".audioDevice").hasClass('active') && $(".videoDevice").hasClass('active') && !$(".desktopDevice").hasClass('active'))
-      comms.emit('stop', 'onlyvideo');
-
     if(document.getElementById('uploadMedia').checked) {
       $('#uploadProgress').show();
       this.addLoader(document.getElementById('uploadProgress'), 'Transfert en cours...', {fontSize: '1.5rem'});
@@ -595,6 +585,23 @@ App.prototype = {
     rafLoop.unsubscribe(this.recTimeToken);
     this.recTimeToken = null;
     this.recTime = [];
+
+    setTimeout(function () {
+      if ($(".videoDevice").hasClass('active') && $(".desktopDevice").hasClass('active'))
+        comms.emit('stop', 'video-and-desktop');
+
+      if($(".audioDevice").hasClass('active') && !$(".videoDevice").hasClass('active') && !$(".desktopDevice").hasClass('active'))
+        comms.emit('stop', 'onlyaudio');
+
+      if($(".desktopDevice").hasClass('active') && $(".audioDevice").hasClass('active') && !$(".videoDevice").hasClass('active'))
+        comms.emit('stop', 'audio-and-desktop');
+
+      if($(".desktopDevice").hasClass('active') && !$(".audioDevice").hasClass('active') && !$(".videoDevice").hasClass('active'))
+        comms.emit('stop', 'onlydesktop');
+
+      if($(".audioDevice").hasClass('active') && $(".videoDevice").hasClass('active') && !$(".desktopDevice").hasClass('active'))
+        comms.emit('stop', 'onlyvideo');
+    }, 500);
   },
   logRecordingTime: function(timestamp) {
     if (this.logNextTick) {
