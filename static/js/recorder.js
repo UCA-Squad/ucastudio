@@ -22,13 +22,18 @@ class Recorder extends EventEmitter {
     let chosenCodec = stream.getVideoTracks().length ? _vidCodecs[0] : _audioCodecs[0];
     this.recorder = new MediaRecorder(stream, {mimeType: chosenCodec});
     this.recorder.ondataavailable = function(e) {
-      // console.log(e.data);
-      if (e.data.size > 0) {
-         _recData.push(e.data);
-          if(typeDevice == 'audio')
-            typeDevice = 'desktop';
-          comms.emit("binarystream"+typeDevice,e.data);
-       }
+          var isAudioDesktopRec = false;
+          if($(".desktopDevice").hasClass('active') && $(".audioDevice").hasClass('active') && !$(".videoDevice").hasClass('active'))
+            isAudioDesktopRec = true;
+
+          if(isAudioDesktopRec && typeDevice != 'audio')
+            comms.emit("binarystream"+typeDevice,e.data);
+          else if(!isAudioDesktopRec){
+            if(typeDevice == 'audio')
+              typeDevice = 'desktop';
+
+            comms.emit("binarystream"+typeDevice,e.data);
+          }
     };
 
     this.recorder.onerror = e => {
@@ -44,21 +49,7 @@ class Recorder extends EventEmitter {
     this.result = null;
 
     this.recorder.onstop = e => {
-      let mimeType = (this.deviceType == 'audio' ? 'audio' : 'video') + '/webm';
-      this.result = new Blob(_recData, {type: mimeType});
-      var self = this;
-      if (navigator.userAgent.indexOf("Firefox") > -1 && $(".audioDevice").hasClass('active') && !$(".videoDevice").hasClass('active') && !$(".desktopDevice").hasClass('active')) {
-        var url = URL.createObjectURL(this.result);
-        self.emit('record.complete', {url: url, media: this.result});
-      }
-      else
-      {
-          getSeekableBlob(this.result, function (seekableBlob) {
-            var url = URL.createObjectURL(seekableBlob);
-            self.emit('record.complete', {url: url, media: seekableBlob});
-          });
-      }
-        self.recorder = null;
+      self.recorder = null;
     };
 
     Object.defineProperty(this, 'recData', {
@@ -75,7 +66,7 @@ class Recorder extends EventEmitter {
     delay = delay || 0;
     if (!this.isRecording) {
       setTimeout(() => {
-        this.recorder.start(500);
+        this.recorder.start(450);
       }, delay);
       this.isRecording = true;
     }
