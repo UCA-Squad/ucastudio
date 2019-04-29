@@ -245,7 +245,7 @@ class Device extends EventEmitter {
   connect(opts) {
 
     if (this.deviceType === 'desktop' && 'getDisplayMedia' in navigator.mediaDevices) {
-      return this.connectDisplayMedia();
+      return this.connectDisplayMedia(opts);
     }
     else if (this.deviceType === 'desktop' && this.isChrome) {
       return this.connectChromeDesktop(opts);
@@ -279,10 +279,15 @@ class Device extends EventEmitter {
     });
   }
 
-  connectDisplayMedia() {
+  connectDisplayMedia(opts) {
     return new Promise((resolve, reject) => {
-      return navigator.mediaDevices.getDisplayMedia()
+      var constraints = {};
+      if(typeof opts != 'undefined') {
+        var constraints = {  video: { width: opts.width, height: opts.height } };
+      }
+      return navigator.mediaDevices.getDisplayMedia(constraints)
                .then(stream => {
+                 console.log(this.deviceType);
                  this.stream = stream;
                  this.cachedAudioTracks.forEach(track => this.stream.addTrack(track));
                  resolve(stream);
@@ -367,7 +372,7 @@ class Device extends EventEmitter {
         this.emit('record.complete', media);
         this.recorder = null;
       });
-      this.recorder.start();
+      this.recorder.start(500);
     }
     else {
       this.recorder.resume();
