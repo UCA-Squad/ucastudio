@@ -287,7 +287,6 @@ class Device extends EventEmitter {
       }
       return navigator.mediaDevices.getDisplayMedia(constraints)
                .then(stream => {
-                 console.log(this.deviceType);
                  this.stream = stream;
                  this.cachedAudioTracks.forEach(track => this.stream.addTrack(track));
                  resolve(stream);

@@ -38,6 +38,21 @@ function Communications() {
     }
   });
 
+  this.socket.on('idRecord',function(idRecord) {
+
+    // if ($(".videoDevice").hasClass('active') && $(".desktopDevice").hasClass('active')) {
+    //   console.log('toto');
+    //   $('#screenPreview').show();
+    //   $('#videoPreview').show();
+    // }
+    // else
+    //   $('#videoPreview').show();
+
+    // document.getElementById("screenPreviewSrc").src = "records/"+idRecord+"screen.webm";
+    // document.getElementById("videoPreviewSrc").src = "records/"+idRecord+".webm";
+
+  });
+
   this.transportOrder = ['SOCKET'];
   this.transportOrder.some(newTransport => {
     if (this[newTransport.toLowerCase()]) {

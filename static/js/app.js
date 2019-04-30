@@ -576,6 +576,9 @@ App.prototype = {
       peers[peer].stopRecording();
     }
 
+    // document.getElementById("screenPreview").load();
+    // document.getElementById("videoPreview").load();
+
     if(document.getElementById('uploadMedia').checked) {
       $('#uploadProgress').show();
       this.addLoader(document.getElementById('uploadProgress'), 'Transfert en cours...', {fontSize: '1.5rem'});
@@ -620,26 +623,7 @@ App.prototype = {
     this.timeEl.textContent = timeArr.join(':');
   },
   listRecording: function(details) {
-    let anchor = document.createElement('a');
-    anchor.target = '_blank';
-    // anchor.textContent = details.label; //vraiment nécessaire ?
-    anchor.setAttribute('data-id', details.id);
-    anchor.setAttribute('data-flavor', details.flavor);
-    document.getElementById('recordingList').appendChild(anchor);
-    if (details.flavor === 'remote' && peers[details.id].capabilities.MediaRecorder) {
-      let requestRaw = document.createElement('button');
-      requestRaw.value = details.id;
-      requestRaw.className = 'requestRaw';
-      requestRaw.addEventListener('click', this.requestRawFootage.bind(this), true);
-      requestRaw.textContent = ts.translate('RAW_FOOTAGE');
-      let currentLoader = document.querySelector('#introCover .loader');
-      let loader = currentLoader.cloneNode(true);
-      loader.querySelector('circle').setAttributeNS(null, 'stroke-width', '12');
-      loader.querySelector('.loaderText').textContent = 'Incoming Transfer';
 
-      anchor.appendChild(requestRaw);
-      anchor.appendChild(loader);
-    }
   },
   setMediaLink: function(details) {
     let anchor = document.querySelector(`a[data-id="${details.id}"]`);

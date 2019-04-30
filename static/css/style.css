@@ -2019,7 +2019,12 @@ input:focus {
 }
 
 #saveRecordings{
-  display:none;
+  /*display:none;*/
+}
+
+#recordingList .videoPreview-dimensions, #recordingList .screenPreview-dimensions{
+  width: 300px !important;
+  height: 150px !important;
 }
 
 .labelVideoResolution ul li::before, .labelDesktopResolution ul li::before, .labelDesktop ul li::before {

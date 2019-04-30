@@ -47,6 +47,8 @@ io.on('connection', function(socket){
 
 		socket.on('start', function (m) {
 
+			socket.emit('idRecord', socket.handshake.issued);
+
 			if (ffmpeg_process || feedStream || ffmpeg_process2 || feedStream2) {
 				socket.emit('fatal', 'stream already started.');
 				return;

@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="css/style.css">
     <link rel="chrome-webstore-item" href="https://chrome.google.com/webstore/detail/oghkihildgnkedhlolgjomnbfmjpmddm">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+    <link href="//vjs.zencdn.net/7.3.0/video-js.min.css" rel="stylesheet">
 </head>
 <body class="loading translating">
 <header>
@@ -221,14 +222,32 @@
 <div id="saveCreation" class="modal">
     <div class="modalBody">
         <h1 data-translate="PRODUCTION_MEDIA">Médias</h1>
-        <div id="recordingList"></div>
+        <div id="recordingList">
+                <video
+                        id="screenPreview"
+                        class="video-js card-50"
+                        controls
+                        data-setup='{}'
+                        style="display: none"
+                        >
+                    <source id="screenPreviewSrc" src="//vjs.zencdn.net/v/oceans.webm" type="video/webm">
+                </video>
+                <video
+                        id="videoPreview"
+                        class="video-js card-50"
+                        controls
+                        data-setup='{}'
+                        style="display: none"
+                       >
+                    <source id="videoPreviewSrc" src="//vjs.zencdn.net/v/oceans.webm" type="video/webm">
+                </video>
+        </div>
     </div>
     <div class="modalFooter">
-        <button class="button button-uca-blue" id="saveRecordings" data-translate="PRODUCTION_SAVE">Télécharger les médias</button>
+        <button class="button button-uca-blue" id="saveRecordings" data-translate="PRODUCTION_SAVE">Télécharger une archive de vos médias</button>
         <label for="toggleSaveCreationModal" class="button button-amber" data-translate="PRODUCTION_DISCARD">Fermer</label>
     </div>
 </div>
-
 
 <script src="js/jquery.min.js"></script>
 <script src="js/script.js"></script>
@@ -246,5 +265,7 @@
 <link href="css/googlefont.css" rel="stylesheet">
 <script src="js/RecordRTC.min.js"></script>
 <script src="js/EBML.js"></script>
+<script src="//vjs.zencdn.net/7.3.0/video.min.js"></script>
+<script>window.HELP_IMPROVE_VIDEOJS = false;</script>
 </body>
 </html>
