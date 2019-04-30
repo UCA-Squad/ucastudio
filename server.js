@@ -94,7 +94,7 @@ io.on('connection', function(socket){
 				ffmpeg_process2.on('exit', function (e) {
 					console.log('child process desktop exit' + e);
 					socket.emit('fatal', 'ffmpeg exit!' + e);
-					if(m == 'onlyaudio' || m == 'onlydesktop') {
+					if(m == 'onlyaudio' || m == 'onlydesktop' || m == 'audio-and-desktop') {
                         if(m == 'onlyaudio')
                             encodeAudioToMp4(socket)
 					    else
