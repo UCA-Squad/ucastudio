@@ -623,7 +623,12 @@ App.prototype = {
     this.timeEl.textContent = timeArr.join(':');
   },
   listRecording: function(details) {
-
+      if ($(".videoDevice").hasClass('active') && $(".desktopDevice").hasClass('active')) {
+            $('#screenPreview').show();
+            $('#videoPreview').show();
+      }
+      else
+        $('#videoPreview').show();
   },
   setMediaLink: function(details) {
     let anchor = document.querySelector(`a[data-id="${details.id}"]`);

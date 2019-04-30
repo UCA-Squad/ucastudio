@@ -40,17 +40,24 @@ function Communications() {
 
   this.socket.on('idRecord',function(idRecord) {
 
-    // if ($(".videoDevice").hasClass('active') && $(".desktopDevice").hasClass('active')) {
-    //   console.log('toto');
-    //   $('#screenPreview').show();
-    //   $('#videoPreview').show();
-    // }
-    // else
-    //   $('#videoPreview').show();
+    if ($(".videoDevice").hasClass('active') && $(".desktopDevice").hasClass('active')) {
+      setTimeout(function () {
+        videojs("#videoPreview").src([
+          {type: "video/webm", src: "./records/" + idRecord + ".webm"}
+        ]);
 
-    // document.getElementById("screenPreviewSrc").src = "records/"+idRecord+"screen.webm";
-    // document.getElementById("videoPreviewSrc").src = "records/"+idRecord+".webm";
-
+        videojs("#screenPreview").src([
+          {type: "video/webm", src: "./records/" + idRecord + "screen.webm"}
+        ]);
+      }, 500);
+    }
+    else
+      setTimeout(function () {
+        videojs("#videoPreview").src([
+          { type: "video/webm", src: "./records/"+idRecord+".webm" }
+        ]);
+        videojs("#videoPreview").load();
+      }, 500);
   });
 
   this.transportOrder = ['SOCKET'];

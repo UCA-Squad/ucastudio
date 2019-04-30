@@ -47,8 +47,6 @@ io.on('connection', function(socket){
 
 		socket.on('start', function (m) {
 
-			socket.emit('idRecord', socket.handshake.issued);
-
 			if (ffmpeg_process || feedStream || ffmpeg_process2 || feedStream2) {
 				socket.emit('fatal', 'stream already started.');
 				return;
@@ -57,7 +55,7 @@ io.on('connection', function(socket){
 				'-re', '-i', '-',
 				'-c:v', 'copy', '-preset', 'veryfast',
 				'-b:a', '192k', '-strict', '-2',
-				'./records/' + socket.handshake.issued + '.webm'
+				'./static/records/' + socket.handshake.issued + '.webm'
 			];
 
 			if(m == 'video-and-desktop') {
@@ -65,7 +63,7 @@ io.on('connection', function(socket){
 					'-re', '-i', '-',
 					'-c:v', 'copy', '-preset', 'veryfast',
 					'-an',
-					'./records/' + socket.handshake.issued + 'screen.webm'
+					'./static/records/' + socket.handshake.issued + 'screen.webm'
 				];
 			}
 			else
@@ -74,7 +72,7 @@ io.on('connection', function(socket){
 					'-re', '-i', '-',
 					'-c:v', 'copy', '-preset', 'veryfast',
 					'-b:a', '192k', '-strict', '-2',
-					'./records/' + socket.handshake.issued + 'screen.webm'
+					'./static/records/' + socket.handshake.issued + 'screen.webm'
 				];
 			}
 
@@ -175,6 +173,8 @@ io.on('connection', function(socket){
 					}
 				}
 			}
+
+			socket.emit('idRecord', socket.handshake.issued);
 		});
 		socket.on('disconnect', function () {
 			feedStream = false,feedStream2 = false;
@@ -237,7 +237,7 @@ function encodeAudioToMp4(socket)
         '-y', '-loop', '1', '-t', '1',
         '-i', './static/img/onlyaudio_ffmpeg.jpg',
         '-i',
-        './records/'+socket.handshake.issued+'screen.webm', './records/'+socket.handshake.issued+'screen.mp4'
+        './static/records/'+socket.handshake.issued+'screen.webm', './static/records/'+socket.handshake.issued+'screen.mp4'
     ];
 
     ffmpeg_process = spawn('ffmpeg', ops);
@@ -372,7 +372,7 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 				{
 					presenter:
 					{
-						value: fs.createReadStream("records/" + idFileUpload + ".webm"),
+						value: fs.createReadStream("static/records/" + idFileUpload + ".webm"),
 						options:
 						{
 							filename: 'metadata/' + idFileUpload + '.webm'
@@ -380,7 +380,7 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 					},
 					presentation:
 					{
-						value: fs.createReadStream("records/" + idFileUpload + "screen.webm"),
+						value: fs.createReadStream("static/records/" + idFileUpload + "screen.webm"),
 						options:
 						{
 							filename: 'metadata/' + idFileUpload + 'screen.webm'
@@ -416,7 +416,7 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 				{
 					presenter:
 					{
-						value: fs.createReadStream("records/" +nameFile ),
+						value: fs.createReadStream("static/records/" +nameFile ),
 						options:
 						{
 							filename: 'metadata/' + nameFile
