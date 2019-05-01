@@ -264,6 +264,9 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 		var idFileUpload = socket.handshake.issued;
 		var uid = socket.handshake.session.cas_user;
 		var desc = 'N/R';
+		var location = 'N/R';
+		if(usermediainfosToUpload.locationUpload != '')
+			location = usermediainfosToUpload.locationUpload;
 
 
 		var acl = '[\n' +
@@ -339,7 +342,7 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 			'      },\n' +
 			'      {\n' +
 			'        "id": "location",\n' +
-			'        "value": "' + usermediainfosToUpload.locationUpload + '"\n' +
+			'        "value": "' + location + '"\n' +
 			'      }\n' +
 			'    ]\n' +
 			'  }\n' +
