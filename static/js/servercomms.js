@@ -51,13 +51,19 @@ function Communications() {
         ]);
       }, 500);
     }
-    else
+    else if($(".videoDevice").hasClass('active')) {
       setTimeout(function () {
         videojs("#videoPreview").src([
           { type: "video/webm", src: "./records/"+idRecord+".webm" }
         ]);
         videojs("#videoPreview").load();
       }, 500);
+    }
+    else{
+      videojs("#screenPreview").src([
+        {type: "video/webm", src: "./records/" + idRecord + "screen.webm"}
+      ]);
+    }
   });
 
   this.transportOrder = ['SOCKET'];
