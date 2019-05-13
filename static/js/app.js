@@ -604,7 +604,7 @@ App.prototype = {
 
       if($(".audioDevice").hasClass('active') && $(".videoDevice").hasClass('active') && !$(".desktopDevice").hasClass('active'))
         comms.emit('stop', 'onlyvideo');
-    }, 500);
+    }, 5000);
   },
   logRecordingTime: function(timestamp) {
     if (this.logNextTick) {
