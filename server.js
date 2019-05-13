@@ -2,7 +2,6 @@ const config = require('./config.json');
 var express = require('express');
 var app = express();
 var spawn = require('child_process').spawn;
-var session = require('express-session');
 var CASAuthentication = require('connect-cas-uca');
 
 var fs = require('fs');
@@ -52,7 +51,7 @@ io.on('connection', function(socket){
 				return;
 			}
 			var ops = [
-				'-re', '-i', '-',
+				'-i', '-',
 				'-c:v', 'copy', '-preset', 'veryfast',
 				'-b:a', '192k', '-strict', '-2',
 				'./static/records/' + socket.handshake.issued + '.webm'
@@ -60,7 +59,7 @@ io.on('connection', function(socket){
 
 			if(m == 'video-and-desktop') {
 				var ops2 = [
-					'-re', '-i', '-',
+					'-i', '-',
 					'-c:v', 'copy', '-preset', 'veryfast',
 					'-an',
 					'./static/records/' + socket.handshake.issued + 'screen.webm'
@@ -69,7 +68,7 @@ io.on('connection', function(socket){
 			else
 			{
 				var ops2 = [
-					'-re', '-i', '-',
+					'-i', '-',
 					'-c:v', 'copy', '-preset', 'veryfast',
 					'-b:a', '192k', '-strict', '-2',
 					'./static/records/' + socket.handshake.issued + 'screen.webm'
@@ -136,6 +135,7 @@ io.on('connection', function(socket){
 			if (!feedStream) {
 				socket.emit('fatal', 'ffmpep not processing.');
 				ffmpeg_process.stdin.end();
+				ffmpeg_process.kill('SIGINT');
 				return;
 			}
 			feedStream(m);
@@ -145,6 +145,7 @@ io.on('connection', function(socket){
 			if (!feedStream2) {
 				socket.emit('fatal', 'ffmpep not processing.');
 				ffmpeg_process2.stdin.end();
+				ffmpeg_process2.kill('SIGINT');
 				return;
 			}
 			feedStream2(m);
