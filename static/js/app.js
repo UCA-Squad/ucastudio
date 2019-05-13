@@ -623,12 +623,10 @@ App.prototype = {
     this.timeEl.textContent = timeArr.join(':');
   },
   listRecording: function(details) {
-      if ($(".videoDevice").hasClass('active') && $(".desktopDevice").hasClass('active')) {
-            $('#screenPreview').show();
-            $('#videoPreview').show();
-      }
-      else
-        $('#videoPreview').show();
+      if ($(".videoDevice").hasClass('active') && !$(".desktopDevice").hasClass('active'))
+          $('#screenPreview').hide();
+      else if (!$(".videoDevice").hasClass('active') && $(".desktopDevice").hasClass('active'))
+        $('#videoPreview').hide();
   },
   setMediaLink: function(details) {
     let anchor = document.querySelector(`a[data-id="${details.id}"]`);
