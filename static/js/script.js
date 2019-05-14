@@ -44,7 +44,6 @@ $( document ).ready(function() {
             }
         }
     } , function() {
-        console.log('Callback video-js initiated');
         this.on('downloadvideo', function(){
             console.log('downloadvideo triggered');
         });
@@ -59,7 +58,6 @@ $( document ).ready(function() {
             }
         }
     } , function() {
-        console.log('Callback video-js initiated');
         this.on('downloadvideo', function(){
             console.log('downloadvideo triggered');
         });
