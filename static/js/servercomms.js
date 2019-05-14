@@ -31,17 +31,16 @@ function Communications() {
 
   this.socket.on('insidemoodle',function(idSerieToselectTmp) {
     idSerieToselect = idSerieToselectTmp.split( '=' );
-    if(idSerieToselect[1])
-    {
+    if(idSerieToselect[1]){
       $('#listseries option[value="'+idSerieToselect[1]+'"]').attr('selected','selected');
       $('#dropdownlistserie').hide();
+      $('#uploadAtEnd').hide();
     }
   });
 
   this.socket.on('idRecord',function(idRecord) {
 
     if ($(".videoDevice").hasClass('active') && $(".desktopDevice").hasClass('active')) {
-      setTimeout(function () {
         videojs("#videoPreview").src([
           {type: "video/webm", src: "./records/" + idRecord + ".webm"}
         ]);
@@ -49,15 +48,11 @@ function Communications() {
         videojs("#screenPreview").src([
           {type: "video/webm", src: "./records/" + idRecord + "screen.webm"}
         ]);
-      }, 500);
     }
     else if($(".videoDevice").hasClass('active')) {
-      setTimeout(function () {
         videojs("#videoPreview").src([
           { type: "video/webm", src: "./records/"+idRecord+".webm" }
         ]);
-        videojs("#videoPreview").load();
-      }, 500);
     }
     else{
       videojs("#screenPreview").src([

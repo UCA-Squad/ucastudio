@@ -8,7 +8,8 @@
     <link rel="stylesheet" href="css/style.css">
     <link rel="chrome-webstore-item" href="https://chrome.google.com/webstore/detail/oghkihildgnkedhlolgjomnbfmjpmddm">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
-    <link href="//vjs.zencdn.net/7.3.0/video-js.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="//vjs.zencdn.net/7.3.0/video-js.min.css" >
+    <link rel="stylesheet" href="css/videojs-vjsdownload.css" >
 </head>
 <body class="loading translating">
 <header>
@@ -67,7 +68,7 @@
                         <label>Localisation</label>
                         <input type="text" id="locationUpload" name="location" placeholder="lieux de l'enregistrement">
                     </div>
-                    <div class="form-input card-80">
+                    <div id="uploadAtEnd" class="form-input card-80">
                         <div class="checkbox">
                             <input type="checkbox" id="uploadMedia" name="uploadMedia" checked>
                             <label for="uploadMedia">
@@ -227,15 +228,23 @@
                         id="screenPreview"
                         class="video-js card-50"
                         controls
-                        data-setup='{}'
+
                          >
+                    <p class='vjs-no-js'>
+                    To view this video please enable JavaScript, and consider upgrading to a web browser that
+                    <a href='https://videojs.com/html5-video-support/' target='_blank'>supports HTML5 video</a>
+                </p>
                 </video>
                 <video
                         id="videoPreview"
                         class="video-js card-50"
                         controls
-                        data-setup='{}'
+
                         >
+                    <p class='vjs-no-js'>
+                    To view this video please enable JavaScript, and consider upgrading to a web browser that
+                    <a href='https://videojs.com/html5-video-support/' target='_blank'>supports HTML5 video</a>
+                    </p>
                 </video>
         </div>
     </div>
@@ -262,6 +271,7 @@
 <link href="css/googlefont.css" rel="stylesheet">
 <script src="js/RecordRTC.min.js"></script>
 <script src="js/EBML.js"></script>
+<script src="js/videojs-vjsdownload.js"></script>
 <script>window.HELP_IMPROVE_VIDEOJS = false;</script>
 </body>
 </html>

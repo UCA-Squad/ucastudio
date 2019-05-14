@@ -576,10 +576,9 @@ App.prototype = {
       peers[peer].stopRecording();
     }
 
-    // document.getElementById("screenPreview").load();
-    // document.getElementById("videoPreview").load();
 
-    if(document.getElementById('uploadMedia').checked) {
+    //on check si on a select l'upload ou qu'on est dans moodle
+    if(document.getElementById('uploadMedia').checked || !$('#dropdownlistserie').is(':visible')) {
       $('#uploadProgress').show();
       this.addLoader(document.getElementById('uploadProgress'), 'Transfert en cours...', {fontSize: '1.5rem'});
     }
