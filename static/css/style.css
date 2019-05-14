@@ -2036,3 +2036,8 @@ input:focus {
   background: none !important;
   color: white !important;
 }
+
+#screenPreview, #videoPreview{
+  max-width: 300px !important;
+  width: 300px !important;
+}
