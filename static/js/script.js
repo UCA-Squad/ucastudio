@@ -35,7 +35,22 @@ $( document ).ready(function() {
     });
 
 
-    videojs(document.querySelector('.video-js'), {
+    videojs('#screenPreview', {
+        plugins: {
+            vjsdownload:{
+                beforeElement: 'playbackRateMenuButton',
+                textControl: 'Download video',
+                name: 'downloadButton'
+            }
+        }
+    } , function() {
+        console.log('Callback video-js initiated');
+        this.on('downloadvideo', function(){
+            console.log('downloadvideo triggered');
+        });
+    });
+
+  videojs('#videoPreview', {
         plugins: {
             vjsdownload:{
                 beforeElement: 'playbackRateMenuButton',
