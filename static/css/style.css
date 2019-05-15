@@ -1178,7 +1178,7 @@ svg {
 }
 
 #uploadProgress .loader{
-  top:30%;
+  top:48%;
 }
 
 .loader {
@@ -1251,7 +1251,7 @@ svg {
 
 .modal {
   position: fixed;
-  top: 3.5rem;
+  top: 3.3rem;
   left: calc(50% - 320px);
   width: 640px;
   height: 480px;
