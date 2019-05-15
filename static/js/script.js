@@ -63,4 +63,23 @@ $( document ).ready(function() {
         });
     });
 
+
+    var players = [videojs('#videoPreview'), videojs('#screenPreview')];
+
+    players.forEach(function(player) {
+        player.on('play', function() {
+            players.forEach(function(pl) {
+                if (pl !== player) {
+                    pl.play();
+                }
+            })
+        });
+        player.on('pause', function() {
+            players.forEach(function(pl) {
+                if (pl !== player) {
+                    pl.pause();
+                }
+            })
+        });
+    });
 });
