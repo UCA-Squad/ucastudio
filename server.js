@@ -34,6 +34,7 @@ app.use(session);
 io.use(sharedsession(session));
 
 app.get( '/', cas.bounce );
+app.get( '/index.html', cas.bounce );
 
 app.use(express.static(__dirname + "/static/"));
 
@@ -45,7 +46,19 @@ io.on('connection', function(socket){
 
 	if(typeof socket.handshake.session.cas_user !== 'undefined' ) {
 
+		var uid = socket.handshake.session.cas_user;
+		var socketissued = socket.handshake.issued;
+
+		try {
+			//on check si l'user est co via cas, et on créer un folder si existe pas
+			fs.existsSync('./static/records/' + uid) || fs.mkdirSync('./static/records/' + uid);
+		} catch(err) {
+			console.error(err)
+		}
+
 		socket.on('start', function (m) {
+
+			fs.mkdirSync('./static/records/' + uid + '/'+socketissued+'/');
 
 			if (ffmpeg_process || feedStream || ffmpeg_process2 || feedStream2) {
 				socket.emit('fatal', 'stream already started.');
@@ -55,7 +68,7 @@ io.on('connection', function(socket){
 				'-i', '-',
 				'-c:v', 'copy', '-preset', 'veryfast',
 				'-b:a', '192k', '-strict', '-2',
-				'./static/records/' + socket.handshake.issued + '.webm'
+				'./static/records/' + uid + '/' + socketissued + '/' + socketissued + '.webm'
 			];
 
 			if(m == 'video-and-desktop') {
@@ -63,7 +76,7 @@ io.on('connection', function(socket){
 					'-i', '-',
 					'-c:v', 'copy', '-preset', 'veryfast',
 					'-an',
-					'./static/records/' + socket.handshake.issued + 'screen.webm'
+					'./static/records/' + uid + '/' + socketissued + '/' + socketissued + 'screen.webm'
 				];
 			}
 			else
@@ -72,7 +85,7 @@ io.on('connection', function(socket){
 					'-i', '-',
 					'-c:v', 'copy', '-preset', 'veryfast',
 					'-b:a', '192k', '-strict', '-2',
-					'./static/records/' + socket.handshake.issued + 'screen.webm'
+					'./static/records/' + uid + '/' + socketissued + '/' + socketissued + 'screen.webm'
 				];
 			}
 
@@ -176,7 +189,7 @@ io.on('connection', function(socket){
 				}
 			}
 
-			socket.emit('idRecord', socket.handshake.issued);
+			socket.emit('idRecord', socketissued, uid);
 		});
 		socket.on('disconnect', function () {
 			feedStream = false,feedStream2 = false;
@@ -195,6 +208,34 @@ io.on('connection', function(socket){
 		});
 		socket.on('error', function (e) {
 			console.log('socket.io error:' + e);
+		});
+
+		socket.on('zipfiles', function () {
+			var JSZip = require("jszip");
+			var zip = new JSZip();
+
+			const webcamMedia = './static/records/' + uid + '/' + socketissued + '/' + socketissued + '.webm';
+			const screenMedia = './static/records/' + uid + '/' + socketissued + '/' + socketissued + 'screen.webm';
+
+			try {
+				if (fs.existsSync(webcamMedia))
+					zip.file(socketissued + '.webm', fs.createReadStream('./static/records/' + uid + '/' + socketissued + '/' + socketissued + '.webm'));
+			} catch(err) {
+				console.error(err);
+			}
+
+			try {
+				if (fs.existsSync(screenMedia))
+					zip.file(socketissued + 'screen.webm', fs.createReadStream('./static/records/' + uid + '/' + socketissued + '/' + socketissued + 'screen.webm'));
+			} catch(err) {
+				console.error(err);
+			}
+
+			zip.generateNodeStream({type:'nodebuffer',streamFiles:true})
+			.pipe(fs.createWriteStream('./static/records/' + uid + '/' + socketissued + '/' + socketissued+'.zip'))
+			.on('finish', function () {
+				socket.emit('endzip', fs.readFileSync('./static/records/' + uid + '/' + socketissued + '/' + socketissued+'.zip'), socketissued);
+			});
 		});
 
 		getListSeries(socket, function (displayName) {
@@ -235,11 +276,13 @@ process.on('uncaughtException', function(err) {
  */
 function encodeAudioToMp4(socket)
 {
+	var uid = socket.handshake.session.cas_user;
+	var socketissued = socket.handshake.issued;
     var ops = [
         '-y', '-loop', '1', '-t', '1',
         '-i', './static/img/onlyaudio_ffmpeg.jpg',
-        '-i',
-        './static/records/'+socket.handshake.issued+'screen.webm', './static/records/'+socket.handshake.issued+'screen.mp4'
+        '-i', './static/records/' + uid + '/' + socketissued + '/' + socketissued + 'screen.webm',
+		'./static/records/' + uid + '/' + socketissued + '/' + socketissued + 'screen.mp4'
     ];
 
     ffmpeg_process = spawn('ffmpeg', ops);
@@ -270,13 +313,13 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 		if(usermediainfosToUpload.locationUpload != '')
 			location = usermediainfosToUpload.locationUpload;
 
-		var nameFile = idFileUpload + ".webm";
+		var nameFile = uid + '/' + idFileUpload + '/' + idFileUpload + ".webm";
 
 		if(onlySecondStream)
-			nameFile = idFileUpload + "screen.webm";
+			nameFile = uid + '/' + idFileUpload + '/' + idFileUpload + "screen.webm";
 
 		if(isAudioFile)
-			nameFile = idFileUpload + "screen.mp4";
+			nameFile = uid + '/' + idFileUpload + '/' + idFileUpload + "screen.mp4";
 
 		//on récup la duration du média
 		var duration = '00:00:00';
@@ -447,15 +490,15 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 				} else {
 				// var obj = JSON.parse(body);
 				// console.log(body);
-					socket.emit('endupload');
+					socket.emit('endupload', 1);
 				}
-				socket.disconnect();
+				// socket.disconnect();
 			});
 		});
 	}
 	else {
-		socket.emit('endupload'); // pas nécessaire si on force l'upload
-		socket.disconnect();
+		socket.emit('endupload', 0); // pas nécessaire si on force l'upload
+		// socket.disconnect();
 	}
 }
 
