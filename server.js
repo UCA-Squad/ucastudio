@@ -436,7 +436,7 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 						{
 							presenter:
 								{
-									value: fs.createReadStream("static/records/" + idFileUpload + ".webm"),
+									value: fs.createReadStream('./static/records/'+ uid + '/' + idFileUpload + '/' + idFileUpload + ".webm"),
 									options:
 										{
 											filename: 'metadata/' + idFileUpload + '.webm'
@@ -444,7 +444,7 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 								},
 							presentation:
 								{
-									value: fs.createReadStream("static/records/" + idFileUpload + "screen.webm"),
+									value: fs.createReadStream('./static/records/'+ uid + '/' + idFileUpload + '/' + idFileUpload + "screen.webm"),
 									options:
 										{
 											filename: 'metadata/' + idFileUpload + 'screen.webm'
@@ -470,7 +470,7 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 						{
 							presenter:
 								{
-									value: fs.createReadStream("static/records/" + nameFile),
+									value: fs.createReadStream("./static/records/" + nameFile),
 									options:
 										{
 											filename: 'metadata/' + nameFile
