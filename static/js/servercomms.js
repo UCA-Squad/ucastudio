@@ -11,9 +11,19 @@ function Communications() {
     this.socket = io();
   }
 
-  this.socket.on('endupload',function(){
+  this.socket.on('endupload',function(e){
     $('#uploadProgress').hide();
-    alert('Votre média a bien été tranféré');
+    if(e == 1)
+        alert('Votre média a bien été tranféré');
+    else
+        alert('Votre média a bien été traité');
+  });
+
+  this.socket.on('endzip',function(e, socketissued){
+    $('#uploadProgress').hide();
+    var file = new File([e],
+        socketissued+".zip", {type: "application/zip, application/octet-stream, application/x-zip-compressed, multipart/x-zip"});
+    saveAs(file);
   });
 
   this.socket.on('listseries',function(listSeries){
@@ -38,25 +48,25 @@ function Communications() {
     }
   });
 
-  this.socket.on('idRecord',function(idRecord) {
+  this.socket.on('idRecord',function(idRecord, uid) {
 
     if ($(".videoDevice").hasClass('active') && $(".desktopDevice").hasClass('active')) {
         videojs("#videoPreview").src([
-          {type: "video/webm", src: "./records/" + idRecord + ".webm"}
+          {type: "video/webm", src: "./records/" + uid + '/' + idRecord + '/' + idRecord + ".webm"}
         ]);
 
         videojs("#screenPreview").src([
-          {type: "video/webm", src: "./records/" + idRecord + "screen.webm"}
+          {type: "video/webm", src: "./records/" + uid + '/' + idRecord + '/' + idRecord + "screen.webm"}
         ]);
     }
     else if($(".videoDevice").hasClass('active')) {
         videojs("#videoPreview").src([
-          { type: "video/webm", src: "./records/"+idRecord+".webm" }
+          { type: "video/webm", src: "./records/"+ uid + '/' + idRecord + '/' +idRecord+".webm" }
         ]);
     }
     else{
       videojs("#screenPreview").src([
-        {type: "video/webm", src: "./records/" + idRecord + "screen.webm"}
+        {type: "video/webm", src: "./records/" + uid + '/' + idRecord + '/' + idRecord + "screen.webm"}
       ]);
     }
   });
