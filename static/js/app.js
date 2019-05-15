@@ -578,10 +578,13 @@ App.prototype = {
 
 
     //on check si on a select l'upload ou qu'on est dans moodle
-    if(document.getElementById('uploadMedia').checked || !$('#dropdownlistserie').is(':visible')) {
+    // if(document.getElementById('uploadMedia').checked || !$('#dropdownlistserie').is(':visible')) {
       $('#uploadProgress').show();
-      this.addLoader(document.getElementById('uploadProgress'), 'Transfert en cours...', {fontSize: '1.5rem'});
-    }
+      if(document.getElementById('uploadMedia').checked)
+        this.addLoader(document.getElementById('uploadProgress'), 'Transfert en cours...', {fontSize: '1.5rem'});
+      else
+        this.addLoader(document.getElementById('uploadProgress'), 'Traitement en cours...', {fontSize: '1.5rem'});
+    // }
 
     document.getElementById('toggleSaveCreationModal').checked = true;
     rafLoop.unsubscribe(this.recTimeToken);
@@ -624,7 +627,8 @@ App.prototype = {
   listRecording: function(details) {
       if ($(".videoDevice").hasClass('active') && !$(".desktopDevice").hasClass('active'))
           $('#screenPreview').hide();
-      else if (!$(".videoDevice").hasClass('active') && $(".desktopDevice").hasClass('active'))
+      else if ((!$(".videoDevice").hasClass('active') && $(".desktopDevice").hasClass('active')) ||
+          (!$(".videoDevice").hasClass('active') && !$(".desktopDevice").hasClass('active') && $(".audioDevice ").hasClass('active')))
         $('#videoPreview').hide();
   },
   setMediaLink: function(details) {
@@ -683,7 +687,10 @@ App.prototype = {
     this.location = e.target.value;
   },
   saveMedia: function(e) {
-    [...document.querySelectorAll('#saveCreation a')].forEach(anchor => anchor.click());
+    $('#uploadProgress').html('');
+    $('#uploadProgress').show();
+    this.addLoader(document.getElementById('uploadProgress'), 'Création en cours...', {fontSize: '1.5rem'});
+    comms.emit('zipfiles');
   },
   setDetails: function(e) {
     let keyupEvent = new Event('keyup');
