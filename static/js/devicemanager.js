@@ -190,7 +190,7 @@ class Device extends EventEmitter {
     let _vidConstraints = {audio: true, video: {exact: device.deviceId, facingMode: "user"}};
     let _desktop = {
       firefox: {
-        video: {mediaSource: 'screen', frameRate: {ideal: 10, max: 15}}
+        video: {mediaSource: 'screen', frameRate: {min: 15, ideal: 25, max: 30}}
       },
       chrome: {
         audio: false,
