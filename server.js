@@ -66,7 +66,7 @@ io.on('connection', function(socket){
 			}
 			var ops = [
 				'-i', '-',
-				'-c:v', 'copy', '-preset', 'veryfast',
+				'-c:v', 'copy', '-preset', 'fast',
 				'-b:a', '192k', '-strict', '-2',
 				'./static/records/' + uid + '/' + socketissued + '/' + socketissued + '.webm'
 			];
@@ -74,7 +74,7 @@ io.on('connection', function(socket){
 			if(m == 'video-and-desktop') {
 				var ops2 = [
 					'-i', '-',
-					'-c:v', 'copy', '-preset', 'veryfast',
+					'-c:v', 'copy', '-preset', 'fast',
 					'-an',
 					'./static/records/' + uid + '/' + socketissued + '/' + socketissued + 'screen.webm'
 				];
@@ -83,7 +83,7 @@ io.on('connection', function(socket){
 			{
 				var ops2 = [
 					'-i', '-',
-					'-c:v', 'copy', '-preset', 'veryfast',
+					'-c:v', 'copy', '-preset', 'fast',
 					'-b:a', '192k', '-strict', '-2',
 					'./static/records/' + uid + '/' + socketissued + '/' + socketissued + 'screen.webm'
 				];
@@ -234,35 +234,31 @@ io.on('connection', function(socket){
 			if((fs.existsSync(webcamMedia) && fs.existsSync(screenMedia))) //si deux flux alors on merge
 			{
 
-				var width = 1280;
-				var height = 720;
-				var bitrate = 1450;
-				var videowidth = 480; //480;
-				var videoheight = 270;
-				var slidewidth = 800;
-				var slideheight = 450;
-				var videotop = (height - videoheight) / 2;
-				var slidetop = (height - slideheight) / 2;
-				var leftmargin = 10; //10;
+				var width = 1920;
+				var height = 1080;
+				var videowidth = 640; //480;
+				var slidewidth = 1280;
+				var leftmargin = 0; //10;
 
 				fluentFFMPEG()
-					.input(webcamMedia)
 					.input(screenMedia)
+					.input(webcamMedia)
 					.complexFilter([
-						'[0]scale='+videowidth+':-1, pad='+width+':'+height+':'+leftmargin+':('+height+'-ih)/2 [LEFT]',
-						'[1] scale='+slidewidth+':-1 [RIGHT]',
-						'[LEFT][RIGHT] overlay='+videowidth+':(main_h/2)-(overlay_h/2)',
+						'[0]scale='+slidewidth+':-1:force_original_aspect_ratio=decrease, pad='+width+':'+height+':'+leftmargin+':('+height+'-ih)/2 [LEFT]',
+						'[1] scale='+videowidth+':-1:force_original_aspect_ratio=decrease [RIGHT]',
+						'[LEFT][RIGHT] overlay='+slidewidth+':(main_h/2)-(overlay_h/2)',
 					])
+					.outputOption('-r', '25')
 					.outputOption('-ac', '1')
-					.outputOption('-b', bitrate+'k')
-					.outputOption('-preset', 'fast')
+					.outputOption('-crf', '17')
+					.outputOption('-preset', 'slow')
 					.outputOption('-s', width + "x" + height)
-					.output('./static/records/' + uid + '/' + socketissued + '/' + socketissued + 'merged.webm')
+					.output('./static/records/' + uid + '/' + socketissued + '/' + socketissued + 'merged.mp4')
 					.on("error",function(er){
 						console.log("error occured: "+er.message);
 					})
 					.on("end",function(){
-						zip.file(socketissued + 'merged.webm', fs.createReadStream('./static/records/' + uid + '/' + socketissued + '/' + socketissued + 'merged.webm'));
+						zip.file(socketissued + 'merged.mp4', fs.createReadStream('./static/records/' + uid + '/' + socketissued + '/' + socketissued + 'merged.mp4'));
 						zip.generateNodeStream({type:'nodebuffer',streamFiles:true})
 							.pipe(fs.createWriteStream('./static/records/' + uid + '/' + socketissued + '/' + socketissued+'.zip'))
 							.on('finish', function () {
