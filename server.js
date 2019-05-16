@@ -231,11 +231,54 @@ io.on('connection', function(socket){
 				console.error(err);
 			}
 
-			zip.generateNodeStream({type:'nodebuffer',streamFiles:true})
-			.pipe(fs.createWriteStream('./static/records/' + uid + '/' + socketissued + '/' + socketissued+'.zip'))
-			.on('finish', function () {
-				socket.emit('endzip', fs.readFileSync('./static/records/' + uid + '/' + socketissued + '/' + socketissued+'.zip'), socketissued);
-			});
+			if((fs.existsSync(webcamMedia) && fs.existsSync(screenMedia))) //si deux flux alors on merge
+			{
+
+				var width = 1280;
+				var height = 720;
+				var bitrate = 1450;
+				var videowidth = 480; //480;
+				var videoheight = 270;
+				var slidewidth = 800;
+				var slideheight = 450;
+				var videotop = (height - videoheight) / 2;
+				var slidetop = (height - slideheight) / 2;
+				var leftmargin = 10; //10;
+
+				fluentFFMPEG()
+					.input(webcamMedia)
+					.input(screenMedia)
+					.complexFilter([
+						'[0]scale='+videowidth+':-1, pad='+width+':'+height+':'+leftmargin+':('+height+'-ih)/2 [LEFT]',
+						'[1] scale='+slidewidth+':-1 [RIGHT]',
+						'[LEFT][RIGHT] overlay='+videowidth+':(main_h/2)-(overlay_h/2)',
+					])
+					.outputOption('-ac', '1')
+					.outputOption('-b', bitrate+'k')
+					.outputOption('-preset', 'fast')
+					.outputOption('-s', width + "x" + height)
+					.output('./static/records/' + uid + '/' + socketissued + '/' + socketissued + 'merged.webm')
+					.on("error",function(er){
+						console.log("error occured: "+er.message);
+					})
+					.on("end",function(){
+						zip.file(socketissued + 'merged.webm', fs.createReadStream('./static/records/' + uid + '/' + socketissued + '/' + socketissued + 'merged.webm'));
+						zip.generateNodeStream({type:'nodebuffer',streamFiles:true})
+							.pipe(fs.createWriteStream('./static/records/' + uid + '/' + socketissued + '/' + socketissued+'.zip'))
+							.on('finish', function () {
+								socket.emit('endzip', fs.readFileSync('./static/records/' + uid + '/' + socketissued + '/' + socketissued+'.zip'), socketissued);
+							});
+					})
+					.run();
+			}
+			else
+			{
+				zip.generateNodeStream({type:'nodebuffer',streamFiles:true})
+					.pipe(fs.createWriteStream('./static/records/' + uid + '/' + socketissued + '/' + socketissued+'.zip'))
+					.on('finish', function () {
+						socket.emit('endzip', fs.readFileSync('./static/records/' + uid + '/' + socketissued + '/' + socketissued+'.zip'), socketissued);
+					});
+			}
 		});
 
 		getListSeries(socket, function (displayName) {
