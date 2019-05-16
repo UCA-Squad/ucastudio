@@ -1178,7 +1178,7 @@ svg {
 }
 
 #uploadProgress .loader{
-  top:48%;
+  top:15em;
 }
 
 .loader {
