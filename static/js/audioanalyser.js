@@ -7,6 +7,10 @@ var AudioAnalyser = function AudioAnalyserImpl(isNoCanvas) {
   this.height = 0;
   this.noCanvas = isNoCanvas;
 
+  var AudioContext = window.AudioContext          // Default
+      || window.webkitAudioContext
+      || false;
+
   this.audioCtx = new AudioContext();
   this.analyser = this.audioCtx.createAnalyser();
   this.bufferLength = 0;
