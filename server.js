@@ -564,7 +564,7 @@ function getLdapInfos(uid, callback)
 		url: config.path_ldap_uca
 	});
 	var opts = {
-		filter: '(&(|(clfdstatus=0)(clfdstatus=9))(uid='+uid+'))',
+		filter: '(uid='+uid+')',
 		scope: 'sub',
 		attributes: ['sn', 'cn', 'displayName']
 	};
