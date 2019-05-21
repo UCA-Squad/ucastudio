@@ -195,12 +195,14 @@ io.on('connection', function(socket){
 			feedStream = false,feedStream2 = false;
 			if (ffmpeg_process)
 				try {
+					ffmpeg_process.stdin.end();
 					ffmpeg_process.kill('SIGINT');
 				} catch (e) {
 					console.warn('killing ffmpeg process attempt failed...');
 				}
 			if (ffmpeg_process2)
 				try {
+					ffmpeg_process2.stdin.end();
 					ffmpeg_process2.kill('SIGINT');
 				} catch (e) {
 					console.warn('killing ffmpeg2 process attempt failed...');
