@@ -4,8 +4,6 @@
 
 function Communications() {
   this.socket = null;
-  this.bt = null;
-  this.nfc = null;
 
   if (io) {
     this.socket = io();
@@ -26,11 +24,20 @@ function Communications() {
     saveAs(file);
   });
 
-  this.socket.on('listseries',function(listSeries){
-      var html = '<option value="" disabled selected>Sélectionner votre bibliothèque</option>';
+  this.socket.on('listseries',function(listSeries, uid){
+    var html = '<option value="" disabled selected>Sélectionner votre bibliothèque</option>';
+
+    if (typeof listSeries !== 'undefined' && listSeries.length > 0) {
       $.each(listSeries, function (index, item) {
-          html += "<option value='"+ item.identifier +"'>" + item.title + "</option>";
+        if(item.title == uid)
+          html += "<option value='" + item.identifier + "'>Mon dossier</option>";
+        else
+          html += "<option value='" + item.identifier + "'>" + item.title + "</option>";
       });
+    }
+    else
+      html += "<option value='myfolder'>Mon dossier</option>";
+
       $('#listseries').append(html);
   });
 

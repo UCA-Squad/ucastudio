@@ -278,7 +278,7 @@ io.on('connection', function(socket){
 		});
 
 		getListSeries(socket, function (displayName) {
-			socket.emit('listseries', displayName);
+			socket.emit('listseries', displayName, uid);
 			if(typeof socket.handshake.headers.referer !== 'undefined' && socket.handshake.headers.referer.indexOf('serieid') > -1)
 			{
 				let infos = socket.handshake.headers.referer.split( '?' );
@@ -360,178 +360,184 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 		if(isAudioFile)
 			nameFile = uid + '/' + idFileUpload + '/' + idFileUpload + "screen.mp4";
 
-		//on récup la duration du média
-		var duration = '00:00:00';
-		fluentFFMPEG.ffprobe('./static/records/'+nameFile, function(err, metadata) {
+		//on check si l'user à select une serie ou son dossier, si son dossier et exist pas alors on le créer
+		createSerie(uid, usermediainfosToUpload.idSerie).then( function (idSerie) {
 
-			duration = new Date(metadata.format.duration * 1000).toISOString().substr(11, 8);
+			usermediainfosToUpload.idSerie = idSerie;
 
-			var acl = '[\n' +
-				'  {\n' +
-				'    "allow": true,\n' +
-				'    "role": "ROLE_EXTERNAL_APPLICATION",\n' +
-				'    "action": "read"\n' +
-				'  },\n' +
-				'  {\n' +
-				'    "allow": true,\n' +
-				'    "role": "ROLE_EXTERNAL_APPLICATION",\n' +
-				'    "action": "write"\n' +
-				'  },\n' +
-				'  {\n' +
-				'    "allow": true,\n' +
-				'    "role": "ROLE_GROUP_MOODLE",\n' +
-				'    "action": "read"\n' +
-				'  },\n' +
-				'  {\n' +
-				'    "allow": true,\n' +
-				'    "role": "ROLE_GROUP_MOODLE",\n' +
-				'    "action": "write"\n' +
-				'  },\n' +
-				'  {\n' +
-				'    "allow": true,\n' +
-				'    "role": "ROLE_GROUP_MOODLE",\n' +
-				'    "action": "annotate"\n' +
-				'  },\n' +
-				'  {\n' +
-				'    "allow": true,\n' +
-				'    "role": "ROLE_USER_LDAP_' + uid + '",\n' +
-				'    "action": "read"\n' +
-				'  },\n' +
-				'  {\n' +
-				'    "allow": true,\n' +
-				'    "role": "ROLE_USER_LDAP_' + uid + '",\n' +
-				'    "action": "write"\n' +
-				'  }\n' +
-				'  {\n' +
-				'    "allow": true,\n' +
-				'    "role": "ROLE_USER_LDAP_' + uid + '",\n' +
-				'    "action": "annotate-admin"\n' +
-				'  }\n' +
-				']';
+			//on récup la duration du média
+			var duration = '00:00:00';
+			fluentFFMPEG.ffprobe('./static/records/'+nameFile, function(err, metadata) {
 
-			var metadata = '[\n' +
-				'  {\n' +
-				'    "flavor": "dublincore/episode",\n' +
-				'    "fields": [\n' +
-				'      {\n' +
-				'        "id": "title",\n' +
-				'        "value": "' + usermediainfosToUpload.titleUpload + '"\n' +
-				'      },\n' +
-				'      {\n' +
-				'        "id": "description",\n' +
-				'        "value": "' + desc + '"\n' +
-				'      },\n' +
-				'      {\n' +
-				'        "id": "creator",\n' +
-				'        "value": ["' + socket.handshake.session.cn + '"]\n' +
-				'      },\n' +
-				'      {\n' +
-				'        "id": "isPartOf",\n' +
-				'        "value": "' + usermediainfosToUpload.idSerie + '"\n' +
-				'      },\n' +
-				'      {\n' +
-				'        "id": "startDate",\n' +
-				'        "value": "' + startDate + '"\n' +
-				'      },\n' +
-				'      {\n' +
-				'        "id": "startTime",\n' +
-				'        "value": "' + startTime + '"\n' +
-				'      },\n' +
-				'      {\n' +
-				'        "id": "duration",\n' +
-				'        "value": "' + duration + '"\n' +
-				'      },\n' +
-				'      {\n' +
-				'        "id": "location",\n' +
-				'        "value": "' + location + '"\n' +
-				'      }\n' +
-				'    ]\n' +
-				'  }\n' +
-				']';
+				duration = new Date(metadata.format.duration * 1000).toISOString().substr(11, 8);
 
-			if (isAudioFile) {
-				var processing = '{\n' +
-					'  "workflow": "' + config.opencast_workflow_audio + '"\n' +
-					'}';
-			} else {
-				var processing = '{\n' +
-					'  "workflow": "' + config.opencast_workflow + '"\n' +
-					'}';
-			}
+				var acl = '[\n' +
+					'  {\n' +
+					'    "allow": true,\n' +
+					'    "role": "ROLE_EXTERNAL_APPLICATION",\n' +
+					'    "action": "read"\n' +
+					'  },\n' +
+					'  {\n' +
+					'    "allow": true,\n' +
+					'    "role": "ROLE_EXTERNAL_APPLICATION",\n' +
+					'    "action": "write"\n' +
+					'  },\n' +
+					'  {\n' +
+					'    "allow": true,\n' +
+					'    "role": "ROLE_GROUP_MOODLE",\n' +
+					'    "action": "read"\n' +
+					'  },\n' +
+					'  {\n' +
+					'    "allow": true,\n' +
+					'    "role": "ROLE_GROUP_MOODLE",\n' +
+					'    "action": "write"\n' +
+					'  },\n' +
+					'  {\n' +
+					'    "allow": true,\n' +
+					'    "role": "ROLE_GROUP_MOODLE",\n' +
+					'    "action": "annotate"\n' +
+					'  },\n' +
+					'  {\n' +
+					'    "allow": true,\n' +
+					'    "role": "ROLE_USER_LDAP_' + uid + '",\n' +
+					'    "action": "read"\n' +
+					'  },\n' +
+					'  {\n' +
+					'    "allow": true,\n' +
+					'    "role": "ROLE_USER_LDAP_' + uid + '",\n' +
+					'    "action": "write"\n' +
+					'  }\n' +
+					'  {\n' +
+					'    "allow": true,\n' +
+					'    "role": "ROLE_USER_LDAP_' + uid + '",\n' +
+					'    "action": "annotate-admin"\n' +
+					'  }\n' +
+					']';
 
+				var metadata = '[\n' +
+					'  {\n' +
+					'    "flavor": "dublincore/episode",\n' +
+					'    "fields": [\n' +
+					'      {\n' +
+					'        "id": "title",\n' +
+					'        "value": "' + usermediainfosToUpload.titleUpload + '"\n' +
+					'      },\n' +
+					'      {\n' +
+					'        "id": "description",\n' +
+					'        "value": "' + desc + '"\n' +
+					'      },\n' +
+					'      {\n' +
+					'        "id": "creator",\n' +
+					'        "value": ["' + socket.handshake.session.cn + '"]\n' +
+					'      },\n' +
+					'      {\n' +
+					'        "id": "isPartOf",\n' +
+					'        "value": "' + usermediainfosToUpload.idSerie + '"\n' +
+					'      },\n' +
+					'      {\n' +
+					'        "id": "startDate",\n' +
+					'        "value": "' + startDate + '"\n' +
+					'      },\n' +
+					'      {\n' +
+					'        "id": "startTime",\n' +
+					'        "value": "' + startTime + '"\n' +
+					'      },\n' +
+					'      {\n' +
+					'        "id": "duration",\n' +
+					'        "value": "' + duration + '"\n' +
+					'      },\n' +
+					'      {\n' +
+					'        "id": "location",\n' +
+					'        "value": "' + location + '"\n' +
+					'      }\n' +
+					'    ]\n' +
+					'  }\n' +
+					']';
 
-			if (hasSecondStream) {
-				var options = {
-					method: "POST",
-					url: config.opencast_events_url,
-					ca: fs.readFileSync(config.opencast_cert),
-					headers:
-						{
-							'cache-control': 'no-cache',
-							'Authorization': 'Basic ' + config.opencast_authentication,
-							'content-type': 'multipart/form-data;'
-						},
-					formData:
-						{
-							presenter:
-								{
-									value: fs.createReadStream('./static/records/'+ uid + '/' + idFileUpload + '/' + idFileUpload + ".webm"),
-									options:
-										{
-											filename: 'metadata/' + idFileUpload + '.webm'
-										}
-								},
-							presentation:
-								{
-									value: fs.createReadStream('./static/records/'+ uid + '/' + idFileUpload + '/' + idFileUpload + "screen.webm"),
-									options:
-										{
-											filename: 'metadata/' + idFileUpload + 'screen.webm'
-										}
-								},
-							processing,
-							metadata,
-							acl
-						}
-				};
-			} else {
-				var options = {
-					method: "POST",
-					url: config.opencast_events_url,
-					ca: fs.readFileSync(config.opencast_cert),
-					headers:
-						{
-							'cache-control': 'no-cache',
-							'Authorization': 'Basic ' + config.opencast_authentication,
-							'content-type': 'multipart/form-data;'
-						},
-					formData:
-						{
-							presenter:
-								{
-									value: fs.createReadStream("./static/records/" + nameFile),
-									options:
-										{
-											filename: 'metadata/' + nameFile
-										}
-								},
-							processing,
-							metadata,
-							acl
-						}
-				};
-			}
-
-			request(options, function (error, response, body) {
-				if (error) {
-					socket.disconnect(); //?? à set ailleur ?
-					throw new Error(error);
+				if (isAudioFile) {
+					var processing = '{\n' +
+						'  "workflow": "' + config.opencast_workflow_audio + '"\n' +
+						'}';
 				} else {
-				// var obj = JSON.parse(body);
-				// console.log(body);
-					socket.emit('endupload', 1);
+					var processing = '{\n' +
+						'  "workflow": "' + config.opencast_workflow + '"\n' +
+						'}';
 				}
-				// socket.disconnect();
+
+
+				if (hasSecondStream) {
+					var options = {
+						method: "POST",
+						url: config.opencast_events_url,
+						ca: fs.readFileSync(config.opencast_cert),
+						headers:
+							{
+								'cache-control': 'no-cache',
+								'Authorization': 'Basic ' + config.opencast_authentication,
+								'content-type': 'multipart/form-data;'
+							},
+						formData:
+							{
+								presenter:
+									{
+										value: fs.createReadStream('./static/records/'+ uid + '/' + idFileUpload + '/' + idFileUpload + ".webm"),
+										options:
+											{
+												filename: 'metadata/' + idFileUpload + '.webm'
+											}
+									},
+								presentation:
+									{
+										value: fs.createReadStream('./static/records/'+ uid + '/' + idFileUpload + '/' + idFileUpload + "screen.webm"),
+										options:
+											{
+												filename: 'metadata/' + idFileUpload + 'screen.webm'
+											}
+									},
+								processing,
+								metadata,
+								acl
+							}
+					};
+				} else {
+					var options = {
+						method: "POST",
+						url: config.opencast_events_url,
+						ca: fs.readFileSync(config.opencast_cert),
+						headers:
+							{
+								'cache-control': 'no-cache',
+								'Authorization': 'Basic ' + config.opencast_authentication,
+								'content-type': 'multipart/form-data;'
+							},
+						formData:
+							{
+								presenter:
+									{
+										value: fs.createReadStream("./static/records/" + nameFile),
+										options:
+											{
+												filename: 'metadata/' + nameFile
+											}
+									},
+								processing,
+								metadata,
+								acl
+							}
+					};
+				}
+
+				request(options, function (error, response, body) {
+					if (error) {
+						socket.disconnect(); //?? à set ailleur ?
+						throw new Error(error);
+					} else {
+					// var obj = JSON.parse(body);
+					// console.log(body);
+						socket.emit('endupload', 1);
+					}
+					// socket.disconnect();
+				});
 			});
 		});
 	}
@@ -552,7 +558,7 @@ function getLdapInfos(uid, callback)
 		url: config.path_ldap_uca
 	});
 	var opts = {
-		filter: '(&(clfdstatus=9)(uid='+uid+'))',
+		filter: '(&(|(clfdstatus=0)(clfdstatus=9))(uid='+uid+'))',
 		scope: 'sub',
 		attributes: ['sn', 'cn', 'displayName']
 	};
@@ -643,5 +649,87 @@ function checkSerieAcl(uid, serieinfo)
 					resolve(serieinfo);
 			resolve();
 		});
+	});
+}
+
+/**
+ * Créer une série si existe pas
+ * @param uid
+ * @param idSerieSelect
+ * @returns {Promise<any>}
+ */
+function createSerie(uid, idSerieSelect)
+{
+	return new Promise(function (resolve, reject) {
+
+		if(idSerieSelect == 'myfolder') {
+
+			var acl = '[\n' +
+				'  {\n' +
+				'    "allow": true,\n' +
+				'    "action": "read"\n' +
+				'    "role": "ROLE_ADMIN",\n' +
+				'  },\n' +
+				'  {\n' +
+				'    "allow": true,\n' +
+				'    "action": "write"\n' +
+				'    "role": "ROLE_ADMIN",\n' +
+				'  },\n' +
+				'  {\n' +
+				'    "allow": true,\n' +
+				'    "action": "read"\n' +
+				'    "role": "ROLE_USER_LDAP_' + uid.toUpperCase() + '",\n' +
+				'  },\n' +
+				'  {\n' +
+				'    "allow": true,\n' +
+				'    "action": "write"\n' +
+				'    "role": "ROLE_USER_LDAP_' + uid.toUpperCase() + '",\n' +
+				'  },\n' +
+				']';
+
+
+			var metadata = '[\n' +
+				'  {\n' +
+				'    "label": "Opencast Series DublinCore",\n' +
+				'    "flavor": "dublincore/series",\n' +
+				'    "fields": [\n' +
+				'      {\n' +
+				'        "id": "title",\n' +
+				'        "value": "' + uid + '"\n' +
+				'      },\n' +
+				'    ]\n' +
+				'  }\n' +
+				']';
+
+
+			var options = {
+				method: "POST",
+				url: config.opencast_series_url,
+				ca: fs.readFileSync(config.opencast_cert),
+				headers:
+					{
+						'cache-control': 'no-cache',
+						'Authorization': 'Basic ' + config.opencast_authentication,
+						'content-type': 'multipart/form-data;'
+					},
+				formData:
+					{
+						metadata,
+						acl
+					}
+			};
+
+			var request = require("request");
+			request(options, function (error, response, body) {
+				if (error) {
+					throw new Error(error);
+				} else {
+					var obj = JSON.parse(body);
+					resolve(obj.identifier);
+				}
+			});
+		}
+		else
+			resolve(idSerieSelect);
 	});
 }
