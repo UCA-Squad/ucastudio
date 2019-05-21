@@ -151,20 +151,28 @@ io.on('connection', function(socket){
 
 		socket.on('binarystreamvideo', function (m) {
 			if (!feedStream) {
-				socket.emit('fatal', 'ffmpep not processing.');
-				ffmpeg_process.stdin.end();
-				ffmpeg_process.kill('SIGINT');
-				return;
+				try {
+					socket.emit('fatal', 'ffmpep not processing.');
+					ffmpeg_process.stdin.end();
+					ffmpeg_process.kill('SIGINT');
+					return;
+				} catch (e) {
+					console.warn('End ffmpeg not processing failed...');
+				}
 			}
 			feedStream(m);
 		});
 
 		socket.on('binarystreamdesktop', function (m) {
 			if (!feedStream2) {
-				socket.emit('fatal', 'ffmpep not processing.');
-				ffmpeg_process2.stdin.end();
-				ffmpeg_process2.kill('SIGINT');
-				return;
+				try {
+					socket.emit('fatal', 'ffmpep not processing.');
+					ffmpeg_process2.stdin.end();
+					ffmpeg_process2.kill('SIGINT');
+					return;
+				} catch (e) {
+					console.warn('End ffmpeg2 not processing failed...');
+				}
 			}
 			feedStream2(m);
 		});
