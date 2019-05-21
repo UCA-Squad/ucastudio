@@ -734,7 +734,7 @@ App.prototype = {
   setLanguage: function(langObj) {
     document.documentElement.lang = langObj.language;
     document.body.classList.add('translating');
-    if (!document.head.querySelector(`link[data-lang=${langObj.language}`)) {
+    if (!document.head.querySelector(`link[data-lang=${langObj.language}]`)) {
       let link = document.createElement('link');
       link.rel = "stylesheet";
       link.href = `css/translations_${langObj.short}.css`;
