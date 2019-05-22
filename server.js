@@ -67,6 +67,8 @@ io.on('connection', function(socket){
 			var ops = [
 				'-i', '-',
 				'-c:v', 'copy', '-preset', 'fast',
+				'-use_wallclock_as_timestamps', '1',
+				'-async', '1',
 				'-b:a', '192k', '-strict', '-2',
 				'./static/records/' + uid + '/' + socketissued + '/' + socketissued + '.webm'
 			];
@@ -76,6 +78,7 @@ io.on('connection', function(socket){
 					'-i', '-',
 					'-c:v', 'copy', '-preset', 'fast',
 					'-an',
+					'-use_wallclock_as_timestamps', '1',
 					'./static/records/' + uid + '/' + socketissued + '/' + socketissued + 'screen.webm'
 				];
 			}
@@ -84,6 +87,8 @@ io.on('connection', function(socket){
 				var ops2 = [
 					'-i', '-',
 					'-c:v', 'copy', '-preset', 'fast',
+					'-use_wallclock_as_timestamps', '1',
+					'-async', '1',
 					'-b:a', '192k', '-strict', '-2',
 					'./static/records/' + uid + '/' + socketissued + '/' + socketissued + 'screen.webm'
 				];
