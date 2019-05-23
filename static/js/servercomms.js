@@ -14,6 +14,11 @@ function Communications() {
     location.reload();
   });
 
+  this.socket.on('fatal',function(e){
+    alert("Un problème est survenu sur cette page web, elle va donc être rechargée");
+    location.reload();
+  });
+
   this.socket.on('endupload',function(e){
     $('#uploadProgress').hide();
     if(e == 1)

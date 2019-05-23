@@ -111,7 +111,6 @@ io.on('connection', function(socket){
 				});
 				ffmpeg_process2.on('exit', function (e) {
 					console.log('child process desktop exit' + e);
-					socket.emit('fatal', 'ffmpeg exit!' + e);
 					if(m == 'onlyaudio' || m == 'onlydesktop' || m == 'audio-and-desktop') {
                         if(m == 'onlyaudio')
                             encodeAudioToMp4(socket)
@@ -139,7 +138,6 @@ io.on('connection', function(socket){
 				});
 				ffmpeg_process.on('exit', function (e) {
 					console.log('child process video exit' + e);
-					socket.emit('fatal', 'ffmpeg exit!' + e);
 					if(m == 'video-and-desktop')
 						uploadFile(socket, true);
 					else
@@ -394,9 +392,20 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 
 			usermediainfosToUpload.idSerie = idSerie;
 
+			var pathMediaToFFprobe;
+			if(hasSecondStream || onlySecondStream)
+				pathMediaToFFprobe = './static/records/'+ uid + '/' + idFileUpload + '/' + idFileUpload + "screen.webm";
+			else
+				pathMediaToFFprobe = './static/records/'+nameFile;
+
 			//on récup la duration du média
 			var duration = '00:00:00';
-			fluentFFMPEG.ffprobe('./static/records/'+nameFile, function(err, metadata) {
+			fluentFFMPEG.ffprobe(pathMediaToFFprobe, function(err, metadata) {
+
+				var canEncode720p = true;
+				if((hasSecondStream || onlySecondStream) && metadata.streams[0].height < 720 ) {
+					canEncode720p = false;
+				}
 
 				duration = new Date(metadata.format.duration * 1000).toISOString().substr(11, 8);
 
@@ -488,9 +497,19 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 						'  "workflow": "' + config.opencast_workflow_audio + '"\n' +
 						'}';
 				} else {
-					var processing = '{\n' +
-						'  "workflow": "' + config.opencast_workflow + '"\n' +
-						'}';
+					if(canEncode720p) {
+						var processing = '{\n' +
+							'  "workflow": "' + config.opencast_workflow + '"\n' +
+							'}';
+					}
+					else{
+						var processing = '{\n' +
+							'  "workflow": "' + config.opencast_workflow + '",\n' +
+							'  "configuration": {\n' +
+							'    "flagQuality720p": "false",\n' +
+							'  }\n' +
+							'}'
+					}
 				}
 
 
