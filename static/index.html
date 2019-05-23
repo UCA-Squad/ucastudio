@@ -89,6 +89,14 @@
             <input type="checkbox" id="minimiseStreams" class="hiddenCheck" />
             <input name="userView" type="radio" value="simple" class="hiddenCheck" id="simpleUserView" autocomplete="off" />
             <input name="userView" type="radio" value="advanced" class="hiddenCheck" checked id="advancedUserView" autocomplete="off" />
+            <div id="alertNoWebcam" style="" class="alert alert-orange card-100 ">
+                <a href="#" class="close"></a>
+                <span style="padding: 10em">
+                    Impossible de trouver un périphérique multimédia. Il est très probable que votre navigateur n'autorise pas l'accès à ce périphérique ou qu'il n'est pas connecté.
+                    <br>
+                    Essayez de recharger cette page ou ouvrez-la à l'aide d'un autre navigateur. N'oubliez pas que pour démarrer votre webcam, vous devez autoriser notre site Web à l'utiliser.
+                </span>
+            </div>
             <div id="videoView">
                 <input type="radio" name="desktop" class="hiddenCheck streamToggle" id="desktopstream" autocomplete="off" />
                 <label for="desktopstream" class="mediadevice action desktopDevice" data-title="Partager l'écran" data-pseudotext="SHARE_DESKTOP" data-target="desktop">

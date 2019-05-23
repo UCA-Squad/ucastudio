@@ -1291,9 +1291,6 @@ svg {
   transition: transform 0.25s ease-out;
 }
 
-.modalClose {
-}
-
 .modalFooter {
   position: absolute;
   bottom: 0;
@@ -1827,28 +1824,32 @@ input:focus {
   transition: width 0.5s, opacity 0.25s, visibility 0s 0.25s;
 }
 
-.close::before, .close::after {
-  width: 1rem;
-  height: 2px;
-  background: white;
+.close {
   position: absolute;
-  left: 50%;
-  top: 50%;
-  content: '';
-  transform: translate(-50%, -50%) rotate(45deg);
-  pointer-events: none;
-  transition: background 0.3s !important;
-  margin: 0 !important;
+  right: 4em;
+  top: 5.8em;
+  width: 20px;
+  height: 20px;
+  opacity: 0.3;
+  z-index: 10;
+}
+.close:hover {
+  opacity: 1;
+}
+.close:before, .close:after {
+  position: absolute;
+  content: ' ';
+  height: 20px;
+  width: 2px;
+  background-color: #333;
+}
+.close:before {
+  transform: rotate(45deg);
+}
+.close:after {
+  transform: rotate(-45deg);
 }
 
-.close::after {
-  transform: translate(-50%, -50%) rotate(-45deg);
-}
-
-
-.close:hover::before, .close:hover::after {
-  background: #333;
-}
 
 @keyframes circleCover1 {
   0% {
@@ -2039,4 +2040,13 @@ input:focus {
 #screenPreview, #videoPreview{
   max-width: 300px !important;
   width: 300px !important;
+}
+
+#alertNoWebcam{
+  text-align: center;
+  display: none;
+  width: 95%;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 20px;
 }

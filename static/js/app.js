@@ -191,7 +191,11 @@ App.prototype = {
     }
 
     deviceMgr.connect(e.target.value)
-      .catch(err => console.log(err));
+      .catch(function(err){
+          console.log(err);
+          if(e.target.value != 'desktop')
+            $('#alertNoWebcam').show();
+      });
   },
   displayStream: function(stream, value) {
     audAnalyser.resume();

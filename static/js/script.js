@@ -13,6 +13,10 @@ $(".backToInfo").on('click', function () {
     $(".nextBtn").closest('section').css("transform", ``);
 });
 
+$("#alertNoWebcam > .close").on('click', function () {
+    $(this).parent().slideUp("slow");
+});
+
 $( document ).ready(function() {
     $(document).keydown(function (e) {
         var charCode = e.charCode || e.keyCode || e.which;
