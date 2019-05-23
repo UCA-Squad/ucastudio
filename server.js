@@ -161,7 +161,14 @@ io.on('connection', function(socket){
 					console.warn('End ffmpeg not processing failed...');
 				}
 			}
-			feedStream(m);
+			else {
+				if (typeof feedStream === "function")
+					feedStream(m);
+				else {
+					socket.emit('errorffmpeg');
+					socket.disconnect();
+				}
+			}
 		});
 
 		socket.on('binarystreamdesktop', function (m) {
@@ -175,7 +182,14 @@ io.on('connection', function(socket){
 					console.warn('End ffmpeg2 not processing failed...');
 				}
 			}
-			feedStream2(m);
+			else {
+				if (typeof feedStream === "function")
+					feedStream2(m);
+				else {
+					socket.emit('errorffmpeg');
+					socket.disconnect();
+				}
+			}
 		});
 		socket.on('infos', function (m) {
 			socket.handshake.session.usermediadatas = m;
