@@ -183,7 +183,7 @@ io.on('connection', function(socket){
 				}
 			}
 			else {
-				if (typeof feedStream === "function")
+				if (typeof feedStream2 === "function")
 					feedStream2(m);
 				else {
 					socket.emit('errorffmpeg');
