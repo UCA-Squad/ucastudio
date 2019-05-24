@@ -214,7 +214,7 @@ io.on('connection', function(socket){
 				}
 			}
 
-			socket.emit('idRecord', socketissued, uid);
+			// socket.emit('idRecord', socketissued, uid);
 		});
 		socket.on('disconnect', function () {
 			feedStream = false,feedStream2 = false;
@@ -593,6 +593,7 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 		socket.emit('endupload', 0); // pas nécessaire si on force l'upload
 		// socket.disconnect();
 	}
+	socket.emit('idRecord', socket.handshake.session.cas_user, socket.handshake.issued);
 }
 
 /**
