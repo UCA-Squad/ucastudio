@@ -313,8 +313,9 @@ io.on('connection', function(socket){
 					socket.emit('insidemoodle', infos[1]);
 			}
 		});
-		getLdapInfos(socket.handshake.session.cas_user, function (displayName) {
+		getLdapInfos(socket.handshake.session.cas_user, function (displayName, mail) {
 			socket.handshake.session.cn = displayName;
+			socket.handshake.session.mail = mail;
 			socket.emit('displayName', displayName);
 		});
 	}
@@ -388,7 +389,7 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 			nameFile = uid + '/' + idFileUpload + '/' + idFileUpload + "screen.mp4";
 
 		//on check si l'user à select une serie ou son dossier, si son dossier et exist pas alors on le créer
-		createSerie(uid, usermediainfosToUpload.idSerie).then( function (idSerie) {
+		createSerie(uid, socket.handshake.session.mail, usermediainfosToUpload.idSerie).then( function (idSerie) {
 
 			usermediainfosToUpload.idSerie = idSerie;
 
@@ -609,13 +610,15 @@ function getLdapInfos(uid, callback)
 	var opts = {
 		filter: '(uid='+uid+')',
 		scope: 'sub',
-		attributes: ['sn', 'cn', 'displayName']
+		attributes: ['sn', 'cn', 'displayName', 'mail']
 	};
 
 	let displayName = '';
+	let mail = '';
 	client.search('ou=people, dc=uca,dc=fr', opts, function(err, res) {
 		res.on('searchEntry', function(entry) {
 			displayName = entry.object.displayName;
+			mail = entry.object.mail;
 		});
 		res.on('searchReference', function(referral) {
 			console.log('referral: ' + referral.uris.join());
@@ -624,7 +627,7 @@ function getLdapInfos(uid, callback)
 			console.error('error: ' + err.message);
 		});
 		res.on('end', function(result) {
-			callback(displayName);
+			callback(displayName, mail);
 		});
 	});
 }
@@ -707,7 +710,7 @@ function checkSerieAcl(uid, serieinfo)
  * @param idSerieSelect
  * @returns {Promise<any>}
  */
-function createSerie(uid, idSerieSelect)
+function createSerie(uid, mail, idSerieSelect)
 {
 	return new Promise(function (resolve, reject) {
 
@@ -733,7 +736,7 @@ function createSerie(uid, idSerieSelect)
 				'    "allow": true,\n' +
 				'    "action": "write"\n' +
 				'    "role": "ROLE_USER_LDAP_' + uid.toUpperCase() + '",\n' +
-				'  },\n' +
+				'  }\n' +
 				']';
 
 
@@ -746,6 +749,10 @@ function createSerie(uid, idSerieSelect)
 				'        "id": "title",\n' +
 				'        "value": "' + uid + '"\n' +
 				'      },\n' +
+				'      {\n' +
+				'        "id": "subject",\n' +
+				'        "value": "' + mail + '"\n' +
+				'      }\n' +
 				'    ]\n' +
 				'  }\n' +
 				']';
