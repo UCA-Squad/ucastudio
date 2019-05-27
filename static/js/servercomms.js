@@ -65,7 +65,7 @@ function Communications() {
     }
   });
 
-  this.socket.on('idRecord',function(idRecord, uid) {
+  this.socket.on('idRecord',function(uid, idRecord) {
 
     if ($(".videoDevice").hasClass('active') && $(".desktopDevice").hasClass('active')) {
         videojs("#videoPreview").src([
