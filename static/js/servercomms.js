@@ -62,6 +62,7 @@ function Communications() {
       $('#listseries option[value="'+idSerieToselect[1]+'"]').attr('selected','selected');
       $('#dropdownlistserie').hide();
       $('#uploadAtEnd').hide();
+      $('.nextBtn').css('bottom', '10');
     }
   });
 
