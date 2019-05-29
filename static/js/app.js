@@ -703,15 +703,15 @@ App.prototype = {
     this.locationEl.dispatchEvent(keyupEvent)
   },
   uploadMedia: function(e) {
-    if(document.getElementById('uploadMedia').checked) {
       var infos = {};
       infos['titleUpload'] = document.getElementById('titleUpload').value;
       infos['presenterUpload'] = document.getElementById('presenterUpload').value;
       infos['locationUpload'] = document.getElementById('locationUpload').value;
+      infos['descUpload'] = document.getElementById('descUpload').value;
+      infos['mustBeUpload'] = document.getElementById('uploadMedia').checked;
       var select = document.getElementById('listseries');
       infos['idSerie'] = select.options[select.selectedIndex].value;
       comms.emit('infos', JSON.stringify(infos));
-    }
   },
   changeLanguage: function(e) {
     let btn = e.target.parentNode.querySelector('button');

@@ -243,17 +243,25 @@ io.on('connection', function(socket){
 
 			const webcamMedia = './static/records/' + uid + '/' + socketissued + '/' + socketissued + '.webm';
 			const screenMedia = './static/records/' + uid + '/' + socketissued + '/' + socketissued + 'screen.webm';
+			const metadataXML = './static/records/' + uid + '/' + socketissued + '/metadata.xml';
 
 			try {
 				if (fs.existsSync(webcamMedia))
-					zip.file(socketissued + '.webm', fs.createReadStream('./static/records/' + uid + '/' + socketissued + '/' + socketissued + '.webm'));
+					zip.file(socketissued + '.webm', fs.createReadStream(webcamMedia));
 			} catch(err) {
 				console.error(err);
 			}
 
 			try {
 				if (fs.existsSync(screenMedia))
-					zip.file(socketissued + 'screen.webm', fs.createReadStream('./static/records/' + uid + '/' + socketissued + '/' + socketissued + 'screen.webm'));
+					zip.file(socketissued + 'screen.webm', fs.createReadStream(screenMedia));
+			} catch(err) {
+				console.error(err);
+			}
+
+			try {
+				if (fs.existsSync(metadataXML))
+					zip.file('metadata.xml', fs.createReadStream(metadataXML));
 			} catch(err) {
 				console.error(err);
 			}
@@ -375,7 +383,10 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 
 		var idFileUpload = socket.handshake.issued;
 		var uid = socket.handshake.session.cas_user;
+		var mustBeUpload = usermediainfosToUpload.mustBeUpload;
 		var desc = 'N/R';
+		if(usermediainfosToUpload.descUpload != '')
+			desc = usermediainfosToUpload.descUpload;
 		var location = 'N/R';
 		if(usermediainfosToUpload.locationUpload != '')
 			location = usermediainfosToUpload.locationUpload;
@@ -389,7 +400,7 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 			nameFile = uid + '/' + idFileUpload + '/' + idFileUpload + "screen.mp4";
 
 		//on check si l'user à select une serie ou son dossier, si son dossier et exist pas alors on le créer
-		createSerie(uid, socket.handshake.session.mail, usermediainfosToUpload.idSerie).then( function (idSerie) {
+		createSerie(uid, socket.handshake.session.mail, usermediainfosToUpload.idSerie, mustBeUpload).then( function (idSerie) {
 
 			usermediainfosToUpload.idSerie = idSerie;
 
@@ -401,57 +412,9 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 
 			//on récup la duration du média
 			var duration = '00:00:00';
-			fluentFFMPEG.ffprobe(pathMediaToFFprobe, function(err, metadata) {
+			fluentFFMPEG.ffprobe(pathMediaToFFprobe, function(err, metadataFFprobe) {
 
-				var canEncode720p = true;
-				if((hasSecondStream || onlySecondStream) && metadata.streams[0].height < 720 ) {
-					canEncode720p = false;
-				}
-
-				duration = new Date(metadata.format.duration * 1000).toISOString().substr(11, 8);
-
-				var acl = '[\n' +
-					'  {\n' +
-					'    "allow": true,\n' +
-					'    "role": "ROLE_EXTERNAL_APPLICATION",\n' +
-					'    "action": "read"\n' +
-					'  },\n' +
-					'  {\n' +
-					'    "allow": true,\n' +
-					'    "role": "ROLE_EXTERNAL_APPLICATION",\n' +
-					'    "action": "write"\n' +
-					'  },\n' +
-					'  {\n' +
-					'    "allow": true,\n' +
-					'    "role": "ROLE_GROUP_MOODLE",\n' +
-					'    "action": "read"\n' +
-					'  },\n' +
-					'  {\n' +
-					'    "allow": true,\n' +
-					'    "role": "ROLE_GROUP_MOODLE",\n' +
-					'    "action": "write"\n' +
-					'  },\n' +
-					'  {\n' +
-					'    "allow": true,\n' +
-					'    "role": "ROLE_GROUP_MOODLE",\n' +
-					'    "action": "annotate"\n' +
-					'  },\n' +
-					'  {\n' +
-					'    "allow": true,\n' +
-					'    "role": "ROLE_USER_LDAP_' + uid + '",\n' +
-					'    "action": "read"\n' +
-					'  },\n' +
-					'  {\n' +
-					'    "allow": true,\n' +
-					'    "role": "ROLE_USER_LDAP_' + uid + '",\n' +
-					'    "action": "write"\n' +
-					'  }\n' +
-					'  {\n' +
-					'    "allow": true,\n' +
-					'    "role": "ROLE_USER_LDAP_' + uid + '",\n' +
-					'    "action": "annotate-admin"\n' +
-					'  }\n' +
-					']';
+				duration = new Date(metadataFFprobe.format.duration * 1000).toISOString().substr(11, 8);
 
 				var metadata = '[\n' +
 					'  {\n' +
@@ -459,11 +422,11 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 					'    "fields": [\n' +
 					'      {\n' +
 					'        "id": "title",\n' +
-					'        "value": "' + usermediainfosToUpload.titleUpload + '"\n' +
+					'        "value": "' + usermediainfosToUpload.titleUpload.replace(/"/g, '\\"') + '"\n' +
 					'      },\n' +
 					'      {\n' +
 					'        "id": "description",\n' +
-					'        "value": "' + desc + '"\n' +
+					'        "value": "' + desc.replace(/"/g, '\\"') + '"\n' +
 					'      },\n' +
 					'      {\n' +
 					'        "id": "creator",\n' +
@@ -493,108 +456,165 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 					'  }\n' +
 					']';
 
-				if (isAudioFile) {
-					var processing = '{\n' +
-						'  "workflow": "' + config.opencast_workflow_audio + '"\n' +
-						'}';
-				} else {
-					if(canEncode720p) {
+
+				var js2xmlparser = require("js2xmlparser");
+                var metadataXML  = js2xmlparser.parse("media", metadata);
+				try {
+					fs.writeFileSync('./static/records/'+ uid + '/' + idFileUpload + '/metadata.xml', metadataXML);
+				} catch (err) {
+					console.error(err)
+				}
+
+				if(mustBeUpload)
+				{
+					var acl = '[\n' +
+						'  {\n' +
+						'    "allow": true,\n' +
+						'    "role": "ROLE_EXTERNAL_APPLICATION",\n' +
+						'    "action": "read"\n' +
+						'  },\n' +
+						'  {\n' +
+						'    "allow": true,\n' +
+						'    "role": "ROLE_EXTERNAL_APPLICATION",\n' +
+						'    "action": "write"\n' +
+						'  },\n' +
+						'  {\n' +
+						'    "allow": true,\n' +
+						'    "role": "ROLE_GROUP_MOODLE",\n' +
+						'    "action": "read"\n' +
+						'  },\n' +
+						'  {\n' +
+						'    "allow": true,\n' +
+						'    "role": "ROLE_GROUP_MOODLE",\n' +
+						'    "action": "write"\n' +
+						'  },\n' +
+						'  {\n' +
+						'    "allow": true,\n' +
+						'    "role": "ROLE_GROUP_MOODLE",\n' +
+						'    "action": "annotate"\n' +
+						'  },\n' +
+						'  {\n' +
+						'    "allow": true,\n' +
+						'    "role": "ROLE_USER_LDAP_' + uid + '",\n' +
+						'    "action": "read"\n' +
+						'  },\n' +
+						'  {\n' +
+						'    "allow": true,\n' +
+						'    "role": "ROLE_USER_LDAP_' + uid + '",\n' +
+						'    "action": "write"\n' +
+						'  }\n' +
+						'  {\n' +
+						'    "allow": true,\n' +
+						'    "role": "ROLE_USER_LDAP_' + uid + '",\n' +
+						'    "action": "annotate-admin"\n' +
+						'  }\n' +
+						']';
+
+					var canEncode720p = true;
+					if((hasSecondStream || onlySecondStream) && metadataFFprobe.streams[0].height < 720 ) {
+						canEncode720p = false;
+					}
+
+					if (isAudioFile)
+					{
 						var processing = '{\n' +
-							'  "workflow": "' + config.opencast_workflow + '"\n' +
+							'  "workflow": "' + config.opencast_workflow_audio + '"\n' +
 							'}';
 					}
-					else{
-						var processing = '{\n' +
-							'  "workflow": "' + config.opencast_workflow + '",\n' +
-							'  "configuration": {\n' +
-							'    "flagQuality720p": "false",\n' +
-							'  }\n' +
-							'}'
+					else
+					{
+						if (canEncode720p)
+						{
+							var processing = '{\n' +
+								'  "workflow": "' + config.opencast_workflow + '"\n' +
+								'}';
+						}
+						else
+						{
+							var processing = '{\n' +
+								'  "workflow": "' + config.opencast_workflow + '",\n' +
+								'  "configuration": {\n' +
+								'    "flagQuality720p": "false",\n' +
+								'  }\n' +
+								'}'
+						}
 					}
-				}
 
-
-				if (hasSecondStream) {
-					var options = {
-						method: "POST",
-						url: config.opencast_events_url,
-						ca: fs.readFileSync(config.opencast_cert),
-						headers:
-							{
-								'cache-control': 'no-cache',
-								'Authorization': 'Basic ' + config.opencast_authentication,
-								'content-type': 'multipart/form-data;'
-							},
-						formData:
-							{
-								presenter:
-									{
-										value: fs.createReadStream('./static/records/'+ uid + '/' + idFileUpload + '/' + idFileUpload + ".webm"),
-										options:
-											{
-												filename: 'metadata/' + idFileUpload + '.webm'
-											}
-									},
-								presentation:
-									{
-										value: fs.createReadStream('./static/records/'+ uid + '/' + idFileUpload + '/' + idFileUpload + "screen.webm"),
-										options:
-											{
-												filename: 'metadata/' + idFileUpload + 'screen.webm'
-											}
-									},
-								processing,
-								metadata,
-								acl
-							}
-					};
-				} else {
-					var options = {
-						method: "POST",
-						url: config.opencast_events_url,
-						ca: fs.readFileSync(config.opencast_cert),
-						headers:
-							{
-								'cache-control': 'no-cache',
-								'Authorization': 'Basic ' + config.opencast_authentication,
-								'content-type': 'multipart/form-data;'
-							},
-						formData:
-							{
-								presenter:
-									{
-										value: fs.createReadStream("./static/records/" + nameFile),
-										options:
-											{
-												filename: 'metadata/' + nameFile
-											}
-									},
-								processing,
-								metadata,
-								acl
-							}
-					};
-				}
-
-				request(options, function (error, response, body) {
-					if (error) {
-						socket.disconnect(); //?? à set ailleur ?
-						throw new Error(error);
+					if (hasSecondStream) {
+						var options = {
+							method: "POST",
+							url: config.opencast_events_url,
+							ca: fs.readFileSync(config.opencast_cert),
+							headers:
+								{
+									'cache-control': 'no-cache',
+									'Authorization': 'Basic ' + config.opencast_authentication,
+									'content-type': 'multipart/form-data;'
+								},
+							formData:
+								{
+									presenter:
+										{
+											value: fs.createReadStream('./static/records/' + uid + '/' + idFileUpload + '/' + idFileUpload + ".webm"),
+											options:
+												{
+													filename: 'metadata/' + idFileUpload + '.webm'
+												}
+										},
+									presentation:
+										{
+											value: fs.createReadStream('./static/records/' + uid + '/' + idFileUpload + '/' + idFileUpload + "screen.webm"),
+											options:
+												{
+													filename: 'metadata/' + idFileUpload + 'screen.webm'
+												}
+										},
+									processing,
+									metadata,
+									acl
+								}
+						};
 					} else {
-					// var obj = JSON.parse(body);
-					// console.log(body);
-						socket.emit('endupload', 1);
+						var options = {
+							method: "POST",
+							url: config.opencast_events_url,
+							ca: fs.readFileSync(config.opencast_cert),
+							headers:
+								{
+									'cache-control': 'no-cache',
+									'Authorization': 'Basic ' + config.opencast_authentication,
+									'content-type': 'multipart/form-data;'
+								},
+							formData:
+								{
+									presenter:
+										{
+											value: fs.createReadStream("./static/records/" + nameFile),
+											options:
+												{
+													filename: 'metadata/' + nameFile
+												}
+										},
+									processing,
+									metadata,
+									acl
+								}
+						};
 					}
-					// socket.disconnect();
-				});
+
+					request(options, function (error, response, body) {
+						if (error)
+							throw new Error(error);
+						else
+							socket.emit('endupload', 1);
+					});
+				}
+				else
+					socket.emit('endupload', 0); // pas nécessaire si on force l'upload
 			});
 		});
+		socket.emit('idRecord', socket.handshake.session.cas_user, socket.handshake.issued);
 	}
-	else {
-		socket.emit('endupload', 0); // pas nécessaire si on force l'upload
-		// socket.disconnect();
-	}
-	socket.emit('idRecord', socket.handshake.session.cas_user, socket.handshake.issued);
 }
 
 /**
@@ -710,11 +730,11 @@ function checkSerieAcl(uid, serieinfo)
  * @param idSerieSelect
  * @returns {Promise<any>}
  */
-function createSerie(uid, mail, idSerieSelect)
+function createSerie(uid, mail, idSerieSelect, mustBeUpload)
 {
 	return new Promise(function (resolve, reject) {
 
-		if(idSerieSelect == 'myfolder') {
+		if(idSerieSelect == 'myfolder' && mustBeUpload) {
 
 			var acl = '[\n' +
 				'  {\n' +
