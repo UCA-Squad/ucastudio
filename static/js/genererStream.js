@@ -41,6 +41,6 @@ function genLive() {
 	xhr.setRequestHeader("cache-control", "no-cache");
 
 	xhr.send(data);
-	document.getElementById("keyStream").innerHTML = courseid;
+	document.getElementById("keyStream").innerHTML = "Clé de stream = "+courseid;
 	document.getElementById("idStream").innerHTML = "OK !";
 }
