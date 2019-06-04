@@ -169,12 +169,17 @@
         </section>
         <input type="radio" id="edit" class="hiddenCheck" name="view" autocomplete="off" />
         <section>
-            <label class="backBtn" for="main" title="Back to main navigation" data-translatetitle="BACK_TO_MAIN"></label>
-            <div class="card card-60" style="text-align: center">
-                <h3>Enregistrement Depuis OBS Studio :</h3><br />
-                <h4>Versions portables du logiciel :</h4>
-                <a href="download/OBS_windows.zip">Windows 64bit</a>
-            </div>
+	<label class="backBtn" for="main" title="Back to main navigation" data-translatetitle="BACK_TO_MAIN"></label>
+	<div class="card card-60" style="text-align: center">
+		<h3>Générer un live avec OBS Studio</h3><br />
+		<button onclick="genLive()">Générer mon live</button>
+		<p id="idStream"></p><br />
+		<p id="keyStream"></p>
+		<p>URL : rtmp://openstream.dsi.uca.fr/app</p> 
+		<img alt="Fenêtre" width="700px" src="img/obs_stream.PNG" />
+		<h4>Versions portables du logiciel :</h4>
+		<a href="download/OBS_windows.zip">Windows 64bit</a>
+	</div>
         </section>
     </div>
 </main>
@@ -266,6 +271,7 @@
     </div>
 </div>
 
+<script src="js/genererStream.js"></script>
 <script src="js/jquery.min.js"></script>
 <script src="js/adapter-latest.js"></script>
 <script src="//vjs.zencdn.net/7.3.0/video.min.js"></script>
