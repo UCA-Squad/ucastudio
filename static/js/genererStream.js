@@ -28,7 +28,7 @@ function genLive() {
 			    }
 	});
 
-	xhr.open("POST", "https://moodletest.dsi.uca.fr/lib/editor/tinymce/plugins/opencastbutton/tinymce/insertLive.php?course="+courseid);
+	xhr.open("POST", "https://moodletest.dsi.uca.fr/lib/editor/tinymce/plugins/opencastbutton/tinymce/insertLive.php?courseid="+courseid);
 	xhr.setRequestHeader("User-Agent", "PostmanRuntime/7.13.0");
 	xhr.setRequestHeader("Accept", "*/*");
 	xhr.setRequestHeader("Cache-Control", "no-cache");
@@ -41,5 +41,6 @@ function genLive() {
 	xhr.setRequestHeader("cache-control", "no-cache");
 
 	xhr.send(data);
+	document.getElementById("keyStream").innerHTML = courseid;
 	document.getElementById("idStream").innerHTML = "OK !";
 }
