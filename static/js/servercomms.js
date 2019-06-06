@@ -57,7 +57,8 @@ function Communications() {
   });
 
   this.socket.on('insidemoodle',function(idSerieToselectTmp) {
-    idSerieToselect = idSerieToselectTmp.split( '=' );
+    idSerieToselectTmp = idSerieToselectTmp.split( '&' );
+    idSerieToselect = idSerieToselectTmp[0].split( '=' );
     if(idSerieToselect[1]){
       $('#listseries option[value="'+idSerieToselect[1]+'"]').attr('selected','selected');
       $('#dropdownlistserie').hide();
