@@ -379,7 +379,7 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 		var request = require("request");
 		var d = new Date();
 		var startDate = d.getFullYear() + '-' + ("0" + (d.getMonth() + 1)).slice(-2) + '-' + ("0" + d.getDate()).slice(-2);
-		var startTime = d.getUTCHours() + ':' + d.getMinutes();
+		var startTime = d.getUTCHours() + ':' + (d.getMinutes()<10?'0':'') + d.getMinutes();
 
 		var idFileUpload = socket.handshake.issued;
 		var uid = socket.handshake.session.cas_user;
@@ -458,7 +458,7 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 
 
 				var js2xmlparser = require("js2xmlparser");
-                var metadataXML  = js2xmlparser.parse("media", metadata);
+                var metadataXML  = js2xmlparser.parse("media", JSON.parse(metadata)[0]);
 				try {
 					fs.writeFileSync('./static/records/'+ uid + '/' + idFileUpload + '/metadata.xml', metadataXML);
 				} catch (err) {
