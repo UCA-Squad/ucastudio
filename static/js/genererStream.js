@@ -28,13 +28,13 @@ function genLive() {
 			    }
 	});
 
-	xhr.open("POST", "https://moodletest.dsi.uca.fr/lib/editor/tinymce/plugins/opencastbutton/tinymce/insertLive.php?courseid="+courseid);
+	xhr.open("POST", "https://ent.uca.fr/moodle/lib/editor/tinymce/plugins/opencastbutton/tinymce/insertLive.php?courseid="+courseid);
 	xhr.setRequestHeader("User-Agent", "PostmanRuntime/7.13.0");
 	xhr.setRequestHeader("Accept", "*/*");
 	xhr.setRequestHeader("Cache-Control", "no-cache");
 	xhr.setRequestHeader("Postman-Token", "643fc522-2791-4d29-be77-a179189985b8,19266315-cc2d-42f2-932e-f98d208e00c1");
-	xhr.setRequestHeader("Host", "moodletest.dsi.uca.fr");
-	xhr.setRequestHeader("cookie", "MoodleSession=985d9d9e62b744c4f28b140a225acbc7");
+	xhr.setRequestHeader("Host", "ent.uca.fr");
+	xhr.setRequestHeader("Cookie", "MoodleSession=giruj0vbh61j1vi2r837lc7ep8; ROUTEMOODLE=.node1");
 	xhr.setRequestHeader("accept-encoding", "gzip, deflate");
 	xhr.setRequestHeader("content-length", "");
 	xhr.setRequestHeader("Connection", "keep-alive");
