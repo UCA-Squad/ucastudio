@@ -226,7 +226,7 @@ input:checked + section {
 }
 
 .bigButton[for=edit]::after {
-  content: 'Créer une vidéo via l\'application OBS';
+  content: 'Générer un live avec l\'application OBS';
 }
 
 .action {
