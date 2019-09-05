@@ -281,6 +281,7 @@ App.prototype = {
 
     deviceMgr.video[vid.getAttribute('data-id')].stream.getTracks().forEach(track => track.stop());
     compositor.removeStream(vid.getAttribute('data-id'));
+    // $('.video.videoDevice.active').removeClass('active');
     deviceMgr.connect(id, 'isSwitch');
   },
   getStreamSource: function(id, isPeer) {
@@ -553,6 +554,9 @@ App.prototype = {
       comms.emit('start', 'onlyvideo');
 
     [...document.querySelectorAll('#recordingList a')].forEach(anchor => anchor.parentNode.removeChild(anchor));
+
+    document.querySelector('#listWebCamAvailable').style.display = 'none';
+
   },
   pauseRecord: function(e) {
     deviceMgr.pauseRecording();
