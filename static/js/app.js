@@ -265,7 +265,7 @@ App.prototype = {
     }
   },
   switchStream: function(e) {
-    let id = e.target.value;
+    let id = e.target.value; //la webcam vers laquelle on veut switch
     let parent = e.target.parentNode;
     while (parent && !parent.querySelector('video')) {
       parent = parent.parentNode;
@@ -274,19 +274,14 @@ App.prototype = {
     if (!parent) {
       return console.log('no vid elements');
     }
-    let vid = parent.querySelector('video');
+    let vid = parent.querySelector('video'); //la video en cours de capture
     if (vid.getAttribute('data-id') === id) {
       return;
     }
 
-    let stream = this.getStreamSource(id, !!e.target.getAttribute('data-peer'));
-    if (!stream) {
-      return console.log('no such stream source for switching');
-    }
-
-    vid.srcObject = stream;
-    vid.setAttribute('data-id', id);
-    parent.querySelector('label[for^=inputSource] > span').textContent = e.target.getAttribute('data-label');
+    deviceMgr.video[vid.getAttribute('data-id')].stream.getTracks().forEach(track => track.stop());
+    compositor.removeStream(vid.getAttribute('data-id'));
+    deviceMgr.connect(id, 'isSwitch');
   },
   getStreamSource: function(id, isPeer) {
     if (isPeer) {

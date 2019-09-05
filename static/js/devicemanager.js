@@ -253,29 +253,64 @@ class Device extends EventEmitter {
 
     return new Promise((resolve, reject) => {
       opts = opts || {};
-      for (var key in opts) {
-        if (this.deviceType === 'desktop') {
-          this.constraints.video[key] = opts[key];
-        }
-        else {
-          this.constraints[this.deviceType][key] = opts[key];
-        }
+
+      if(opts == 'isSwitch')
+      {
+        var audio = document.querySelector('#audiostream');
+        var video = document.querySelector('#video');
+        var constraintsVideo = { deviceId: { exact: this.constraints.video.exact, facingMode: "user"} };
+
+        navigator.mediaDevices.getUserMedia({audio: this.constraints.audio, video: constraintsVideo })
+            .then(stream => {
+
+              this.stream = stream;
+
+              video.srcObject = stream;
+
+              $('.labelWebcam').trigger('click');
+
+              $('#video').attr('data-id', this.constraints.video.exact);
+
+              $('#webcamstream').val(this.constraints.video.exact);
+
+              resolve(stream);
+            })
+            .catch(err => reject(err));
       }
-
-      navigator.mediaDevices.getUserMedia(this.constraints)
-        .then(stream => {
-
-          if (!this.isChrome && this.deviceType === 'desktop') {
-            this.cachedAudioTracks.forEach(track =>
-              stream = new MediaStream([track, ...stream.getVideoTracks(), ...stream.getAudioTracks()])
-            );
+      else
+      {
+        for (var key in opts) {
+          if (this.deviceType === 'desktop') {
+            this.constraints.video[key] = opts[key];
           }
+          else {
+            this.constraints[this.deviceType][key] = opts[key];
+          }
+        }
 
-          this.stream = stream;
+        navigator.mediaDevices.getUserMedia(this.constraints)
+            .then(stream => {
+              if (!this.isChrome && this.deviceType === 'desktop') {
+                this.cachedAudioTracks.forEach(track =>
+                    stream = new MediaStream([track, ...stream.getVideoTracks(), ...stream.getAudioTracks()])
+                );
+              }
 
-          resolve(stream);
-        })
-        .catch(err => reject(err));
+              this.stream = stream;
+
+              resolve(stream);
+
+              navigator.mediaDevices.enumerateDevices().then(devices => {
+                    for (var key in devices) {
+                      if ($('.labelWebcam').find('li[data-id="' + devices[key].deviceId + '"]').length != 0) {
+                        $('.labelWebcam').find('li[data-id="' + devices[key].deviceId + '"]').find('button').attr('data-label', devices[key].label);
+                        $('.labelWebcam').find('li[data-id="' + devices[key].deviceId + '"]').find('button').html(devices[key].label);
+                      }
+                    }
+                  })
+                  .catch(err => { throw err })
+            }).catch(err => reject(err));
+      }
     });
   }
 
