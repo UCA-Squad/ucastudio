@@ -94,13 +94,13 @@ class DeviceManager extends EventEmitter {
       });
   }
 
-  connect(id, opts) {
+  connect(id, opts, idAudio=null) {
     if (id == 'desktop') {
       return this.desktop.connect();
     }
 
     if (this.video.hasOwnProperty(id)) {
-      return this.video[id].connect(opts);
+      return this.video[id].connect(opts, idAudio);
     }
 
     if (this.audio.hasOwnProperty(id)) {
@@ -242,7 +242,7 @@ class Device extends EventEmitter {
     }
   }
 
-  connect(opts) {
+  connect(opts, idAudio) {
 
     if (this.deviceType === 'desktop' && 'getDisplayMedia' in navigator.mediaDevices) {
       return this.connectDisplayMedia(opts);
@@ -254,28 +254,63 @@ class Device extends EventEmitter {
     return new Promise((resolve, reject) => {
       opts = opts || {};
 
-      if(opts == 'isSwitch')
+      if(opts == 'isSwitch' || opts == 'isOnlyChangeMic')
       {
-        var audio = document.querySelector('#audiostream');
+        // var audio = document.querySelector('#audiostream');
+        var audio = document.querySelector('#audio');
         var video = document.querySelector('#video');
-        var constraintsVideo = { deviceId: { exact: this.constraints.video.exact, facingMode: "user"} };
 
-        navigator.mediaDevices.getUserMedia({audio: this.constraints.audio, video: constraintsVideo })
-            .then(stream => {
+        if ( $(".videoDevice").hasClass('active'))
+        {
+          let constraintAudioTest = true;
+          if(idAudio != null)
+            constraintAudioTest = { deviceId: {exact: idAudio} }
 
-              this.stream = stream;
+          navigator.mediaDevices.getUserMedia({audio: constraintAudioTest, video: { deviceId: { exact: this.constraints.video.exact, facingMode: "user"} } })
+              .then(stream => {
 
-              video.srcObject = stream;
+                this.stream = stream;
 
-              $('.labelWebcam').trigger('click');
+                video.srcObject = stream;
 
-              $('#video').attr('data-id', this.constraints.video.exact);
+                if(opts != 'isOnlyChangeMic')
+                  $('.labelWebcam').trigger('click');
 
-              $('#webcamstream').val(this.constraints.video.exact);
+                if(opts == 'isOnlyChangeMic') {
+                  $('.labelAudio').trigger('click');
+                }
 
-              resolve(stream);
-            })
-            .catch(err => reject(err));
+                if(idAudio != null) {
+                  $('#audio').attr('data-id', idAudio);
+                  $('#audiostream').val(this.constraints.video.exact);
+                }
+
+                $('#video').attr('data-id', this.constraints.video.exact);
+                $('#webcamstream').val(this.constraints.video.exact);
+
+                resolve(stream);
+              })
+              .catch(err => reject(err));
+        }
+        else if($(".audioDevice").hasClass('active'))
+        {
+          navigator.mediaDevices.getUserMedia({ audio: { deviceId: { exact: this.constraints.audio.exact } }})
+              .then(stream => {
+
+                this.stream = stream;
+
+                audio.srcObject = stream;
+
+                $('.labelAudio').trigger('click');
+
+                $('#audio').attr('data-id', this.constraints.audio.exact);
+
+                $('#audiostream').val(this.constraints.audio.exact);
+
+                resolve(stream);
+              })
+              .catch(err => reject(err));
+        }
       }
       else
       {
@@ -305,6 +340,10 @@ class Device extends EventEmitter {
                       if ($('.labelWebcam').find('li[data-id="' + devices[key].deviceId + '"]').length != 0) {
                         $('.labelWebcam').find('li[data-id="' + devices[key].deviceId + '"]').find('button').attr('data-label', devices[key].label);
                         $('.labelWebcam').find('li[data-id="' + devices[key].deviceId + '"]').find('button').html(devices[key].label);
+                      }
+                      if ($('.labelAudio').find('li[data-id="' + devices[key].deviceId + '"]').length != 0) {
+                        $('.labelAudio').find('li[data-id="' + devices[key].deviceId + '"]').find('button').attr('data-label', devices[key].label);
+                        $('.labelAudio').find('li[data-id="' + devices[key].deviceId + '"]').find('button').html(devices[key].label);
                       }
                     }
                   })

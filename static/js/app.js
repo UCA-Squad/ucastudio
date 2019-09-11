@@ -264,25 +264,54 @@ App.prototype = {
       }
     }
   },
-  switchStream: function(e) {
+  switchStream: function(e) { //!!!!!!!!!!!!CHECKER BUG AUDIO RESUME (audiostream et audio value sont bien change quand select)
     let id = e.target.value; //la webcam vers laquelle on veut switch
     let parent = e.target.parentNode;
-    while (parent && !parent.querySelector('video')) {
-      parent = parent.parentNode;
-    }
 
-    if (!parent) {
-      return console.log('no vid elements');
-    }
-    let vid = parent.querySelector('video'); //la video en cours de capture
-    if (vid.getAttribute('data-id') === id) {
-      return;
-    }
+    //switch de mic uniquement
+    if(parent.parentNode.parentNode.classList.contains('labelAudio') && !$(".videoDevice").hasClass('active'))
+    {
+      let audio = document.querySelector('audio');
+      if (audio.getAttribute('data-id') === id) {
+        return;
+      }
 
-    deviceMgr.video[vid.getAttribute('data-id')].stream.getTracks().forEach(track => track.stop());
-    compositor.removeStream(vid.getAttribute('data-id'));
-    // $('.video.videoDevice.active').removeClass('active');
-    deviceMgr.connect(id, 'isSwitch');
+      deviceMgr.audio[audio.getAttribute('data-id')].stream.getTracks().forEach(track => track.stop());
+      deviceMgr.connect(id, 'isSwitch');
+    }
+    else //swich de mic ou de video, les deux run
+    {
+      //on vérifie si c'est just un switch de mic
+      var isOnlyChangeMic = false;
+      if(parent.parentNode.parentNode.classList.contains('labelAudio'))
+        isOnlyChangeMic = true;
+
+      while (parent && !parent.querySelector('video')) {
+        parent = parent.parentNode;
+      }
+
+      if (!parent) {
+        return console.log('no vid elements');
+      }
+      let vid = parent.querySelector('#video'); //la video en cours de capture
+      if (vid.getAttribute('data-id') === id){
+        return;
+      }
+
+      //comprend pas comment le disabled :(
+      let audio = document.querySelector('audio');
+      if (audio.getAttribute('data-id') === id) {
+        return;
+      }
+
+      deviceMgr.video[vid.getAttribute('data-id')].stream.getTracks().forEach(track => track.stop());
+      compositor.removeStream(vid.getAttribute('data-id'));
+
+      if(!isOnlyChangeMic)
+        deviceMgr.connect(id, 'isSwitch');
+      else
+        deviceMgr.connect( $('#webcamstream').val(), 'isOnlyChangeMic', id);
+    }
   },
   getStreamSource: function(id, isPeer) {
     if (isPeer) {
@@ -480,6 +509,40 @@ App.prototype = {
       })
 
     inputSources.forEach(input => {
+      input.style.maxHeight = (([...input.querySelectorAll('li')].length + 1) * 2) + 'rem';
+    });
+
+
+    //on ajoute un event click sur le switch de l'audio et on créer la liste
+    let inputSourcesAudio = document.querySelectorAll('.inputSourceAudio ul');
+    Object.keys(details)
+        .filter(key => details[key].deviceType == 'audio')
+        .forEach(key => {
+          if (!inputSourcesAudio[0].querySelector(`li[data-id="${key}"]`)) {
+            let item = utils.createElement('li', {
+              data: {
+                id: key
+              }
+            });
+            let deviceBtn = utils.createElement('button', {
+              text: details[key].info.label,
+              value: key,
+              data: {
+                label: details[key].info.label
+              }
+            });
+
+            item.appendChild(deviceBtn);
+
+            inputSourcesAudio.forEach(input => {
+              let cloned = item.cloneNode(true);
+              input.appendChild(cloned);
+              cloned.addEventListener('click', this.switchStream.bind(this), false);
+            });
+          }
+        })
+
+    inputSourcesAudio.forEach(input => {
       input.style.maxHeight = (([...input.querySelectorAll('li')].length + 1) * 2) + 'rem';
     });
   },
