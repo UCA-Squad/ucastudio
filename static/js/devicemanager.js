@@ -251,6 +251,8 @@ class Device extends EventEmitter {
       return this.connectChromeDesktop(opts);
     }
 
+    $('.audioDevice').removeClass('active');
+
     return new Promise((resolve, reject) => {
       opts = opts || {};
 
@@ -278,6 +280,11 @@ class Device extends EventEmitter {
 
                 if(opts == 'isOnlyChangeMic') {
                   $('.labelAudio').trigger('click');
+                }
+
+                var tracks = stream.getTracks();
+                for(var i = 0; i < tracks.length; i++){
+                  GetDevice(tracks[i].getSettings().deviceId)
                 }
 
                 if(idAudio != null) {
@@ -332,6 +339,11 @@ class Device extends EventEmitter {
               }
 
               this.stream = stream;
+
+              var tracks = stream.getTracks();
+              for(var i = 0; i < tracks.length; i++){
+                GetDevice(tracks[i].getSettings().deviceId)
+              }
 
               resolve(stream);
 
@@ -462,4 +474,31 @@ class Device extends EventEmitter {
   pauseRecording() {
     this.recorder.pause();
   }
+
+}
+
+/**
+ *
+ * @param id
+ * @constructor
+ */
+function GetDevice(id)
+{
+  navigator.mediaDevices.enumerateDevices()
+      .then(function(devices) {
+        devices.forEach(function(device) {
+          if(device.deviceId == id){
+            if(device.kind == 'audioinput'){
+              $('#audiostream').val(device.deviceId);
+              $('#audio').data('id', device.deviceId);
+              let audioListItem = document.querySelector(`#streams li.audioDevice[data-id="${device.deviceId}"]`);
+              if (audioListItem)
+                audioListItem.classList.add('active');
+            }
+          }
+        });
+      })
+      .catch(function(err) {
+        console.log(err.name + ": " + err.message);
+      });
 }
