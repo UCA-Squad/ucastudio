@@ -374,7 +374,7 @@ input[id^=inputSource]:not(:checked) ~ label[for^=inputSource] ul {
   line-height: 2.5rem;
 }
 
-.recording .streamControls label:nth-of-type(1) {
+.recording .streamControls:nth-of-type(1) {
   pointer-events: none !important;
   background: rgba(254,0,1,0.4);
 }
@@ -1539,8 +1539,7 @@ label, button {
 #recordingTime {
   line-height: 4rem; 
   position: absolute;
-  top: 0;
-  right: 2rem;
+  bottom: 3em;
   font-family: monospace;
 }
 
@@ -2051,4 +2050,8 @@ input:focus {
   margin-left: auto;
   margin-right: auto;
   margin-bottom: 20px;
+}
+
+.labelCamSelect, .labelMicSelect{
+  margin-top: 0.95em;
 }

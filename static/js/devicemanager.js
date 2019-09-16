@@ -494,11 +494,34 @@ function GetDevice(id)
               let audioListItem = document.querySelector(`#streams li.audioDevice[data-id="${device.deviceId}"]`);
               if (audioListItem)
                 audioListItem.classList.add('active');
+              $('.labelMicSelect').html(trimLabelDevice(device.label), 'audio');
             }
+            if(device.kind == 'videoinput')
+              $('.labelCamSelect').html(trimLabelDevice(device.label), 'video');
           }
         });
       })
       .catch(function(err) {
         console.log(err.name + ": " + err.message);
       });
+}
+
+/**
+ *
+ * @param deviceLabelTmp
+ * @param type
+ */
+function trimLabelDevice(deviceLabelTmp, type)
+{
+  var length = 50;
+
+  let deviceLabel = type == 'video' ?
+      deviceLabelTmp.replace('Webcam','') :
+      deviceLabelTmp.replace('Microphone','');
+
+  var trimmedString = deviceLabel.length > length ?
+      deviceLabel.substring(0, length - 3) + "..." :
+      deviceLabel;
+
+  return deviceLabel;
 }
