@@ -177,7 +177,7 @@ App.prototype = {
       btn.addEventListener('click', this.chooseResolution.bind(this), false);
     });
 
-    document.getElementById('switchDevice').addEventListener('click',this.chooseResolution.bind(this), false);
+    document.querySelector('label.pull-left.inputSource.labelDesktop').addEventListener('click',this.chooseResolution.bind(this), false);
 
   },
   toggleStream: function(e) {
@@ -229,38 +229,73 @@ App.prototype = {
     }
 
     if (stream.getVideoTracks().length > 0 && mediaContainer && mediaContainer.parentNode.id === 'videoView') {
-      let resolution = stream.getVideoTracks()[0].getSettings().height + 'p';
+
       let videoControls = mediaContainer.querySelector('.streamControls');
-      videoControls.querySelector('label:first-of-type span').textContent = resolution;
 
-      let resolutionOptions = [...videoControls.querySelectorAll('label:first-of-type button')]
-      let doListRes = true;
-      resolutionOptions.some(button => {
-        if (button.value === resolution) {
-          doListRes = false;
-          return;
-        }
-      });
-
-      if (doListRes) {
-        resolutionOptions.some((button, i) => {
-          if (parseInt(resolution) < parseInt(button.value) ||
-              i === resolutionOptions.length - 1) {
-            let resButton = document.createElement('button');
-            button.type = 'button';
-            button.textContent = button.value = resolution;
-
-            if (parseInt(resolution) < parseInt(button.value)) {
-              button.parentNode.insertBefore(resButton, button);
-            }
-            else {
-              button.parentNode.appendChild(resButton);
-            }
-
-            resButton.addEventListener('click', this.chooseResolution.bind(this), false);
+      if(value == 'desktop')
+      {
+        let resolution = stream.getVideoTracks()[0].getSettings().height + 'p';
+        videoControls.querySelector('label:first-of-type span').textContent = resolution;
+        let resolutionOptions = [...videoControls.querySelectorAll('label:first-of-type button')]
+        let doListRes = true;
+        resolutionOptions.some(button => {
+          if (button.value === resolution) {
+            doListRes = false;
             return;
           }
         });
+
+        // if (doListRes) {
+        //   resolutionOptions.some((button, i) => {
+        //     if (parseInt(resolution) < parseInt(button.value) ||
+        //         i === resolutionOptions.length - 1) {
+        //       let resButton = document.createElement('button');
+        //       button.type = 'button';
+        //       button.textContent = button.value = resolution;
+        //
+        //       if (parseInt(resolution) < parseInt(button.value)) {
+        //         button.parentNode.insertBefore(resButton, button);
+        //       }
+        //       else {
+        //         button.parentNode.appendChild(resButton);
+        //       }
+        //
+        //       resButton.addEventListener('click', this.chooseResolution.bind(this), false);
+        //       return;
+        //     }
+        //   });
+        // }
+      }
+      else {
+
+        let resolution = null;
+        switch (stream.getVideoTracks()[0].getSettings().height) {
+          case 240:
+            resolution = 'QVGA (240p,4:3)';
+            break;
+          case 360:
+            resolution = 'nHD (360p,16:9)';
+            break;
+          case 480:
+            resolution = 'VGA (480p,4:3)';
+            break;
+          case 600:
+            resolution = 'SVGA (600p,4:3)';
+            break;
+          case 720:
+            resolution = 'HD (720p,16:9)';
+            break;
+          case 1080:
+            resolution = 'Full HD (1080p, 16:9)';
+            break;
+          case 3840:
+            resolution = '4H (UHD) (3840p, 16:9)';
+            break;
+          default:
+            resolution = 'VGA (480p,4:3)';
+        }
+
+        videoControls.querySelector('label:first-of-type span').textContent = resolution;
       }
     }
   },

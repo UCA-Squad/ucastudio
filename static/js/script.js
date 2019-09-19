@@ -38,6 +38,22 @@ $( document ).ready(function() {
         window.location = window.location.href;
     });
 
+    $(document).on('click','body *',function(event){
+        if(!$(event.target).closest('.streamControls').length) {
+
+            if ($("#listWebCamAvailable").outerHeight(true) > 1)
+                $('.labelWebcam').trigger('click');
+
+            if ($("#listMicAvailable").outerHeight(true) > 1)
+                $('.labelAudio').trigger('click');
+
+            if ($("#listResoWebCam").outerHeight(true) > 1)
+                $('.labelVideoResolution').trigger('click');
+
+            if ($("#listResoDesktop").outerHeight(true) > 1)
+                $('.labelDesktopResolution').trigger('click');
+        }
+    });
 
     videojs('#screenPreview', {
         plugins: {
@@ -87,3 +103,5 @@ $( document ).ready(function() {
         });
     });
 });
+
+

@@ -110,7 +110,7 @@
                         <input type="checkbox" id="desktopResolution" class="hiddenCheck" />
                         <label for="desktopResolution" class="labelDesktopResolution">
                             <span></span>
-                            <ul>
+                            <ul id="listResoDesktop">
                                 <li><button type="button" value="360p">360p</button></li>
                                 <li><button type="button" value="480p">480p</button></li>
                                 <li><button type="button" value="720p">720p</button></li>
@@ -132,7 +132,7 @@
                         <input type="checkbox" id="inputSource3" class="hiddenCheck" />
                         <label for="inputSource3" class="pull-left inputSourceAudio labelAudio">
                             <span id="switchMic">Micro <i  class="fas fa-retweet audioDevice"></i> </span>
-                            <ul></ul>
+                            <ul id="listMicAvailable"></ul>
                         </label>
                         <span class="labelMicSelect pull-left"></span>
                     </div>
@@ -148,11 +148,14 @@
                         <input type="checkbox" id="videoResolution" class="hiddenCheck" />
                         <label for="videoResolution" class="labelVideoResolution">
                             <span></span>
-                            <ul>
-                                <li><button type="button" value="360p">360p</button></li>
-                                <li><button type="button" value="480p">480p</button></li>
-                                <li><button type="button" value="720p">720p</button></li>
-                                <li><button type="button" value="1080p">1080p</button></li>
+                            <ul  id="listResoWebCam">
+                                <li class="qvga"><button type="button" value="qvga">QVGA (240p,4:3)</button></li>
+                                <li class="nhd"><button type="button" value="nhd">nHD (360p,16:9)</button></li>
+                                <li class="vga"><button type="button" value="vga">VGA (480p,4:3)</button></li>
+                                <li class="svga"><button type="button" value="svga">SVGA (600p,4:3)</button></li>
+                                <li class="hd"><button type="button" value="hd">HD (720p,16:9)</button></li>
+                                <li class="fullhd"><button type="button" value="fullhd">Full HD (1080p, 16:9)</button></li>
+                                <li class="ufullhd"><button type="button" value="ufullhd">4H (UHD) (3840p, 16:9)</button></li>
                             </ul>
                         </label>
                         <input type="checkbox" id="inputSource2" class="hiddenCheck" />

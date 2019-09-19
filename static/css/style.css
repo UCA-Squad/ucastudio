@@ -314,13 +314,26 @@ input:checked + section {
 }
 
 .streamControls label {
-  width: 2.5rem;
+  width: 6rem;
   height: 2rem;
   line-height: 2rem;
   display: inline-block;
   vertical-align: top;
   margin: 0.5rem;
   position: relative;
+  background: transparent;
+  transition: background 0.3s;
+  color: white;
+  font-size: 0.8rem;
+  text-align: center;
+  transition: color 0.3s;
+}
+
+.labelMicSelect, .labelCamSelect{
+  line-height: 2rem;
+  display: inline-block;
+  vertical-align: top;
+  margin: 0.5rem;
   background: transparent;
   transition: background 0.3s;
   color: white;
@@ -374,7 +387,7 @@ input[id^=inputSource]:not(:checked) ~ label[for^=inputSource] ul {
   line-height: 2.5rem;
 }
 
-.recording .streamControls:nth-of-type(1) {
+.recording .streamControls label {
   pointer-events: none !important;
   background: rgba(254,0,1,0.4);
 }
@@ -406,7 +419,7 @@ input[id^=inputSource]:not(:checked) ~ label[for^=inputSource] ul {
 }
 
 .streamControls input:nth-of-type(1):checked ~ label:nth-of-type(1) ul {
-  max-height: 6rem;
+  max-height: 10rem;
 }
 
 .streamControls input:nth-of-type(2):checked ~ label:nth-of-type(2) ul {
@@ -414,7 +427,7 @@ input[id^=inputSource]:not(:checked) ~ label[for^=inputSource] ul {
 }
 
 .streamControls label ul li {
-  line-height: 1rem;
+  line-height: 1.3rem;
   display: block;
   overflow: hidden;
   padding: 0 0.5rem;
@@ -434,8 +447,9 @@ input[id^=inputSource]:not(:checked) ~ label[for^=inputSource] ul {
   margin: 0;
 }
 
-.streamControls label:hover {
-  background: white;
+.streamControls label:hover, .labelWebcam:hover, .streamControls label[for^="inputSource"]:hover  {
+  background: white !important;
+  color: black !important;
 }
 
 #advancedUserView:checked ~ .mediadevice.active .streamControls,
@@ -2052,6 +2066,14 @@ input:focus {
   margin-bottom: 20px;
 }
 
-.labelCamSelect, .labelMicSelect{
-  margin-top: 0.95em;
+.seizeneuvieme::before{
+  margin-top: 56.25% !important;
+}
+
+.quartretiers::before{
+  margin-top: 75% !important;
+}
+
+.labelVideoResolution ul li::before{
+  padding-right: 0 !important;
 }
