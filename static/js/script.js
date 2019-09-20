@@ -110,7 +110,7 @@ $( document ).ready(function() {
             $(this).addClass('non-clickable');
             setTimeout(function () {
                 $('.streamControls ul li button').removeClass('non-clickable');
-            }, 1000);
+            }, 2000);
         }
     });
 });
