@@ -102,6 +102,17 @@ $( document ).ready(function() {
             })
         });
     });
+
+    $('.streamControls ul li button').on('click',  function (e) {
+        if($(this).hasClass('non-clickable'))
+            return false;
+        else {
+            $(this).addClass('non-clickable');
+            setTimeout(function () {
+                $('.streamControls ul li button').removeClass('non-clickable');
+            }, 1000);
+        }
+    });
 });
 
 
