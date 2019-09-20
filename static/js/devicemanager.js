@@ -604,16 +604,12 @@ class Device extends EventEmitter {
     navigator.mediaDevices.enumerateDevices()
         .then(function(devices) {
           devices.forEach(function(device) {
-            if(device.deviceId == id){
-              if(device.kind == 'audioinput'){
-                $('#audiostream').val(device.deviceId);
-                let audio = document.querySelector('audio');
-                audio.dataset.id = device.deviceId;
-                $('.labelMicSelect').html(trimLabelDevice(device.label), 'audio');
+              if (device.deviceId == id) {
+                if (device.kind == 'audioinput')
+                  $('.labelMicSelect').html(trimLabelDevice(device.label), 'audio');
+                if (device.kind == 'videoinput')
+                  $('.labelCamSelect').html(trimLabelDevice(device.label), 'video');
               }
-              if(device.kind == 'videoinput')
-                $('.labelCamSelect').html(trimLabelDevice(device.label), 'video');
-            }
           });
         })
         .catch(function(err) {
