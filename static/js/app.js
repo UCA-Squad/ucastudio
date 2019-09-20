@@ -22,7 +22,6 @@ function App() {
   this.addDeviceToggle = document.getElementById('addDevice');
   this.cover = document.getElementById('cover');
 
-  this.deviceList = document.querySelector('#streams .list');
   this.audioCanvas = document.querySelector('#audio ~ canvas');
 
   this.simpleUserView = document.getElementById('simpleUserView');
@@ -190,17 +189,26 @@ App.prototype = {
       document.getElementById('toggleExtensionModal').checked = true;
     }
 
-    deviceMgr.connect(e.target.value)
-      .catch(function(err){
-          console.log(err);
-          if(e.target.value != 'desktop')
-            $('#alertNoWebcam').show();
-      });
+   if(e.target.id == 'audiostream' && !$('.videoDevice').hasClass('active'))
+   {
+     deviceMgr.connect(e.target.value)
+     .catch(function(err){
+       console.log(err);
+       if(e.target.value != 'desktop')
+         $('#alertNoWebcam').show();
+     });
+   }
+   else
+     deviceMgr.connect(e.target.value, 'mustListReso')
+     .catch(function(err){
+       console.log(err);
+       if(e.target.value != 'desktop')
+         $('#alertNoWebcam').show();
+     });
   },
-  displayStream: function(stream, value) {
+  displayStream: function(stream, value, resSelect = null) {
     audAnalyser.resume();
     let mediaContainer = null;
-
     [...document.querySelectorAll(`video[data-id="${value}"],audio[data-id="${value}"]`)]
       .forEach(vid => {
         vid.srcObject = stream;
@@ -215,17 +223,10 @@ App.prototype = {
       });
 
     let audioContainer = this.mediaElements.audio.parentNode;
-    if (stream.getAudioTracks().length > 0 &&
-      (!audioContainer.classList.contains('active') || stream.getVideoTracks().length === 0)) {
+    if (stream.getAudioTracks().length > 0){
+      // (!audioContainer.classList.contains('active') || stream.getVideoTracks().length === 0) ) {
       audioContainer.classList.add('active');
       audAnalyser.analyse(stream);
-
-      let audioDeviceId = this.mediaToggles.audio.value;
-      let audioListItem = document.querySelector(`#streams li.audioDevice[data-id="${audioDeviceId}"]`);
-
-      if (audioListItem) {
-        audioListItem.classList.add('active');
-      }
     }
 
     if (stream.getVideoTracks().length > 0 && mediaContainer && mediaContainer.parentNode.id === 'videoView') {
@@ -235,7 +236,10 @@ App.prototype = {
       if(value == 'desktop')
       {
         let resolution = stream.getVideoTracks()[0].getSettings().height + 'p';
-        videoControls.querySelector('label:first-of-type span').textContent = resolution;
+        if(resSelect != null)
+          videoControls.querySelector('label:first-of-type span').textContent = resSelect + 'p';
+        else
+          videoControls.querySelector('label:first-of-type span').textContent = resolution;
         let resolutionOptions = [...videoControls.querySelectorAll('label:first-of-type button')]
         let doListRes = true;
         resolutionOptions.some(button => {
@@ -287,9 +291,6 @@ App.prototype = {
             break;
           case 1080:
             resolution = 'Full HD (1080p, 16:9)';
-            break;
-          case 3840:
-            resolution = '4H (UHD) (3840p, 16:9)';
             break;
           default:
             resolution = 'VGA (480p,4:3)';
@@ -375,7 +376,7 @@ App.prototype = {
     let streamId = document.getElementById(id).value;
     parent.querySelector('.streamControls input:nth-of-type(1)').checked = false;
     let change = this.changeResolution(streamId, res);
-    change.then(streamObj => this.displayStream(streamObj.stream, streamId === 'desktop' ? 'desktop' : 'video', streamId));
+    change.then(streamObj => this.displayStream(streamObj.stream, streamId === 'desktop' ? 'desktop' : 'video', res));
   },
   changeResolution: function(id, res) {
     if (peers.hasOwnProperty(id)) {
@@ -483,8 +484,6 @@ App.prototype = {
       item.appendChild(mediaElContainer);
       item.appendChild(placeholder);
       item.appendChild(shadow);
-
-      this.deviceList.appendChild(item);
 
       if (!this.mediaElements[devices[key].deviceType].getAttribute('data-id')) {
         this.mediaElements[devices[key].deviceType].setAttribute('data-id', deviceType === 'desktop' ? 'desktop' : key);
@@ -890,7 +889,7 @@ App.prototype = {
     compositor.addStream({id: peerId, stream: peers[peerId].stream});
   },
   removePeer: function(peer) {
-    [...document.querySelectorAll(`.streamControls [data-id="${peer}"], #streams [data-id="${peer}"]`)]
+    [...document.querySelectorAll(`.streamControls [data-id="${peer}"]`)]
       .forEach(el => el.parentNode.removeChild(el));
     [...document.querySelectorAll(`video[data-id="${peer}"], audio[data-id="${peer}"]`)]
       .forEach(mediaEl => mediaEl.srcObject = null);

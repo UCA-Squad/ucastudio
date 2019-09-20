@@ -172,13 +172,6 @@ class Device extends EventEmitter {
         "ratio": "4:3"
       },
       {
-        "id" : "ufullhd",
-        "label": "4K(UHD)",
-        "width": 3840,
-        "height": 2160,
-        "ratio": "16:9"
-      },
-      {
         "id" : "fullhd",
         "label": "1080p(FHD)",
         "width": 1920,
@@ -248,7 +241,7 @@ class Device extends EventEmitter {
     this.deviceType = device.deviceType || (device.kind === 'audioinput' ? 'audio' : 'video');
 
     let _audConstraints = {audio: {exact: device.deviceId}};
-    let _vidConstraints = {audio: true, video: {exact: device.deviceId, facingMode: "user"}};
+    let _vidConstraints = {audio: true, video: {exact: device.deviceId, width: {exact: 640}, height: {exact: 480}, facingMode: "user"}};
     let _desktop = {
       firefox: {
         video: {mediaSource: 'screen', frameRate: {min: 15, ideal: 25, max: 30}}
@@ -312,7 +305,9 @@ class Device extends EventEmitter {
       return this.connectChromeDesktop(opts);
     }
 
-    $('.audioDevice').removeClass('active');
+    // if((opts == 'isSwitch' && $(".videoDevice").hasClass('active')) || opts == 'isOnlyChangeMic') {
+    if($(".videoDevice").hasClass('active'))
+      $('.audioDevice').removeClass('active');
 
     return new Promise((resolve, reject) => {
       opts = opts || {};
@@ -347,6 +342,20 @@ class Device extends EventEmitter {
                 for(var i = 0; i < tracks.length; i++){
                   this.getDevice(tracks[i].getSettings().deviceId)
                 }
+
+                //manque foreac
+                navigator.mediaDevices.enumerateDevices().then(devices => {
+                  for (var key in devices) {
+                    if (this.deviceType == 'video' && devices[key].kind == 'videoinput' && this.constraints.video.exact == devices[key].deviceId) {
+                      let camera = {};
+                      camera.id = devices[key].deviceId;
+                      camera.label = devices[key].label;
+
+                      this.gum(this.candidates[0], camera);
+                    }
+                  }
+                });
+
 
                 if(idAudio != null) {
                   $('#audio').attr('data-id', idAudio);
@@ -391,7 +400,7 @@ class Device extends EventEmitter {
           if (this.deviceType === 'desktop') {
             this.constraints.video[key] = opts[key];
           }
-          else {
+          else if(opts != 'mustListReso') {
             this.constraints[this.deviceType][key] = opts[key];
           }
         }
@@ -423,7 +432,7 @@ class Device extends EventEmitter {
                     $('.labelAudio').find('li[data-id="' + devices[key].deviceId + '"]').find('button').html(devices[key].label);
                   }
 
-                  if(this.deviceType == 'video' && devices[key].kind == 'videoinput' && this.constraints.video.exact ==  devices[key].deviceId) {
+                  if(opts == "mustListReso" && this.deviceType == 'video' && devices[key].kind == 'videoinput' && this.constraints.video.exact ==  devices[key].deviceId) {
                     let camera = {};
                     camera.id = devices[key].deviceId;
                     camera.label = devices[key].label;
@@ -531,7 +540,6 @@ class Device extends EventEmitter {
           .catch((error) => {
             if(candidate.id)
               $('.' + candidate.id).hide();
-
             if (cmpt < this.candidates.length)
               this.gum(this.candidates[cmpt++], device, cmpt);
           });
@@ -547,7 +555,7 @@ class Device extends EventEmitter {
       for(var i = 0; i < this.candidates.length; i++) {
         if(this.candidates[i].id == res) {
 
-          if (res == 'nhd' || res == 'hd' || res == 'fullhd' || res == 'ufullhd')
+          if (res == 'nhd' || res == 'hd' || res == 'fullhd')
             $('.videoDevice').removeClass('quartretiers').addClass('seizeneuvieme');
           else
             $('.videoDevice').removeClass('seizeneuvieme').addClass('quartretiers');
@@ -599,10 +607,8 @@ class Device extends EventEmitter {
             if(device.deviceId == id){
               if(device.kind == 'audioinput'){
                 $('#audiostream').val(device.deviceId);
-                $('#audio').data('id', device.deviceId);
-                let audioListItem = document.querySelector(`#streams li.audioDevice[data-id="${device.deviceId}"]`);
-                if (audioListItem)
-                  audioListItem.classList.add('active');
+                let audio = document.querySelector('audio');
+                audio.dataset.id = device.deviceId;
                 $('.labelMicSelect').html(trimLabelDevice(device.label), 'audio');
               }
               if(device.kind == 'videoinput')
