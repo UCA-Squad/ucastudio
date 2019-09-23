@@ -431,13 +431,12 @@ class Device extends EventEmitter {
         //     this.constraints.audio = {deviceId: {exact: $("#audio").data('id')}}
         //   }
        // }
-          //on doit check si switch reson si c'est le cas on force le device
 
-        // if(opts == "mustListReso")
-        //   navigator.mediaDevices.getUserMedia({audio: true, video: { deviceId: { exact: $('#video').data('id'), facingMode: "user"} } })
-        // else
-        //   navigator.mediaDevices.getUserMedia({audio: true, video: { deviceId: { exact: $('#video').data('id'), facingMode: "user"} } })
-        navigator.mediaDevices.getUserMedia(this.constraints)
+        let constraintTmp = this.constraints;
+        if(opts == "mustListReso")
+          constraintTmp = {audio: true, video: { deviceId: { exact: $('#video').data('id'), width: {exact: 640}, height: {exact: 480}, facingMode: "user"} } };
+
+        navigator.mediaDevices.getUserMedia(constraintTmp)
             .then(stream => {
               if (!this.isChrome && this.deviceType === 'desktop') {
                 this.cachedAudioTracks.forEach(track =>
