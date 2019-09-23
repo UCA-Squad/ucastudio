@@ -373,7 +373,8 @@ class Device extends EventEmitter {
 
                 if(idAudio != null) {
                    // $('#audio').attr('data-id', idAudio);
-                  $('#audiostream').val(this.constraints.video.exact);
+                  // $('#audiostream').val(this.constraints.video.exact);
+                  $('#audiostream').val(idAudio);
                 }
 
                 $('#video').attr('data-id', this.constraints.video.exact);

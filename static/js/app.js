@@ -336,11 +336,11 @@ App.prototype = {
         return;
       }
 
-      //comprend pas comment le disabled :(
-      let audio = document.querySelector('audio');
-      if (audio.getAttribute('data-id') === id) {
-        return;
-      }
+      //comprend pas comment le disabled :( // Doit êter FIXER
+      // let audio = document.querySelector('audio');
+      // if (audio.getAttribute('data-id') === id) {
+      //   return;
+      // }
 
      // vid.srcObject = null;
       deviceMgr.video[vid.getAttribute('data-id')].stream.getTracks().forEach(track => track.stop());
