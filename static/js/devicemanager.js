@@ -309,12 +309,17 @@ class Device extends EventEmitter {
     if($(".videoDevice").hasClass('active'))
       $('.audioDevice').removeClass('active');
 
+    if (this.stream != null) {
+      this.stream.getTracks().forEach((track) => {
+        track.stop();
+      });
+    }
+
     return new Promise((resolve, reject) => {
       opts = opts || {};
 
       if(opts == 'isSwitch' || opts == 'isOnlyChangeMic')
       {
-        // var audio = document.querySelector('#audiostream');
         var audio = document.querySelector('#audio');
         var video = document.querySelector('#video');
 
@@ -323,25 +328,35 @@ class Device extends EventEmitter {
           let constraintAudioTest = true;
           if(idAudio != null)
             constraintAudioTest = { deviceId: {exact: idAudio} }
+          // else
+          //   if($('#audio').data('id') != null)
+          //     constraintAudioTest = {deviceId: {exact: $('#audio').data('id')}}
 
           navigator.mediaDevices.getUserMedia({audio: constraintAudioTest, video: { deviceId: { exact: this.constraints.video.exact, facingMode: "user"} } })
               .then(stream => {
-
-                this.stream = stream;
-
-                video.srcObject = stream;
 
                 if(opts != 'isOnlyChangeMic')
                   $('.labelWebcam').trigger('click');
 
                 if(opts == 'isOnlyChangeMic') {
                   $('.labelAudio').trigger('click');
+
+                  var tracks = stream.getTracks();
+                  for(var i = 0; i < tracks.length; i++){
+                    if(tracks[i].kind == 'audio')
+                      this.getDevice(tracks[i].getSettings().deviceId)
+                  }
+                }
+                else
+                {
+                  var tracks = stream.getTracks();
+                  for(var i = 0; i < tracks.length; i++){
+                    this.getDevice(tracks[i].getSettings().deviceId)
+                  }
                 }
 
-                var tracks = stream.getTracks();
-                for(var i = 0; i < tracks.length; i++){
-                  this.getDevice(tracks[i].getSettings().deviceId)
-                }
+                this.stream = stream;
+                video.srcObject = stream;
 
                 //manque foreac
                 navigator.mediaDevices.enumerateDevices().then(devices => {
@@ -356,9 +371,8 @@ class Device extends EventEmitter {
                   }
                 });
 
-
                 if(idAudio != null) {
-                  $('#audio').attr('data-id', idAudio);
+                   // $('#audio').attr('data-id', idAudio);
                   $('#audiostream').val(this.constraints.video.exact);
                 }
 
@@ -366,8 +380,12 @@ class Device extends EventEmitter {
                 $('#webcamstream').val(this.constraints.video.exact);
 
                 resolve(stream);
+
+                document.querySelector('label.labelVideoResolution:first-of-type span').textContent = 'VGA (480p,4:3)';
+                $('.videoDevice').removeClass('seizeneuvieme').addClass('quartretiers');
+
               })
-              .catch(err => reject(err));
+              .catch(function (e) {console.log(e); });
         }
         else if($(".audioDevice").hasClass('active'))
         {
@@ -405,6 +423,19 @@ class Device extends EventEmitter {
           }
         }
 
+        // let constraintAudioTest = true;
+        //
+        //if(opts != "mustListReso") {
+        //   if ($("#audio").data('id') != "") {
+        //     this.constraints.audio = {deviceId: {exact: $("#audio").data('id')}}
+        //   }
+       // }
+          //on doit check si switch reson si c'est le cas on force le device
+
+        // if(opts == "mustListReso")
+        //   navigator.mediaDevices.getUserMedia({audio: true, video: { deviceId: { exact: $('#video').data('id'), facingMode: "user"} } })
+        // else
+        //   navigator.mediaDevices.getUserMedia({audio: true, video: { deviceId: { exact: $('#video').data('id'), facingMode: "user"} } })
         navigator.mediaDevices.getUserMedia(this.constraints)
             .then(stream => {
               if (!this.isChrome && this.deviceType === 'desktop') {

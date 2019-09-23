@@ -235,6 +235,8 @@ App.prototype = {
 
       if(value == 'desktop')
       {
+        //calcul resolutio
+
         let resolution = stream.getVideoTracks()[0].getSettings().height + 'p';
         if(resSelect != null)
           videoControls.querySelector('label:first-of-type span').textContent = resSelect + 'p';
@@ -340,6 +342,7 @@ App.prototype = {
         return;
       }
 
+     // vid.srcObject = null;
       deviceMgr.video[vid.getAttribute('data-id')].stream.getTracks().forEach(track => track.stop());
       compositor.removeStream(vid.getAttribute('data-id'));
 
@@ -467,17 +470,6 @@ App.prototype = {
       mediaBack.appendChild(compositeItem);
       mediaBack.appendChild(cancelItem);
 
-      let optionsList = utils.createElement('span', {
-                          class: 'options'
-                        });
-
-      let addCompositeBtn = utils.createElement('button', {
-                              text: 'Add to composite',
-                              data: {
-                                action: 'composite'
-                              }
-                            });
-
       mediaFront.appendChild(mediaEl);
       mediaElContainer.appendChild(mediaFront);
       mediaElContainer.appendChild(mediaBack);
@@ -490,25 +482,8 @@ App.prototype = {
       }
     }
   },
-  listPeer: function(id) {
-    if (this.listingPeer.indexOf(id) === -1) {
-      this.listingPeer.push(id);
-      let peerItem = utils.createElement('li', {
-                       class: 'peerDevice connecting',
-                        data: {
-                             id: id
-                        }
-                      });
-
-      this.deviceList.appendChild(peerItem);
-      peerItem.addEventListener('click', this.togglePeerStream.bind(this), false);
-      setTimeout(() => {
-        this.addLoader(peerItem, 'Connecting', {fill: '#eee', fontSize: '1.75rem'});
-      }, 500);
-    }
-  },
   listAsSource: function(details) {
-    let inputSources = document.querySelectorAll('.inputSource ul');
+    let inputSources = document.querySelectorAll('.inputSource.labelWebcam ul');
 
     Object.keys(details)
       .filter(key => details[key].deviceType == 'video')
