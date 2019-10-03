@@ -1,0 +1,24 @@
+@media only screen and (max-width:1300px) {
+	.labelMicSelect, .labelCamSelect {
+	    white-space: nowrap;
+	    overflow: hidden;
+	    text-overflow: ellipsis;
+	 }
+
+	.active.audioDevice .placeholder, .active.audioDevice .shadow {
+		top: calc(50% - -0.7rem);
+	}
+
+	.mediadevice canvas {
+		top: calc(50% - -1rem);
+	}
+
+	.pull-left {
+ 		width: 27%;
+	}
+
+	.placeholder {
+ 	    width: 10rem;
+    	height: 8rem;
+	}
+}

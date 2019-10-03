@@ -1607,6 +1607,11 @@ label, button {
   clear: both;
 }
 
+span.labelMicSelect.pull-Micleft {
+    width: 65%;
+    float: left;
+}
+
 ul {
   margin: 0;
   padding: 0;
