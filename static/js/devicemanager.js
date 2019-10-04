@@ -362,9 +362,10 @@ class Device extends EventEmitter {
                 navigator.mediaDevices.enumerateDevices().then(devices => {
                   for (var key in devices) {
                     if (this.deviceType == 'video' && devices[key].kind == 'videoinput' && this.constraints.video.exact == devices[key].deviceId) {
-                      let camera = {};
-                      camera.id = devices[key].deviceId;
-                      camera.label = devices[key].label;
+                      // var labelWebcam = (devices[key].label.includes(worToExclude) ? devices[key].label.replace(worToExclude, '') : devices[key].label);
+                      // let camera = {};
+                      // camera.id = devices[key].deviceId;
+                      // camera.label = labelWebcam;
 
                       this.gum(this.candidates[0], camera);
                     }
@@ -657,14 +658,14 @@ class Device extends EventEmitter {
 function trimLabelDevice(deviceLabelTmp, type)
 {
   var length = 50;
+  var wordsToExclude = ['Par défaut -', "Microphone", "Webcam"];
 
-  let deviceLabel = type == 'video' ?
-      deviceLabelTmp.replace('Webcam','') :
-      deviceLabelTmp.replace('Microphone','');
+  for(var i = 0; i < wordsToExclude.length; i++)
+    deviceLabelTmp = deviceLabelTmp.replace(wordsToExclude[i], '');
 
-  var trimmedString = deviceLabel.length > length ?
-      deviceLabel.substring(0, length - 3) + "..." :
-      deviceLabel;
+  var trimmedString = deviceLabelTmp.length > length ?
+      deviceLabelTmp.substring(0, length - 3) + "..." :
+      deviceLabelTmp;
 
-  return deviceLabel;
+  return trimmedString;
 }

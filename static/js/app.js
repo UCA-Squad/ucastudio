@@ -420,7 +420,7 @@ App.prototype = {
                    class: `${devices[key].deviceType} ${devices[key].deviceType}Device`,
                    data: {
                         id: key,
-                     title: (devices[key].info.label.split(' '))[0]
+                        title: (devices[key].info.label.split(' '))[0]
                    }
                  });
 
