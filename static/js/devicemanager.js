@@ -363,9 +363,9 @@ class Device extends EventEmitter {
                   for (var key in devices) {
                     if (this.deviceType == 'video' && devices[key].kind == 'videoinput' && this.constraints.video.exact == devices[key].deviceId) {
                       // var labelWebcam = (devices[key].label.includes(worToExclude) ? devices[key].label.replace(worToExclude, '') : devices[key].label);
-                      // let camera = {};
-                      // camera.id = devices[key].deviceId;
-                      // camera.label = labelWebcam;
+                      let camera = {};
+                      camera.id = devices[key].deviceId;
+                      camera.label = devices[key].label;
 
                       this.gum(this.candidates[0], camera);
                     }
