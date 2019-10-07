@@ -2017,7 +2017,6 @@ input:focus {
 
 .production{
   position:relative;
-  top:-2.5em;
 }
 
 #language ul li::before{
@@ -2081,4 +2080,9 @@ input:focus {
 
 .labelVideoResolution ul li::before{
   padding-right: 0 !important;
+}
+
+
+section{
+  overflow: auto;
 }
