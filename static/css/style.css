@@ -2070,7 +2070,7 @@ input:focus {
   width: 300px !important;
 }
 
-#alertNoWebcam{
+#alertNoWebcam, #alertBrowser{
   text-align: center;
   display: none;
   width: 95%;
