@@ -1514,7 +1514,7 @@ label[for=mergestreams]::before {
 }
 
 .recording #startRecord::before {
-  background: #fe0001;
+  /*background: rgba(254,0,1,0.4);*/
 }
 
 .recording #startRecord {
