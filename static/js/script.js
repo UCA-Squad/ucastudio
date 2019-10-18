@@ -1,5 +1,5 @@
 $(".nextBtn").on('click', function (e) {
-    if(!$('#titleUpload').val() || !$('#presenterUpload').val() || !$('#listseries').val()){
+    if(!$('#titleUpload').val() || !$('#presenterUpload').val() || (document.getElementById('uploadMedia').checked && !$('#listseries').val())){
         e.preventDefault();
         $('#alert').removeClass('hiddenCheck');
         setTimeout(function(){$('#alert').addClass('hiddenCheck'); }, 5000);
