@@ -285,8 +285,9 @@ io.on('connection', function(socket){
 					])
 					.outputOption('-r', '25')
 					.outputOption('-ac', '1')
-					.outputOption('-crf', '17')
-					.outputOption('-preset', 'slow')
+					.outputOption('-crf', '23')
+					.outputOption('-preset', 'fast')
+					.outputOption('-thread', '0')
 					.outputOption('-s', width + "x" + height)
 					.output('./static/records/' + uid + '/' + socketissued + '/' + socketissued + 'merged.mp4')
 					.on("error",function(er){
