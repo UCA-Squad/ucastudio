@@ -1,17 +1,18 @@
 {
-  "cas_url" : "",
-  "service_url" : "",
+  "cas_url" : "https://ent.uca.fr/cas",
+  "service_url" : "https://dev.uca.fr",
 
-  "path_cert_key" : "",
-  "path_cert" : "",
+  "path_cert_key" : "cert/dev.uca.fr-key.pem",
+  "path_cert" : "cert/dev.uca.fr.pem",
 
-  "session_secret_key" : "",
+  "session_secret_key" : "NK.]xp]OpH8)X8i",
 
-  "opencast_authentication" : "",
-  "opencast_events_url" : "",
-  "opencast_series_url" : "",
-  "opencast_cert" : "",
-  "opencast_workflow" : "",
-  "opencast_workflow_audio" :  "",
-  "path_ldap_uca": ""
+  "opencast_authentication" : "YWRtaW46b3BlbmNhc3Q=",
+  "opencast_events_url" : "https://opencastadmin.dsi.uca.fr/api/events",
+  "opencast_series_url" : "https://opencastadmin.dsi.uca.fr/api/series",
+  "opencast_cert" : "cert/opencast_dsi_uca_fr.pem",
+  "opencast_workflow" : "schedule-and-upload",
+  "opencast_workflow_audio" : "audio2",
+
+  "path_ldap_uca": "ldaps://ldap.uca.fr:636"
 }

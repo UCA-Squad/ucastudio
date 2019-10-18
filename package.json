@@ -5,13 +5,13 @@
   "dependencies": {
     "connect-cas-uca": "^1.0.3",
     "express": "^4.17.1",
-    "express-session": "^1.16.1",
+    "express-session": "^1.16.2",
     "express-socket.io-session": "^1.3.5",
     "fluent-ffmpeg": "^2.0.1",
     "js2xmlparser": "^4.0.0",
-    "jszip": "^3.2.1",
+    "jszip": "^3.2.2",
     "ldapjs": "^1.0.2",
     "request": "^2.88.0",
-    "socket.io": "^2.2.0"
+    "socket.io": "^2.3.0"
   }
 }

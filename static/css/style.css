@@ -371,7 +371,7 @@ input:checked + section {
   height: 2rem;
   line-height: 2rem;
   text-align: left;
-  padding: 0 0.5rem;
+  padding: 0 1rem;
 }
 
 .streamControls label[for^=inputSource] ul li:before {
@@ -445,6 +445,15 @@ input[id^=inputSource]:not(:checked) ~ label[for^=inputSource] ul {
   color: white;
   font-weight: 300;
   margin: 0;
+}
+
+.streamControls label ul{
+  margin-left: -0.6em;
+  overflow-y: auto;
+}
+
+.labelAudio ul, .labelWebcam ul{
+  max-height: 10em !important;
 }
 
 .streamControls label:hover, .labelWebcam:hover, .streamControls label[for^="inputSource"]:hover  {
@@ -2017,7 +2026,6 @@ input:focus {
 
 .production{
   position:relative;
-  top:-2.5em;
 }
 
 #language ul li::before{
@@ -2081,4 +2089,8 @@ input:focus {
 
 .labelVideoResolution ul li::before{
   padding-right: 0 !important;
+}
+
+section{
+  overflow: auto;
 }
