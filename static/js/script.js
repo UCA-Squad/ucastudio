@@ -24,6 +24,9 @@ $( document ).ready(function() {
     if(!isFirefox && !isChrome)
         $("#alertBrowser").show();
 
+    if(!$('#uploadMedia').prop("checked"))
+        $("#listseries").prop('disabled', 'disabled');
+
     $('#uploadMedia').on('change',  function (e) {
        if(!$(this).prop("checked"))
            $("#listseries").prop('disabled', 'disabled');
