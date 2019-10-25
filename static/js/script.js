@@ -20,7 +20,7 @@ $("#alertNoWebcam > .close").on('click', function () {
 $( document ).ready(function() {
 
     var isFirefox = typeof InstallTrigger !== 'undefined';
-    var isChrome = !!window.chrome && !!window.chrome.webstore;
+    var isChrome = !!window.chrome && (!!window.chrome.webstore || !!window.chrome.runtime);
     if(!isFirefox && !isChrome)
         $("#alertBrowser").show();
 
