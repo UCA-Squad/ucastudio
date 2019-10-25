@@ -24,6 +24,13 @@ $( document ).ready(function() {
     if(!isFirefox && !isChrome)
         $("#alertBrowser").show();
 
+    $('#uploadMedia').on('change',  function (e) {
+       if(!$(this).prop("checked"))
+           $("#listseries").prop('disabled', 'disabled');
+       else
+           $("#listseries").prop('disabled', '');
+    });
+
     $(document).keydown(function (e) {
         var charCode = e.charCode || e.keyCode || e.which;
 
