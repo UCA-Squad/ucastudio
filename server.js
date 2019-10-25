@@ -43,6 +43,7 @@ io.on('connection', function(socket){
 
 	var ffmpeg_process, feedStream=false;
 	var ffmpeg_process2, feedStream2=false;
+	var hasCheckFileIsWrite = false,  hasCheckFileIsWrite2 = false;
 
 	if(typeof socket.handshake.session.cas_user !== 'undefined' ) {
 
@@ -102,6 +103,11 @@ io.on('connection', function(socket){
 				}
 				ffmpeg_process2.stderr.on('data', function (d) {
 					socket.emit('ffmpeg_stderr', '' + d);
+					if(!hasCheckFileIsWrite2)
+						setTimeout(function(){
+							hasCheckFileIsWrite2 = true;
+							checkIsFileIsWrite(socket, './static/records/' + uid + '/' + socketissued + '/', m);
+						}, 5000);
 				});
 				ffmpeg_process2.on('error', function (e) {
 					console.log('child process error' + e);
@@ -122,13 +128,17 @@ io.on('connection', function(socket){
 
 			if(m == 'video-and-desktop' || m == 'onlyvideo') {
 				ffmpeg_process = spawn('ffmpeg', ops);
-
 				feedStream = function (data) {
 					ffmpeg_process.stdin.write(data);
 					//write exception cannot be caught here.
 				}
 				ffmpeg_process.stderr.on('data', function (d) {
 					socket.emit('ffmpeg_stderr', '' + d);
+					if(!hasCheckFileIsWrite)
+						setTimeout(function(){
+							hasCheckFileIsWrite = true;
+							checkIsFileIsWrite(socket, './static/records/' + uid + '/' + socketissued + '/', m);
+						}, 5000);
 				});
 				ffmpeg_process.on('error', function (e) {
 					console.log('child process error' + e);
@@ -808,5 +818,30 @@ function createSerie(uid, mail, idSerieSelect, mustBeUpload)
 		}
 		else
 			resolve(idSerieSelect);
+	});
+}
+
+/**
+ *
+ * @param socket
+ * @param path
+ * @param typeOfRec
+ */
+function checkIsFileIsWrite(socket, path, typeOfRec)
+{
+	var uid = socket.handshake.session.cas_user;
+	var socketissued = socket.handshake.issued;
+
+	fs.readdir('./static/records/' + uid + '/' + socketissued + '/', function (err, files) {
+		if (!files.length) {
+			socket.emit('errorffmpeg');
+			socket.disconnect();
+		}
+		else if(typeOfRec == 'video-and-desktop'){
+			if(!fs.existsSync('./static/records/' + uid + '/' + socketissued + '/' + socketissued + 'screen.webm') || !fs.existsSync('./static/records/' + uid + '/' + socketissued + '/' + socketissued + '.webm')) {
+				socket.emit('errorffmpeg');
+				socket.disconnect();
+			}
+		}
 	});
 }

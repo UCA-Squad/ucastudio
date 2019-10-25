@@ -2049,11 +2049,14 @@ input:focus {
 
 #saveRecordings{
   /*display:none;*/
+  text-align: center;
+  display: block;
 }
 
 #recordingList .videoPreview-dimensions, #recordingList .screenPreview-dimensions{
   width: 300px !important;
   height: 150px !important;
+  margin-bottom: 2em;
 }
 
 .labelVideoResolution ul li::before, .labelDesktopResolution ul li::before, .labelDesktop ul li::before {
@@ -2094,3 +2097,4 @@ input:focus {
 section{
   overflow: auto;
 }
+
