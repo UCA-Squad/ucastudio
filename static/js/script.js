@@ -20,7 +20,6 @@ $("#alertNoWebcam > .close").on('click', function () {
 $( document ).ready(function() {
     if(getParameterByName('courseid') == null) {
         $('#live').hide();
-        console.log($('.bigButton:first-child'));
         $('.bigButton:first-child')[0].style.marginLeft = "38%";
     }
     var isFirefox = typeof InstallTrigger !== 'undefined';
