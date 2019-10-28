@@ -18,7 +18,11 @@ $("#alertNoWebcam > .close").on('click', function () {
 });
 
 $( document ).ready(function() {
-
+    if(getParameterByName('courseid') == null) {
+        $('#live').hide();
+        console.log($('.bigButton:first-child'));
+        $('.bigButton:first-child')[0].style.marginLeft = "38%";
+    }
     var isFirefox = typeof InstallTrigger !== 'undefined';
     var isChrome = !!window.chrome && (!!window.chrome.webstore || !!window.chrome.runtime);
     if(!isFirefox && !isChrome)
@@ -129,6 +133,16 @@ $( document ).ready(function() {
             }, 2000);
         }
     });
+
+    function getParameterByName(name, url) {
+        if (!url) url = window.location.href;
+        name = name.replace(/[\[\]]/g, '\\$&');
+        var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+            results = regex.exec(url);
+        if (!results) return null;
+        if (!results[2]) return '';
+        return decodeURIComponent(results[2].replace(/\+/g, ' '));
+    }
 });
 
 
