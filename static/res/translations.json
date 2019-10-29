@@ -191,6 +191,7 @@
     "PRODUCTION_MEDIA": "Médias",
     "PRODUCTION_EDIT": "Modifier les médias",
     "PRODUCTION_SAVE": "Télécharger une archive de vos médias",
+    "PRODUCTION_SAVE_FUSION": "Télécharger une archive et fusionner vos médias (traitement long...)",
     "PRODUCTION_DISCARD": "Fermer",
     "PRODUCTION_UPLOAD": "Transférer les médias",
     "RAW_FOOTAGE": "Images en vrac",

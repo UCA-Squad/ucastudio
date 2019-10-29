@@ -2047,7 +2047,7 @@ input:focus {
   background: url('/img/onlyaudio.jpg');
 }
 
-#saveRecordings{
+#saveRecordings, #saveRecordingsFusion{
   /*display:none;*/
   text-align: center;
   display: block;
@@ -2098,3 +2098,6 @@ section{
   overflow: auto;
 }
 
+.linkToSave, .linkFusion{
+  display: none;
+}

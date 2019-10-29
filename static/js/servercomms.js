@@ -25,6 +25,11 @@ function Communications() {
         alert('Votre média a bien été tranféré');
     else
         alert('Votre média a bien été traité');
+
+    if ($(".videoDevice").hasClass('active') && $(".desktopDevice").hasClass('active'))
+      $('.linkFusion').show();
+
+    $('.linkToSave').show();
   });
 
   this.socket.on('endzip',function(e, socketissued){

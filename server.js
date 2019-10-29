@@ -247,7 +247,7 @@ io.on('connection', function(socket){
 			console.log('socket.io error:' + e);
 		});
 
-		socket.on('zipfiles', function () {
+		socket.on('zipfiles', function (fusion) {
 			var JSZip = require("jszip");
 			var zip = new JSZip();
 
@@ -276,7 +276,7 @@ io.on('connection', function(socket){
 				console.error(err);
 			}
 
-			if((fs.existsSync(webcamMedia) && fs.existsSync(screenMedia))) //si deux flux alors on merge
+			if(fusion && (fs.existsSync(webcamMedia) && fs.existsSync(screenMedia))) //si deux flux alors on merge
 			{
 
 				var width = 1920;

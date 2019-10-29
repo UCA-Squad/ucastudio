@@ -108,6 +108,7 @@ function App() {
   this.locationEl = document.querySelector('input[name=location]');
 
   this.saveRecordings = document.getElementById('saveRecordings');
+  this.saveRecordingsFusion = document.getElementById('saveRecordingsFusion');
   this.nextBtn = document.getElementById('nextBtn');
 
   this.listingPeer = [];
@@ -168,6 +169,7 @@ App.prototype = {
     document.getElementById('nextBtn').addEventListener('click', this.setDetails.bind(this), false);
 
     this.saveRecordings.addEventListener('click', this.saveMedia.bind(this), false);
+    this.saveRecordingsFusion.addEventListener('click', this.saveMediaFusion.bind(this), false);
     this.nextBtn.addEventListener('click', this.uploadMedia.bind(this), false);
 
     document.getElementById('minimiseStreams').addEventListener('change', this.minimiseStreamView.bind(this), false);
@@ -765,7 +767,13 @@ App.prototype = {
     $('#uploadProgress').html('');
     $('#uploadProgress').show();
     this.addLoader(document.getElementById('uploadProgress'), 'Création en cours...', {fontSize: '1.5rem'});
-    comms.emit('zipfiles');
+    comms.emit('zipfiles', false);
+  },
+  saveMediaFusion: function(e) {
+    $('#uploadProgress').html('');
+    $('#uploadProgress').show();
+    this.addLoader(document.getElementById('uploadProgress'), 'Création en cours...', {fontSize: '1.5rem'});
+    comms.emit('zipfiles', true);
   },
   setDetails: function(e) {
     let keyupEvent = new Event('keyup');
