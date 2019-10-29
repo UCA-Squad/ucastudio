@@ -47,14 +47,14 @@ $( document ).ready(function() {
         //escape
         if(charCode == 27 && document.getElementById('toggleSaveCreationModal').checked) {
             e.preventDefault();
-            $('.modalFooter .button-amber').trigger('click');
+            $('.modalFooter label.button.button-amber').trigger('click');
         }
 
     });
 
-    $('.modalFooter .button-amber').on('click',  function (e) {
+    $('.modalFooter label.button.button-amber').on('click',  function (e) {
         e.preventDefault(); // stops its action
-        window.location = window.location.href;
+        document.location.reload(true);
     });
 
     $(document).on('click','body *',function(event){
