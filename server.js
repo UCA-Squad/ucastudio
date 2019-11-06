@@ -157,7 +157,7 @@ io.on('connection', function(socket){
 			}
 
 			try {
-				fs.writeFileSync(logFileEvents, 'startrec;'+uid+'";'+getDateNow()+';'+socketissued+';'+m+';"'+agent.toString()+'"'+"\n", {flag: 'a'});
+				fs.writeFileSync(logFileEvents, 'startrec;'+uid+';'+getDateNow()+';'+socketissued+';'+m+';"'+agent.toString()+'"'+"\n", {flag: 'a'});
 			} catch (err) {
 				console.error(err)
 			}
@@ -232,7 +232,7 @@ io.on('connection', function(socket){
 
 			// socket.emit('idRecord', socketissued, uid);
 			try {
-				fs.writeFileSync(logFileEvents, 'stoprec;'+uid+';"'+getDateNow()+';'+socketissued+';'+m+';"'+agent.toString()+'"'+"\n", {flag: 'a'});
+				fs.writeFileSync(logFileEvents, 'stoprec;'+uid+';'+getDateNow()+';'+socketissued+';'+m+';"'+agent.toString()+'"'+"\n", {flag: 'a'});
 			} catch (err) {
 				console.error(err)
 			}
@@ -848,7 +848,7 @@ function checkIsFileIsWrite(socket, path, typeOfRec, agent)
 		if (!files.length) {
 			console.log('toto');
 			try {
-				fs.writeFileSync(logFileEvents, 'errorrec;'+uid+'";'+getDateNow()+';'+socketissued+';'+typeOfRec+';"'+agent.toString()+'"'+"\n", {flag: 'a'});
+				fs.writeFileSync(logFileEvents, 'errorrec;'+uid+';'+getDateNow()+';'+socketissued+';'+typeOfRec+';"'+agent.toString()+'"'+"\n", {flag: 'a'});
 			} catch (err) {
 				console.error(err)
 			}
@@ -858,7 +858,7 @@ function checkIsFileIsWrite(socket, path, typeOfRec, agent)
 		else if(typeOfRec == 'video-and-desktop'){
 			if(!fs.existsSync('./static/records/' + uid + '/' + socketissued + '/' + socketissued + 'screen.webm') || !fs.existsSync('./static/records/' + uid + '/' + socketissued + '/' + socketissued + '.webm')) {
 				try {
-					fs.writeFileSync(logFileEvents, 'errorrec;'+uid+'";'+getDateNow()+';'+socketissued+';'+typeOfRec+';"'+agent.toString()+'"'+"\n", {flag: 'a'});
+					fs.writeFileSync(logFileEvents, 'errorrec;'+uid+';'+getDateNow()+';'+socketissued+';'+typeOfRec+';"'+agent.toString()+'"'+"\n", {flag: 'a'});
 				} catch (err) {
 					console.error(err)
 				}
