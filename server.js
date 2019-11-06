@@ -4,7 +4,8 @@ var app = express();
 var spawn = require('child_process').spawn;
 var fluentFFMPEG = require('fluent-ffmpeg');
 var CASAuthentication = require('connect-cas-uca');
-
+var useragent = require('useragent');
+var logFileEvents = './static/records/logFileEvents.csv';
 var fs = require('fs');
 const server = require('https').createServer({
 	key: fs.readFileSync(config.path_cert_key),
@@ -46,7 +47,7 @@ io.on('connection', function(socket){
 	var hasCheckFileIsWrite = false,  hasCheckFileIsWrite2 = false;
 
 	if(typeof socket.handshake.session.cas_user !== 'undefined' ) {
-
+		var agent = useragent.parse(socket.request.headers['user-agent']);
 		var uid = socket.handshake.session.cas_user;
 		var socketissued = socket.handshake.issued;
 
@@ -106,7 +107,7 @@ io.on('connection', function(socket){
 					if(!hasCheckFileIsWrite2)
 						setTimeout(function(){
 							hasCheckFileIsWrite2 = true;
-							checkIsFileIsWrite(socket, './static/records/' + uid + '/' + socketissued + '/', m);
+							checkIsFileIsWrite(socket, './static/records/' + uid + '/' + socketissued + '/', m, agent);
 						}, 5000);
 				});
 				ffmpeg_process2.on('error', function (e) {
@@ -137,7 +138,7 @@ io.on('connection', function(socket){
 					if(!hasCheckFileIsWrite)
 						setTimeout(function(){
 							hasCheckFileIsWrite = true;
-							checkIsFileIsWrite(socket, './static/records/' + uid + '/' + socketissued + '/', m);
+							checkIsFileIsWrite(socket, './static/records/' + uid + '/' + socketissued + '/', m, agent);
 						}, 5000);
 				});
 				ffmpeg_process.on('error', function (e) {
@@ -155,6 +156,11 @@ io.on('connection', function(socket){
 				});
 			}
 
+			try {
+				fs.writeFileSync(logFileEvents, 'startrec;'+uid+'";'+getDateNow()+';'+socketissued+';'+m+';"'+agent.toString()+'"'+"\n", {flag: 'a'});
+			} catch (err) {
+				console.error(err)
+			}
 
 		});
 
@@ -225,6 +231,11 @@ io.on('connection', function(socket){
 			}
 
 			// socket.emit('idRecord', socketissued, uid);
+			try {
+				fs.writeFileSync(logFileEvents, 'stoprec;'+uid+';"'+getDateNow()+';'+socketissued+';'+m+';"'+agent.toString()+'"'+"\n", {flag: 'a'});
+			} catch (err) {
+				console.error(err)
+			}
 		});
 		socket.on('disconnect', function () {
 			feedStream = false,feedStream2 = false;
@@ -826,22 +837,43 @@ function createSerie(uid, mail, idSerieSelect, mustBeUpload)
  * @param socket
  * @param path
  * @param typeOfRec
+ * @param agent
  */
-function checkIsFileIsWrite(socket, path, typeOfRec)
+function checkIsFileIsWrite(socket, path, typeOfRec, agent)
 {
 	var uid = socket.handshake.session.cas_user;
 	var socketissued = socket.handshake.issued;
 
 	fs.readdir('./static/records/' + uid + '/' + socketissued + '/', function (err, files) {
 		if (!files.length) {
+			console.log('toto');
+			try {
+				fs.writeFileSync(logFileEvents, 'errorrec;'+uid+'";'+getDateNow()+';'+socketissued+';'+typeOfRec+';"'+agent.toString()+'"'+"\n", {flag: 'a'});
+			} catch (err) {
+				console.error(err)
+			}
 			socket.emit('errorffmpeg');
 			socket.disconnect();
 		}
 		else if(typeOfRec == 'video-and-desktop'){
 			if(!fs.existsSync('./static/records/' + uid + '/' + socketissued + '/' + socketissued + 'screen.webm') || !fs.existsSync('./static/records/' + uid + '/' + socketissued + '/' + socketissued + '.webm')) {
+				try {
+					fs.writeFileSync(logFileEvents, 'errorrec;'+uid+'";'+getDateNow()+';'+socketissued+';'+typeOfRec+';"'+agent.toString()+'"'+"\n", {flag: 'a'});
+				} catch (err) {
+					console.error(err)
+				}
 				socket.emit('errorffmpeg');
 				socket.disconnect();
 			}
 		}
 	});
+}
+
+/**
+ * @returns {string}
+ */
+function getDateNow() {
+	var dateNowTmp = new Date();
+	var dateNow = dateNowTmp.getDay()+'-'+dateNowTmp.getMonth()+'-'+dateNowTmp.getFullYear()+' '+dateNowTmp.getHours()+':'+dateNowTmp.getMinutes();
+	return dateNow;
 }
