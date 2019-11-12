@@ -18,6 +18,12 @@ $("#alertNoWebcam > .close").on('click', function () {
 });
 
 $( document ).ready(function() {
+
+    $(document).on('click','label.mediadevice.action.audioDevice.active',function(event){
+        if($(event.target).attr('class') == 'streamControls')
+            event.preventDefault();
+    });
+
     if(getParameterByName('courseid') == null) {
         $('#live').hide();
         $('.bigButton:first-child')[0].style.marginLeft = "38%";
