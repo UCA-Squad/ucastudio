@@ -26,6 +26,9 @@ $( document ).ready(function() {
     var isChrome = !!window.chrome && (!!window.chrome.webstore || !!window.chrome.runtime);
     if(!isFirefox && !isChrome)
         $("#alertBrowser").show();
+    else if(!('mediaDevices' in navigator) || !('getUserMedia' in navigator.mediaDevices)){
+        $("#alertBrowser").show();
+    }
 
     if(!$('#uploadMedia').prop("checked"))
         $("#listseries").prop('disabled', 'disabled');
