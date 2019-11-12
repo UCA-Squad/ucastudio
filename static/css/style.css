@@ -89,7 +89,8 @@ body:not(#code) header > a > span:nth-child(2) {
 #chosenLanguage {
   line-height: 3rem;
   height: 3rem;
-  display: inline-block;
+  /*display: inline-block;*/
+  display: none;
 }
 
 #language img {
@@ -2100,4 +2101,8 @@ section{
 
 .linkToSave, .linkFusion{
   display: none;
+}
+
+#language .fa-question-circle{
+  margin-top: 0.25em;
 }
