@@ -566,6 +566,8 @@ class Device extends EventEmitter {
             if(candidate.id)
               $('.' + candidate.id).show();
 
+            stream.getTracks().forEach(track => track.stop());
+
             if (cmpt < this.candidates.length)
               this.gum(this.candidates[cmpt++], device, cmpt);
           })
