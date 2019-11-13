@@ -104,7 +104,8 @@ class DeviceManager extends EventEmitter {
     }
 
     if (this.audio.hasOwnProperty(id)) {
-      return this.audio[id].connect(opts);
+      //new add
+      return this.audio[id].connect(opts, idAudio);
     }
 
     return new Promise((resolve, reject) => reject("no such device"));
@@ -241,7 +242,7 @@ class Device extends EventEmitter {
     this.deviceType = device.deviceType || (device.kind === 'audioinput' ? 'audio' : 'video');
 
     let _audConstraints = {audio: {exact: device.deviceId}};
-    let _vidConstraints = {audio: true, video: {exact: device.deviceId, width: {exact: 640}, height: {exact: 480}} };
+    let _vidConstraints = {audio: true, video: {exact: device.deviceId, width: {exact: 640}, height: {exact: 480}, facingMode: "user"} };
     let _desktop = {
       firefox: {
         video: {mediaSource: 'screen', frameRate: {min: 15, ideal: 25, max: 30}}
@@ -312,11 +313,19 @@ class Device extends EventEmitter {
     if (this.stream != null) {
       this.stream.getTracks().forEach((track) => {
         track.stop();
+        track.enabled = false;
       });
+      this.stream = null;
     }
 
     return new Promise((resolve, reject) => {
       opts = opts || {};
+
+      var videoTmp = document.getElementById("video");
+      var deviceVideoIdTmp = videoTmp.getAttribute('data-id');
+
+      var audioTmp = document.getElementById("audio");
+      var deviceAudioIdTmp = audioTmp.getAttribute('data-id');
 
       if(opts == 'isSwitch' || opts == 'isOnlyChangeMic')
       {
@@ -325,14 +334,20 @@ class Device extends EventEmitter {
 
         if ( $(".videoDevice").hasClass('active'))
         {
-          let constraintAudioTest = true;
+          let constraintAudio = true;
           if(idAudio != null)
-            constraintAudioTest = { deviceId: {exact: idAudio} }
-          // else
-          //   if($('#audio').data('id') != null)
-          //     constraintAudioTest = {deviceId: {exact: $('#audio').data('id')}}
+            constraintAudio = { deviceId: {exact: idAudio} }
+          else if(deviceAudioIdTmp != null) //new add
+            constraintAudio = {deviceId: {exact: deviceAudioIdTmp}}
 
-          navigator.mediaDevices.getUserMedia({audio: constraintAudioTest, video: { deviceId: { exact: this.constraints.video.exact } } })
+          //new add
+          var constraintMedia = {audio: constraintAudio, video: { deviceId: { exact: this.constraints.video.exact, facingMode: "user"} } };
+
+          if(opts == 'isOnlyChangeMic' && deviceVideoIdTmp != null) {
+            constraintMedia = {audio: constraintAudio, video: {deviceId: {exact: deviceVideoIdTmp, facingMode: "user"}}};
+          }
+
+          navigator.mediaDevices.getUserMedia(constraintMedia)
               .then(stream => {
 
                 if(opts != 'isOnlyChangeMic')
@@ -373,13 +388,20 @@ class Device extends EventEmitter {
                 });
 
                 if(idAudio != null) {
-                   // $('#audio').attr('data-id', idAudio);
-                  // $('#audiostream').val(this.constraints.video.exact);
+                  //new add
+                  $('#audio').attr('data-id', idAudio);
                   $('#audiostream').val(idAudio);
                 }
 
-                $('#video').attr('data-id', this.constraints.video.exact);
-                $('#webcamstream').val(this.constraints.video.exact);
+                //new add
+                if(opts == 'isOnlyChangeMic' && deviceVideoIdTmp != null) {
+                  $('#video').attr('data-id', deviceVideoIdTmp);
+                  $('#webcamstream').val(deviceVideoIdTmp);
+                }
+                else {
+                  $('#video').attr('data-id', this.constraints.video.exact);
+                  $('#webcamstream').val(this.constraints.video.exact);
+                }
 
                 resolve(stream);
 
@@ -391,7 +413,13 @@ class Device extends EventEmitter {
         }
         else if($(".audioDevice").hasClass('active'))
         {
-          navigator.mediaDevices.getUserMedia({ audio: { deviceId: { exact: this.constraints.audio.exact } }})
+          //new add
+          if(idAudio != null)
+            var exactAudio = idAudio;
+          else
+            var exactAudio = this.constraints.audio.exact;
+          //new add
+          navigator.mediaDevices.getUserMedia({ audio: { deviceId: { exact: exactAudio } }})
               .then(stream => {
 
                 this.stream = stream;
@@ -405,9 +433,9 @@ class Device extends EventEmitter {
                   this.getDevice(tracks[i].getSettings().deviceId)
                 }
 
-                $('#audio').attr('data-id', this.constraints.audio.exact);
-
-                $('#audiostream').val(this.constraints.audio.exact);
+                //new add
+                $('#audio').attr('data-id', exactAudio);
+                $('#audiostream').val(exactAudio);
 
                 resolve(stream);
               })
@@ -425,19 +453,29 @@ class Device extends EventEmitter {
           }
         }
 
-        // let constraintAudioTest = true;
-        //
-        //if(opts != "mustListReso") {
-        //   if ($("#audio").data('id') != "") {
-        //     this.constraints.audio = {deviceId: {exact: $("#audio").data('id')}}
-        //   }
-       // }
-
-        let constraintTmp = this.constraints;
+        let constraintMedia = this.constraints;
         if(opts == "mustListReso")
-          constraintTmp = {audio: true, video: { deviceId: { exact: $('#video').data('id'), width: {exact: 640}, height: {exact: 480}} } };
+          constraintMedia = {audio: {deviceId: {exact: deviceAudioIdTmp}}, video: { deviceId: { exact: deviceVideoIdTmp, width: {exact: 640}, height: {exact: 480}, facingMode: "user"} } };
+        else{
+          //new add
+          if(this.deviceType == 'video')
+            this.constraints['video'] = { deviceId: { exact: deviceVideoIdTmp, width: {exact: 640}, height: {exact: 480}, facingMode: "user"} };
 
-        navigator.mediaDevices.getUserMedia(constraintTmp)
+          this.constraints['audio'] = {deviceId: {exact: deviceAudioIdTmp}};
+
+          for (var key in opts) {
+            if (this.deviceType === 'desktop') {
+              this.constraints.video[key] = opts[key];
+            }
+            else if(opts != 'mustListReso') {
+              //uniquement switch reso ???,
+              this.constraints[this.deviceType][key] = opts[key];
+            }
+          }
+          constraintMedia = this.constraints;
+        }
+
+        navigator.mediaDevices.getUserMedia(constraintMedia)
             .then(stream => {
               if (!this.isChrome && this.deviceType === 'desktop') {
                 this.cachedAudioTracks.forEach(track =>
