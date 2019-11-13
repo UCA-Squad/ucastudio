@@ -241,7 +241,7 @@ class Device extends EventEmitter {
     this.deviceType = device.deviceType || (device.kind === 'audioinput' ? 'audio' : 'video');
 
     let _audConstraints = {audio: {exact: device.deviceId}};
-    let _vidConstraints = {audio: true, video: {exact: device.deviceId, width: {exact: 640}, height: {exact: 480}, facingMode: "user"}};
+    let _vidConstraints = {audio: true, video: {exact: device.deviceId, width: {exact: 640}, height: {exact: 480}} };
     let _desktop = {
       firefox: {
         video: {mediaSource: 'screen', frameRate: {min: 15, ideal: 25, max: 30}}
@@ -332,7 +332,7 @@ class Device extends EventEmitter {
           //   if($('#audio').data('id') != null)
           //     constraintAudioTest = {deviceId: {exact: $('#audio').data('id')}}
 
-          navigator.mediaDevices.getUserMedia({audio: constraintAudioTest, video: { deviceId: { exact: this.constraints.video.exact, facingMode: "user"} } })
+          navigator.mediaDevices.getUserMedia({audio: constraintAudioTest, video: { deviceId: { exact: this.constraints.video.exact } } })
               .then(stream => {
 
                 if(opts != 'isOnlyChangeMic')
@@ -435,7 +435,7 @@ class Device extends EventEmitter {
 
         let constraintTmp = this.constraints;
         if(opts == "mustListReso")
-          constraintTmp = {audio: true, video: { deviceId: { exact: $('#video').data('id'), width: {exact: 640}, height: {exact: 480}, facingMode: "user"} } };
+          constraintTmp = {audio: true, video: { deviceId: { exact: $('#video').data('id'), width: {exact: 640}, height: {exact: 480}} } };
 
         navigator.mediaDevices.getUserMedia(constraintTmp)
             .then(stream => {
