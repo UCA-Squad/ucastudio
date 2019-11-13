@@ -241,9 +241,14 @@ App.prototype = {
 
         let resolution = stream.getVideoTracks()[0].getSettings().height + 'p';
         if(resSelect != null)
-          videoControls.querySelector('label:first-of-type span').textContent = resSelect + 'p';
+          videoControls.querySelector('label:first-of-type span').textContent = $('#listResoDesktop').find('button[value="'+resSelect+'"]').html();
         else
-          videoControls.querySelector('label:first-of-type span').textContent = resolution;
+        {
+          if($('#listResoDesktop').find('button[value="'+resolution+'"]').length != 0)
+            videoControls.querySelector('label:first-of-type span').textContent =  $('#listResoDesktop').find('button[value="'+resolution+'"]').html();
+          else
+            videoControls.querySelector('label:first-of-type span').textContent = resolution;
+        }
         let resolutionOptions = [...videoControls.querySelectorAll('label:first-of-type button')]
         let doListRes = true;
         resolutionOptions.some(button => {
@@ -317,7 +322,8 @@ App.prototype = {
       }
 
       deviceMgr.audio[audio.getAttribute('data-id')].stream.getTracks().forEach(track => track.stop());
-      deviceMgr.connect(id, 'isSwitch');
+      // deviceMgr.connect(id, 'isSwitch'); //POURQUOI
+      deviceMgr.connect(id, 'isSwitch', id);
     }
     else //swich de mic ou de video, les deux run
     {
@@ -338,15 +344,30 @@ App.prototype = {
         return;
       }
 
-      //comprend pas comment le disabled :( // Doit êter FIXER
-      // let audio = document.querySelector('audio');
-      // if (audio.getAttribute('data-id') === id) {
-      //   return;
-      // }
+      let audio = document.querySelector('audio');
+      if (audio.getAttribute('data-id') === id) {
+            return;
+      }
 
-     // vid.srcObject = null;
-      deviceMgr.video[vid.getAttribute('data-id')].stream.getTracks().forEach(track => track.stop());
-      compositor.removeStream(vid.getAttribute('data-id'));
+        if(deviceMgr.video[vid.getAttribute('data-id')].stream != null) {
+            let vid = document.querySelector('#video'); //la video en cours de capture
+            const tracksVideo = vid.srcObject.getTracks();
+            tracksVideo.forEach(function (track) {
+                track.stop();
+                track.enabled = false;
+            });
+            compositor.removeStream(vid.getAttribute('data-id'));
+        }
+
+        if(deviceMgr.audio[audio.getAttribute('data-id')].stream != null){
+            let audio = document.querySelector('#audio'); //la video en cours de capture
+            const tracksAudio = audio.srcObject.getTracks();
+            tracksAudio.forEach(function (track) {
+                track.stop();
+                track.enabled = false;
+            });
+            // compositor.removeStream(audio.getAttribute('data-id'));
+        }
 
       if(!isOnlyChangeMic)
         deviceMgr.connect(id, 'isSwitch');
