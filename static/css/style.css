@@ -315,7 +315,7 @@ input:checked + section {
 }
 
 .streamControls label {
-  width: 6rem;
+  width: 7rem;
   height: 2rem;
   line-height: 2rem;
   display: inline-block;
@@ -446,6 +446,10 @@ input[id^=inputSource]:not(:checked) ~ label[for^=inputSource] ul {
   color: white;
   font-weight: 300;
   margin: 0;
+}
+
+.labelDesktopResolution ul li button{
+  padding-right:1.5em;
 }
 
 .streamControls label ul{
