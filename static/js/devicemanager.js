@@ -498,11 +498,11 @@ class Device extends EventEmitter {
                 for (var key in devices.filter(device => device.kind  !== 'audiooutput')) {
                   if ($('.labelWebcam').find('li[data-id="' + devices[key].deviceId + '"]').length != 0) {
                     $('.labelWebcam').find('li[data-id="' + devices[key].deviceId + '"]').find('button').attr('data-label', devices[key].label);
-                    $('.labelWebcam').find('li[data-id="' + devices[key].deviceId + '"]').find('button').html(devices[key].label);
+                    $('.labelWebcam').find('li[data-id="' + devices[key].deviceId + '"]').find('button').html(devices[key].label.replace(/\s*\(.{4}:.{4}\)\s*/g, ''));
                   }
                   if ($('.labelAudio').find('li[data-id="' + devices[key].deviceId + '"]').length != 0) {
                     $('.labelAudio').find('li[data-id="' + devices[key].deviceId + '"]').find('button').attr('data-label', devices[key].label);
-                    $('.labelAudio').find('li[data-id="' + devices[key].deviceId + '"]').find('button').html(devices[key].label);
+                    $('.labelAudio').find('li[data-id="' + devices[key].deviceId + '"]').find('button').html(devices[key].label.replace(/\s*\(.{4}:.{4}\)\s*/g, ''));
                   }
 
                   if(opts == "mustListReso" && this.deviceType == 'video' && devices[key].kind == 'videoinput' && this.constraints.video.exact ==  devices[key].deviceId) {
@@ -701,7 +701,7 @@ class Device extends EventEmitter {
 function trimLabelDevice(deviceLabelTmp, type)
 {
   var length = 50;
-  var wordsToExclude = ['Par défaut -', "Microphone", "Webcam"];
+  var wordsToExclude = ['Par défaut -', "Microphone", "Webcam", "LifeCam"];
 
   for(var i = 0; i < wordsToExclude.length; i++)
     deviceLabelTmp = deviceLabelTmp.replace(wordsToExclude[i], '');
@@ -710,5 +710,5 @@ function trimLabelDevice(deviceLabelTmp, type)
       deviceLabelTmp.substring(0, length - 3) + "..." :
       deviceLabelTmp;
 
-  return trimmedString;
+  return trimmedString.replace(/\s*\(.{4}:.{4}\)\s*/g, '');
 }
