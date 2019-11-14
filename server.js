@@ -108,7 +108,7 @@ io.on('connection', function(socket){
 						setTimeout(function(){
 							hasCheckFileIsWrite2 = true;
 							checkIsFileIsWrite(socket, './static/records/' + uid + '/' + socketissued + '/', m, agent);
-						}, 5000);
+						}, 45000);
 				});
 				ffmpeg_process2.on('error', function (e) {
 					console.log('child process error' + e);
@@ -846,7 +846,6 @@ function checkIsFileIsWrite(socket, path, typeOfRec, agent)
 
 	fs.readdir('./static/records/' + uid + '/' + socketissued + '/', function (err, files) {
 		if (!files.length) {
-			console.log('toto');
 			try {
 				fs.writeFileSync(logFileEvents, 'errorrec;'+uid+';'+getDateNow()+';'+socketissued+';'+typeOfRec+';"'+agent.toString()+'"'+"\n", {flag: 'a'});
 			} catch (err) {
