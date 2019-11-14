@@ -679,9 +679,9 @@ App.prototype = {
     // if(document.getElementById('uploadMedia').checked || !$('#dropdownlistserie').is(':visible')) {
       $('#uploadProgress').show();
       if(document.getElementById('uploadMedia').checked)
-        this.addLoader(document.getElementById('uploadProgress'), 'Transfert en cours... Merci de ne pas fermer la fenêtre', {fontSize: '1.5rem'});
+        this.addLoader(document.getElementById('uploadProgress'), 'Transfert en cours...', {fontSize: '1.5rem'});
       else
-        this.addLoader(document.getElementById('uploadProgress'), 'Traitement en cours... Merci de ne pas fermer la fenêtre', {fontSize: '1.5rem'});
+        this.addLoader(document.getElementById('uploadProgress'), 'Traitement en cours...', {fontSize: '1.5rem'});
     // }
 
     document.getElementById('toggleSaveCreationModal').checked = true;
