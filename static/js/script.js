@@ -63,7 +63,7 @@ $( document ).ready(function() {
 
     $('.modalFooter label.button.button-amber').on('click',  function (e) {
         e.preventDefault(); // stops its action
-        document.location.reload(true);
+        location.reload();
     });
 
     $(document).on('click','body *',function(event){
