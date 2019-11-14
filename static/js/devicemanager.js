@@ -491,6 +491,9 @@ class Device extends EventEmitter {
 
               resolve(stream);
 
+              $('#audio').attr('data-id', deviceAudioIdTmp);
+              $('#audiostream').val(deviceAudioIdTmp);
+
               navigator.mediaDevices.enumerateDevices().then(devices => {
                 for (var key in devices) {
                   if ($('.labelWebcam').find('li[data-id="' + devices[key].deviceId + '"]').length != 0) {
