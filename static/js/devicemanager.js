@@ -55,7 +55,7 @@ class DeviceManager extends EventEmitter {
     navigator.mediaDevices.enumerateDevices()
       .then(devices => {
         ['audio', 'video'].forEach(deviceType => {
-          this[deviceType] = devices.filter(device => device.kind === `${deviceType}input`)
+          this[deviceType] = devices.filter(device => device.kind === `${deviceType}input` && device.deviceId !== `communications`)
                                .reduce((result, info) => {
                                  result[info.deviceId] = new Device(info);
                                  result[info.deviceId].on('stream', stream => {
@@ -495,7 +495,7 @@ class Device extends EventEmitter {
               $('#audiostream').val(deviceAudioIdTmp);
 
               navigator.mediaDevices.enumerateDevices().then(devices => {
-                for (var key in devices) {
+                for (var key in devices.filter(device => device.kind  !== 'audiooutput')) {
                   if ($('.labelWebcam').find('li[data-id="' + devices[key].deviceId + '"]').length != 0) {
                     $('.labelWebcam').find('li[data-id="' + devices[key].deviceId + '"]').find('button').attr('data-label', devices[key].label);
                     $('.labelWebcam').find('li[data-id="' + devices[key].deviceId + '"]').find('button').html(devices[key].label);
