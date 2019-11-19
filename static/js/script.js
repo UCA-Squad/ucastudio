@@ -29,7 +29,7 @@ $( document ).ready(function() {
         $('.bigButton:first-child')[0].style.marginLeft = "38%";
     }
     if(getParameterByName('ent') != null) {
-	$('#help')[0].style.color = "#178F96";
+    $('#help').css('color', '#178F96');
 	$('#UCAStudio').hide();
     	document.getElementsByTagName("header")[0].style.backgroundColor= "#FAF8F5";
 	    document.getElementsByTagName("header")[0].style.boxShadow = "none";
