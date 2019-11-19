@@ -873,6 +873,6 @@ function checkIsFileIsWrite(socket, path, typeOfRec, agent)
  */
 function getDateNow() {
 	var dateNowTmp = new Date();
-	var dateNow = dateNowTmp.getDay()+'-'+dateNowTmp.getMonth()+'-'+dateNowTmp.getFullYear()+' ('+dateNowTmp.getTime()+')';
+	var dateNow = dateNowTmp.getDate()+'-'+(dateNowTmp.getMonth()+1)+'-'+dateNowTmp.getFullYear()+' ('+dateNowTmp.getTime()+')';
 	return dateNow;
 }
