@@ -29,8 +29,10 @@ $( document ).ready(function() {
         $('.bigButton:first-child')[0].style.marginLeft = "38%";
     }
     if(getParameterByName('ent') != null) {
-    $('#help').css('color', '#178F96');
-	$('#UCAStudio').hide();
+        $('#help').css('color', '#178F96');
+        document.getElementById('help')[0].style.position = "absolute";
+        document.getElementById('help')[0].style.left = "-2em";
+        $('#UCAStudio').hide();
     	document.getElementsByTagName("header")[0].style.backgroundColor= "#FAF8F5";
 	    document.getElementsByTagName("header")[0].style.boxShadow = "none";
     	document.getElementsByTagName("header")[0].style.position = "absolute";
