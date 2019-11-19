@@ -32,11 +32,11 @@ $( document ).ready(function() {
 	$('#help')[0].style.color = "#178F96";
 	$('#UCAStudio').hide();
     	document.getElementsByTagName("header")[0].style.backgroundColor= "#FAF8F5";
-	document.getElementsByTagName("header")[0].style.boxShadow = "none";
+	    document.getElementsByTagName("header")[0].style.boxShadow = "none";
     	document.getElementsByTagName("header")[0].style.position = "absolute";
     	$('#mainSection')[0].style.paddingTop = "1rem";
     }else {
-	$('#help').style.color = "white";
+	    $('#help').css('color', 'white');
     }
     var isFirefox = typeof InstallTrigger !== 'undefined';
     var isChrome = !!window.chrome && (!!window.chrome.webstore || !!window.chrome.runtime);
