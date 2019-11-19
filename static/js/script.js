@@ -30,8 +30,9 @@ $( document ).ready(function() {
     }
     if(getParameterByName('ent') != null) {
         $('#help').css('color', '#178F96');
-        document.getElementById('help')[0].style.position = "absolute";
-        document.getElementById('help')[0].style.left = "-2em";
+        $('#help').css('position', 'absolute');
+        $('#help').css('left', '-2');
+        $('#help').css('z-index', '10');
         $('#UCAStudio').hide();
     	document.getElementsByTagName("header")[0].style.backgroundColor= "#FAF8F5";
 	    document.getElementsByTagName("header")[0].style.boxShadow = "none";
