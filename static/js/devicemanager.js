@@ -245,17 +245,12 @@ class Device extends EventEmitter {
     let _vidConstraints = {audio: true, video: {exact: device.deviceId, width: {exact: 640}, height: {exact: 480}, facingMode: "user"} };
     let _desktop = {
       firefox: {
-        video: {mediaSource: 'screen', frameRate: {min: 15, ideal: 25, max: 30}}
+        audio: false,
+        video: {width: {ideal: 1280}, height: {ideal: 720}}
       },
       chrome: {
         audio: false,
-        video: { mandatory: {
-                   chromeMediaSource: 'desktop',
-                   chromeMediaSourceId: null,
-                   maxWidth: window.screen.width,
-                   maxHeight: window.screen.height
-                 }
-               }
+        video: {width: {ideal: 1280}, height: {ideal: 720}}
       },
       other: null
     }
@@ -522,11 +517,10 @@ class Device extends EventEmitter {
 
   connectDisplayMedia(opts) {
     return new Promise((resolve, reject) => {
-      var constraints = {};
       if(typeof opts != 'undefined') {
         var constraints = {  video: { width: opts.width, height: opts.height } };
       }
-      return navigator.mediaDevices.getDisplayMedia(constraints)
+      return navigator.mediaDevices.getDisplayMedia(this.constraints)
                .then(stream => {
                  this.stream = stream;
                  this.cachedAudioTracks.forEach(track => this.stream.addTrack(track));
