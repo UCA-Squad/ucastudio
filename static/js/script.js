@@ -48,6 +48,17 @@ $( document ).ready(function() {
     else if(!('mediaDevices' in navigator) || !('getUserMedia' in navigator.mediaDevices) || (window.MediaRecorder == undefined)){
         $("#alertBrowser").show();
     }
+    else{
+        let infoBrowser = getVersionOfBrowser();
+        //on check la version
+        if(isFirefox)
+            if(infoBrowser[1] !== undefined && infoBrowser[1] < 54)
+                $("#alertBrowserVersion").show();
+
+        if(isChrome)
+            if(infoBrowser[1] !== undefined && infoBrowser[1] < 47)
+                $("#alertBrowserVersion").show();
+    }
 
     if(!$('#uploadMedia').prop("checked"))
         $("#listseries").prop('disabled', 'disabled');
@@ -154,16 +165,42 @@ $( document ).ready(function() {
             }, 2000);
         }
     });
-
-    function getParameterByName(name, url) {
-        if (!url) url = window.location.href;
-        name = name.replace(/[\[\]]/g, '\\$&');
-        var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
-            results = regex.exec(url);
-        if (!results) return null;
-        if (!results[2]) return '';
-        return decodeURIComponent(results[2].replace(/\+/g, ' '));
-    }
 });
 
+/**
+ * @param name
+ * @param url
+ * @returns {string|null}
+ */
+function getParameterByName(name, url) {
+    if (!url) url = window.location.href;
+    name = name.replace(/[\[\]]/g, '\\$&');
+    var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, ' '));
+}
+
+/**
+ * @returns {string|*[]}
+ */
+function getVersionOfBrowser()
+{
+    var ua= navigator.userAgent, tem,
+        M= ua.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];
+    if(/trident/i.test(M[1])){
+        tem=  /\brv[ :]+(\d+)/g.exec(ua) || [];
+        return 'IE '+(tem[1] || '');
+    }
+    if(M[1]=== 'Chrome'){
+        tem= ua.match(/\b(OPR|Edge)\/(\d+)/);
+        if(tem!= null) return tem.slice(1).join(' ').replace('OPR', 'Opera');
+    }
+    M= M[2]? [M[1], M[2]]: [navigator.appName, navigator.appVersion, '-?'];
+
+    return M;
+    // if((tem= ua.match(/version\/(\d+)/i))!= null) M.splice(1, 1, tem[1]);
+    // return M.join(' ');
+}
 
