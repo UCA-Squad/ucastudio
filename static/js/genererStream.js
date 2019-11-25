@@ -16,7 +16,7 @@ function genLive() {
 	}
 
 	var courseid = $_GET("courseid");
-
+	var serieid = $_GET("serieid");
 	var data = null;
 
 	var xhr = new XMLHttpRequest();
@@ -28,7 +28,7 @@ function genLive() {
 			    }
 	});
 
-	xhr.open("POST", "https://ent.uca.fr/moodle/lib/editor/tinymce/plugins/opencastbutton/tinymce/insertLive.php?courseid="+courseid);
+	xhr.open("POST", "https://moodletest.dsi.uca.fr/lib/editor/tinymce/plugins/opencastbutton/tinymce/insertLive.php?courseid="+courseid+"&serieid="+serieid);
 	xhr.setRequestHeader("User-Agent", "PostmanRuntime/7.13.0");
 	xhr.setRequestHeader("Accept", "*/*");
 	xhr.setRequestHeader("Cache-Control", "no-cache");
@@ -41,6 +41,6 @@ function genLive() {
 	xhr.setRequestHeader("cache-control", "no-cache");
 
 	xhr.send(data);
-	document.getElementById("keyStream").innerHTML = "Clé de stream = "+courseid;
 	document.getElementById("idStream").innerHTML = "OK !";
+	document.getElementById("email").innerHTML = "Un mail contenant les informations a été envoyé.";
 }

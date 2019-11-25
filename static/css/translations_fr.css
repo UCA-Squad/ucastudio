@@ -3,7 +3,7 @@
 }
 
 [lang=fr] .bigButton[for=edit]::after {
-  content: "Créer une vidéo via l'application OBS";
+  content: "Générer un live avec OBS Studio";
 }
 
 [lang=fr] .extensionRequired label[for=desktopstream]::after {
