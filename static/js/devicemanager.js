@@ -250,13 +250,7 @@ class Device extends EventEmitter {
       },
       chrome: {
         audio: false,
-        video: { mandatory: {
-                   chromeMediaSource: 'desktop',
-                   chromeMediaSourceId: null,
-                   width: {ideal: 1280},
-                   height: {ideal: 720}
-                 }
-               }
+        video: {mediaSource: 'screen', width: {ideal: 1280}, height: {ideal: 720}}
       },
       other: null
     }
