@@ -81,6 +81,9 @@ $( document ).ready(function() {
            $("#listseries").prop('disabled', '');
     });
 
+    if(isChrome) {
+        document.getElementById("pauseRecord").style.top = "-13px";
+    }
     $(document).keydown(function (e) {
         var charCode = e.charCode || e.keyCode || e.which;
 
