@@ -24,6 +24,17 @@ $( document ).ready(function() {
             event.preventDefault();
     });
 
+    //Add by lylblaud
+    $(document).on('click', '#pauseRecord', function(event){
+        if(document.getElementById("pauseRecord").className == "fas fa-pause fa-2x") {
+            document.getElementById("pauseRecord").className = "fas fa-play fa-2x";
+        } else {
+            document.getElementById("pauseRecord").className = "fas fa-pause fa-2x"
+        }
+        
+    });
+
+
     if(getParameterByName('courseid') == null) {
         $('#live').hide();
         $('.bigButton:first-child')[0].style.marginLeft = "38%";
