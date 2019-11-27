@@ -334,6 +334,16 @@ io.on('connection', function(socket){
 			}
 		});
 
+		getLdapInfos(socket.handshake.session.cas_user, function (displayName, mail, clfdstatus) {
+			socket.handshake.session.cn = displayName;
+			socket.handshake.session.mail = mail;
+			if(clfdstatus == 0 || clfdstatus == 1 )
+				socket.handshake.session.isEtudiant = true;
+			else
+				socket.handshake.session.isEtudiant = false;
+			socket.emit('displayName', displayName);
+		});
+
 		getListSeries(socket, function (displayName) {
 			socket.emit('listseries', displayName, uid);
 			if(typeof socket.handshake.headers.referer !== 'undefined' && socket.handshake.headers.referer.indexOf('serieid') > -1)
@@ -342,11 +352,6 @@ io.on('connection', function(socket){
 				if(infos[1])
 					socket.emit('insidemoodle', infos[1]);
 			}
-		});
-		getLdapInfos(socket.handshake.session.cas_user, function (displayName, mail) {
-			socket.handshake.session.cn = displayName;
-			socket.handshake.session.mail = mail;
-			socket.emit('displayName', displayName);
 		});
 	}
 });
@@ -422,7 +427,7 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 			nameFile = uid + '/' + idFileUpload + '/' + idFileUpload + "screen.mp4";
 
 		//on check si l'user à select une serie ou son dossier, si son dossier et exist pas alors on le créer
-		createSerie(uid, socket.handshake.session.mail, usermediainfosToUpload.idSerie, mustBeUpload).then( function (idSerie) {
+		createSerie(uid, socket.handshake.session.mail, usermediainfosToUpload.idSerie, mustBeUpload, socket.handshake.session.isEtudiant).then( function (idSerie) {
 
 			usermediainfosToUpload.idSerie = idSerie;
 
@@ -652,15 +657,17 @@ function getLdapInfos(uid, callback)
 	var opts = {
 		filter: '(uid='+uid+')',
 		scope: 'sub',
-		attributes: ['sn', 'cn', 'displayName', 'mail']
+		attributes: ['sn', 'cn', 'displayName', 'mail', 'CLFDstatus']
 	};
 
 	let displayName = '';
 	let mail = '';
+	let clfdstatus = '';
 	client.search('ou=people, dc=uca,dc=fr', opts, function(err, res) {
 		res.on('searchEntry', function(entry) {
 			displayName = entry.object.displayName;
 			mail = entry.object.mail;
+			clfdstatus = entry.object.CLFDstatus;
 		});
 		res.on('searchReference', function(referral) {
 			console.log('referral: ' + referral.uris.join());
@@ -669,7 +676,7 @@ function getLdapInfos(uid, callback)
 			console.error('error: ' + err.message);
 		});
 		res.on('end', function(result) {
-			callback(displayName, mail);
+			callback(displayName, mail, clfdstatus);
 		});
 	});
 }
@@ -752,7 +759,7 @@ function checkSerieAcl(uid, serieinfo)
  * @param idSerieSelect
  * @returns {Promise<any>}
  */
-function createSerie(uid, mail, idSerieSelect, mustBeUpload)
+function createSerie(uid, mail, idSerieSelect, mustBeUpload, isEtudiant)
 {
 	return new Promise(function (resolve, reject) {
 
@@ -781,6 +788,8 @@ function createSerie(uid, mail, idSerieSelect, mustBeUpload)
 				'  }\n' +
 				']';
 
+			if(isEtudiant)
+				uid = 'etd_'+uid;
 
 			var metadata = '[\n' +
 				'  {\n' +
