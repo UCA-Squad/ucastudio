@@ -22,3 +22,19 @@
     	height: 8rem;
 	}
 }
+
+@media only screen and (max-width:1100px) {
+	.pull-left {
+ 		width: 19%;
+	}
+	.streamControls label[for^=inputSource] {
+ 		max-width: 25%;
+	}
+
+}
+
+@media only screen and (max-width:1018px) {
+	.pull-left {
+ 		display: none;
+	}
+}
