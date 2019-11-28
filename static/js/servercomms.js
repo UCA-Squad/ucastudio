@@ -44,7 +44,7 @@ function Communications() {
 
     if (typeof listSeries !== 'undefined' && listSeries.length > 0) {
       $.each(listSeries, function (index, item) {
-        if(item.title == uid)
+        if(item.title == uid || item.title == 'etd_'+uid)
           html += "<option value='" + item.identifier + "'>Mon dossier</option>";
         else
           html += "<option value='" + item.identifier + "'>" + item.title + "</option>";

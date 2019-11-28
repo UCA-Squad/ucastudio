@@ -63,11 +63,11 @@ $( document ).ready(function() {
         let infoBrowser = getVersionOfBrowser();
         //on check la version
         if(isFirefox)
-            if(infoBrowser[1] !== undefined && infoBrowser[1] < 54)
+            if(infoBrowser[1] !== undefined && infoBrowser[1] < 60)
                 $("#alertBrowserVersion").show();
 
         if(isChrome)
-            if(infoBrowser[1] !== undefined && infoBrowser[1] < 47)
+            if(infoBrowser[1] !== undefined && infoBrowser[1] < 65)
                 $("#alertBrowserVersion").show();
     }
 

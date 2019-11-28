@@ -2098,3 +2098,13 @@ section{
 #language .fa-question-circle{
   margin-top: 0.25em;
 }
+
+
+#listMicAvailable{
+  height: 6em !important;
+  overflow-y: auto;
+}
+
+ul#listMicAvailable li:last-child {
+  margin-bottom: 1em;
+}
