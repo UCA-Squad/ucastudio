@@ -2101,7 +2101,7 @@ section{
 
 
 #listMicAvailable{
-  height: 6em !important;
+  height: 10em !important;
   overflow-y: auto;
 }
 
