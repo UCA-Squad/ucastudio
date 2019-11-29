@@ -14,6 +14,10 @@ function Communications() {
     location.reload();
   });
 
+  this.socket.on('moodle',function(url){
+    $('#moodle').val(url);
+  });
+
   this.socket.on('fatal',function(e){
     alert("Un problème est survenu sur cette page web, elle va donc être rechargée");
     location.reload();

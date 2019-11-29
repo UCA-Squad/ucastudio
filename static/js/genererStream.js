@@ -1,5 +1,4 @@
 function genLive() {
-
 	function $_GET(param) {
 			var vars = {};
 			window.location.href.replace( location.hash, '' ).replace( 
@@ -27,8 +26,9 @@ function genLive() {
 			      console.log(this.responseText);
 			    }
 	});
-
-	xhr.open("POST", "https://moodletest.dsi.uca.fr/lib/editor/tinymce/plugins/opencastbutton/tinymce/insertLive.php?courseid="+courseid+"&serieid="+serieid);
+	var moodle = $('#moodle').val();
+	console.log(moodle);
+	xhr.open("POST", moodle+"insertLive.php?courseid="+courseid+"&serieid="+serieid);
 	xhr.setRequestHeader("User-Agent", "PostmanRuntime/7.13.0");
 	xhr.setRequestHeader("Accept", "*/*");
 	xhr.setRequestHeader("Cache-Control", "no-cache");

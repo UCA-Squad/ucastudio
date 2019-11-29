@@ -42,6 +42,7 @@ app.use(express.static(__dirname + "/static/"));
 
 io.on('connection', function(socket){
 
+	socket.emit('moodle', config.moodle); 
 	var ffmpeg_process, feedStream=false;
 	var ffmpeg_process2, feedStream2=false;
 	var hasCheckFileIsWrite = false,  hasCheckFileIsWrite2 = false;
