@@ -246,11 +246,11 @@ class Device extends EventEmitter {
     let _desktop = {
       firefox: {
         audio: false,
-        video: {mediaSource: 'screen', width: {ideal: 1280}, height: {ideal: 720}}
+        video: { width: {ideal: 1280}, height: {ideal: 720}}
       },
       chrome: {
         audio: false,
-        video: {mediaSource: 'screen', width: {ideal: 1280}, height: {ideal: 720}}
+        video: { width: {ideal: 1280}, height: {ideal: 720}}
       },
       other: null
     }
