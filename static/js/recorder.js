@@ -9,7 +9,7 @@ class Recorder extends EventEmitter {
                     'video/webm;codecs="vp9.0,opus"',
                     'video/webm;codecs="avc1"',
                     'video/x-matroska;codecs="avc1"',
-                    'video/webm;codecs="vp8,opus"'
+                    'video/webm'
                   ].filter(codec => MediaRecorder.isTypeSupported(codec));
 
     let _audioCodecs = [

@@ -311,21 +311,6 @@ App.prototype = {
   },
   switchStream: function(e) { //!!!!!!!!!!!!CHECKER BUG AUDIO RESUME (audiostream et audio value sont bien change quand select)
 
-    // console.log('switch');
-    // if($("#gumRunning").length != 0)
-    // {
-    //   setTimeout(function(){
-    //     if($("#gumRunning").length != 0)
-    //     {
-    //
-    //       $('.labelWebcam').trigger('click');
-    //       return;
-    //     }
-    //
-    //     //do what you need here
-    //   }, 2000);
-    // }
-
     let id = e.target.value; //la webcam vers laquelle on veut switch
     let parent = e.target.parentNode;
 
