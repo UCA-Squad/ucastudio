@@ -598,6 +598,11 @@ class Device extends EventEmitter {
       }
     };
 
+    if(cmpt == 1)
+      $('main').append('<input type="hidden" id="gumRunning" />')
+    else if(cmpt >= this.candidates.length)
+      $('#gumRunning').remove();
+
     setTimeout(() => {
       navigator.mediaDevices.getUserMedia(constraints)
           .then(stream => {

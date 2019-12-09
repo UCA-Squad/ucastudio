@@ -311,6 +311,9 @@ App.prototype = {
   },
   switchStream: function(e) { //!!!!!!!!!!!!CHECKER BUG AUDIO RESUME (audiostream et audio value sont bien change quand select)
 
+    if($('#gumRunning').length != 0)
+        return;
+
     let id = e.target.value; //la webcam vers laquelle on veut switch
     let parent = e.target.parentNode;
 
