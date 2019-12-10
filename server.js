@@ -109,7 +109,7 @@ io.on('connection', function(socket){
 						setTimeout(function(){
 							hasCheckFileIsWrite2 = true;
 							checkIsFileIsWrite(socket, './static/records/' + uid + '/' + socketissued + '/', m, agent);
-						}, 45000);
+						}, 30000);
 				});
 				ffmpeg_process2.on('error', function (e) {
 					console.log('child process error' + e);
