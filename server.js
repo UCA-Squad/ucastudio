@@ -555,6 +555,8 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 						{
 							var processing = '{\n' +
 								'  "workflow": "' + config.opencast_workflow + '"\n' +
+								'    "flagQuality480p": "true",\n' +
+								'    "flagQuality720p": "true",\n' +
 								'}';
 						}
 						else
@@ -562,6 +564,7 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 							var processing = '{\n' +
 								'  "workflow": "' + config.opencast_workflow + '",\n' +
 								'  "configuration": {\n' +
+								'    "flagQuality480p": "true",\n' +
 								'    "flagQuality720p": "false",\n' +
 								'  }\n' +
 								'}'
