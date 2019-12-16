@@ -666,7 +666,7 @@ App.prototype = {
     this.isPaused = !this.isPaused;
   },
   stopRecord: function(e) {
-    if (!this.isRecording) {
+    if (!this.isRecording || this.timeEl.textContent < '00:00:03.000') {
       return;
     }
 
