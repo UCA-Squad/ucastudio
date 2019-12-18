@@ -26,7 +26,7 @@ function Communications() {
   this.socket.on('endupload',function(e){
     $('#uploadProgress').hide();
     if(e == 1)
-        alert('Votre média a bien été tranféré');
+        alert('Votre média a bien été transféré');
     else
         alert('Votre média a bien été traité');
 
