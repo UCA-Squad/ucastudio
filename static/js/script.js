@@ -20,7 +20,7 @@ $("#alertNoWebcam > .close").on('click', function () {
 $( document ).ready(function() {
 
     $(document).on('click','label.mediadevice.action.audioDevice.active',function(event){
-        if($(event.target).attr('class') == 'streamControls')
+        if($(event.target).attr('class') == 'streamControls' || $(event.target).attr('class') == 'mediadevice action audioDevice active')
             event.preventDefault();
     });
 
