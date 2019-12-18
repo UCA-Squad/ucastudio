@@ -183,6 +183,9 @@ App.prototype = {
   },
   toggleStream: function(e) {
 
+    if(this.isRecording)
+      return;
+
     if (!e.target.checked) {
       return;
     }
