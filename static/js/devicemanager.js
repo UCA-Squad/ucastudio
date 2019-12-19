@@ -654,12 +654,17 @@ class Device extends EventEmitter {
         throw new Error("Can't record as stream is not active");
       }
 
-      this.recorder = new Recorder(this.stream, this.deviceType);
-      this.recorder.on('record.complete', media => {
-        this.emit('record.complete', media);
-        this.recorder = null;
-      });
-      this.recorder.start(500);
+      if(this.stream.active != false)
+      {
+        this.recorder = new Recorder(this.stream, this.deviceType);
+        this.recorder.on('record.complete', media => {
+          this.emit('record.complete', media);
+          this.recorder = null;
+        });
+        
+        this.recorder.start(500);
+      }
+
     }
     else {
       this.recorder.resume();
