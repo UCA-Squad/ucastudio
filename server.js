@@ -5,7 +5,7 @@ var spawn = require('child_process').spawn;
 var fluentFFMPEG = require('fluent-ffmpeg');
 var CASAuthentication = require('connect-cas-uca');
 var useragent = require('useragent');
-var logFileEvents = './static/records/logFileEvents.csv';
+var logFileEvents = './static/records/ucastudio/logFileEvents.csv';
 var fs = require('fs');
 const server = require('https').createServer({
 	key: fs.readFileSync(config.path_cert_key),
@@ -54,14 +54,14 @@ io.on('connection', function(socket){
 
 		try {
 			//on check si l'user est co via cas, et on créer un folder si existe pas
-			fs.existsSync('./static/records/' + uid) || fs.mkdirSync('./static/records/' + uid);
+			fs.existsSync('./static/records/ucastudio/' + uid) || fs.mkdirSync('./static/records/ucastudio/' + uid);
 		} catch(err) {
 			console.error(err)
 		}
 
 		socket.on('start', function (m) {
 
-			fs.mkdirSync('./static/records/' + uid + '/'+socketissued+'/');
+			fs.mkdirSync('./static/records/ucastudio/' + uid + '/'+socketissued+'/');
 
 			if (ffmpeg_process || feedStream || ffmpeg_process2 || feedStream2) {
 				socket.emit('fatal', 'stream already started.');
@@ -73,7 +73,7 @@ io.on('connection', function(socket){
 				'-use_wallclock_as_timestamps', '1',
 				'-async', '1',
 				'-b:a', '192k', '-strict', '-2',
-				'./static/records/' + uid + '/' + socketissued + '/' + socketissued + '.webm'
+				'./static/records/ucastudio/' + uid + '/' + socketissued + '/' + socketissued + '.webm'
 			];
 
 			if(m == 'video-and-desktop') {
@@ -82,7 +82,7 @@ io.on('connection', function(socket){
 					'-c:v', 'copy', '-preset', 'fast',
 					'-an',
 					'-use_wallclock_as_timestamps', '1',
-					'./static/records/' + uid + '/' + socketissued + '/' + socketissued + 'screen.webm'
+					'./static/records/ucastudio/' + uid + '/' + socketissued + '/' + socketissued + 'screen.webm'
 				];
 			}
 			else
@@ -93,7 +93,7 @@ io.on('connection', function(socket){
 					'-use_wallclock_as_timestamps', '1',
 					'-async', '1',
 					'-b:a', '192k', '-strict', '-2',
-					'./static/records/' + uid + '/' + socketissued + '/' + socketissued + 'screen.webm'
+					'./static/records/ucastudio/' + uid + '/' + socketissued + '/' + socketissued + 'screen.webm'
 				];
 			}
 
@@ -108,7 +108,7 @@ io.on('connection', function(socket){
 					if(!hasCheckFileIsWrite2)
 						setTimeout(function(){
 							hasCheckFileIsWrite2 = true;
-							checkIsFileIsWrite(socket, './static/records/' + uid + '/' + socketissued + '/', m, agent);
+							checkIsFileIsWrite(socket, './static/records/ucastudio/' + uid + '/' + socketissued + '/', m, agent);
 						}, 180000);
 				});
 				ffmpeg_process2.on('error', function (e) {
@@ -139,7 +139,7 @@ io.on('connection', function(socket){
 					if(!hasCheckFileIsWrite)
 						setTimeout(function(){
 							hasCheckFileIsWrite = true;
-							checkIsFileIsWrite(socket, './static/records/' + uid + '/' + socketissued + '/', m, agent);
+							checkIsFileIsWrite(socket, './static/records/ucastudio/' + uid + '/' + socketissued + '/', m, agent);
 						}, 180000);
 				});
 				ffmpeg_process.on('error', function (e) {
@@ -263,9 +263,9 @@ io.on('connection', function(socket){
 			var JSZip = require("jszip");
 			var zip = new JSZip();
 
-			const webcamMedia = './static/records/' + uid + '/' + socketissued + '/' + socketissued + '.webm';
-			const screenMedia = './static/records/' + uid + '/' + socketissued + '/' + socketissued + 'screen.webm';
-			const metadataXML = './static/records/' + uid + '/' + socketissued + '/metadata.xml';
+			const webcamMedia = './static/records/ucastudio/' + uid + '/' + socketissued + '/' + socketissued + '.webm';
+			const screenMedia = './static/records/ucastudio/' + uid + '/' + socketissued + '/' + socketissued + 'screen.webm';
+			const metadataXML = './static/records/ucastudio/' + uid + '/' + socketissued + '/metadata.xml';
 
 			try {
 				if (fs.existsSync(webcamMedia))
@@ -311,16 +311,16 @@ io.on('connection', function(socket){
 					.outputOption('-preset', 'fast')
 					.outputOption('-threads', '0')
 					.outputOption('-s', width + "x" + height)
-					.output('./static/records/' + uid + '/' + socketissued + '/' + socketissued + 'merged.mp4')
+					.output('./static/records/ucastudio/' + uid + '/' + socketissued + '/' + socketissued + 'merged.mp4')
 					.on("error",function(er){
 						console.log("error occured: "+er.message);
 					})
 					.on("end",function(){
-						zip.file(socketissued + 'merged.mp4', fs.createReadStream('./static/records/' + uid + '/' + socketissued + '/' + socketissued + 'merged.mp4'));
+						zip.file(socketissued + 'merged.mp4', fs.createReadStream('./static/records/ucastudio/' + uid + '/' + socketissued + '/' + socketissued + 'merged.mp4'));
 						zip.generateNodeStream({type:'nodebuffer',streamFiles:true})
-							.pipe(fs.createWriteStream('./static/records/' + uid + '/' + socketissued + '/' + socketissued+'.zip'))
+							.pipe(fs.createWriteStream('./static/records/ucastudio/' + uid + '/' + socketissued + '/' + socketissued+'.zip'))
 							.on('finish', function () {
-								socket.emit('endzip', fs.readFileSync('./static/records/' + uid + '/' + socketissued + '/' + socketissued+'.zip'), socketissued);
+								socket.emit('endzip', fs.readFileSync('./static/records/ucastudio/' + uid + '/' + socketissued + '/' + socketissued+'.zip'), socketissued);
 							});
 					})
 					.run();
@@ -328,9 +328,9 @@ io.on('connection', function(socket){
 			else
 			{
 				zip.generateNodeStream({type:'nodebuffer',streamFiles:true})
-					.pipe(fs.createWriteStream('./static/records/' + uid + '/' + socketissued + '/' + socketissued+'.zip'))
+					.pipe(fs.createWriteStream('./static/records/ucastudio/' + uid + '/' + socketissued + '/' + socketissued+'.zip'))
 					.on('finish', function () {
-						socket.emit('endzip', fs.readFileSync('./static/records/' + uid + '/' + socketissued + '/' + socketissued+'.zip'), socketissued);
+						socket.emit('endzip', fs.readFileSync('./static/records/ucastudio/' + uid + '/' + socketissued + '/' + socketissued+'.zip'), socketissued);
 					});
 			}
 		});
@@ -384,8 +384,8 @@ function encodeAudioToMp4(socket)
     var ops = [
         '-y', '-loop', '1', '-t', '1',
         '-i', './static/img/onlyaudio_ffmpeg.jpg',
-        '-i', './static/records/' + uid + '/' + socketissued + '/' + socketissued + 'screen.webm',
-		'./static/records/' + uid + '/' + socketissued + '/' + socketissued + 'screen.mp4'
+        '-i', './static/records/ucastudio/' + uid + '/' + socketissued + '/' + socketissued + 'screen.webm',
+		'./static/records/ucastudio/' + uid + '/' + socketissued + '/' + socketissued + 'screen.mp4'
     ];
 
     ffmpeg_process = spawn('ffmpeg', ops);
@@ -434,9 +434,9 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 
 			var pathMediaToFFprobe;
 			if(hasSecondStream || onlySecondStream)
-				pathMediaToFFprobe = './static/records/'+ uid + '/' + idFileUpload + '/' + idFileUpload + "screen.webm";
+				pathMediaToFFprobe = './static/records/ucastudio/'+ uid + '/' + idFileUpload + '/' + idFileUpload + "screen.webm";
 			else
-				pathMediaToFFprobe = './static/records/'+nameFile;
+				pathMediaToFFprobe = './static/records/ucastudio/'+nameFile;
 
 			//on récup la duration du média
 			var duration = '00:00:00';
@@ -488,7 +488,7 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 				var js2xmlparser = require("js2xmlparser");
                 var metadataXML  = js2xmlparser.parse("media", JSON.parse(metadata)[0]);
 				try {
-					fs.writeFileSync('./static/records/'+ uid + '/' + idFileUpload + '/metadata.xml', metadataXML);
+					fs.writeFileSync('./static/records/ucastudio/'+ uid + '/' + idFileUpload + '/metadata.xml', metadataXML);
 				} catch (err) {
 					console.error(err)
 				}
@@ -586,7 +586,7 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 								{
 									presenter:
 										{
-											value: fs.createReadStream('./static/records/' + uid + '/' + idFileUpload + '/' + idFileUpload + ".webm"),
+											value: fs.createReadStream('./static/records/ucastudio/' + uid + '/' + idFileUpload + '/' + idFileUpload + ".webm"),
 											options:
 												{
 													filename: 'metadata/' + idFileUpload + '.webm'
@@ -594,7 +594,7 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 										},
 									presentation:
 										{
-											value: fs.createReadStream('./static/records/' + uid + '/' + idFileUpload + '/' + idFileUpload + "screen.webm"),
+											value: fs.createReadStream('./static/records/ucastudio/' + uid + '/' + idFileUpload + '/' + idFileUpload + "screen.webm"),
 											options:
 												{
 													filename: 'metadata/' + idFileUpload + 'screen.webm'
@@ -620,7 +620,7 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 								{
 									presenter:
 										{
-											value: fs.createReadStream("./static/records/" + nameFile),
+											value: fs.createReadStream("./static/records/ucastudio/" + nameFile),
 											options:
 												{
 													filename: 'metadata/' + nameFile
@@ -857,7 +857,7 @@ function checkIsFileIsWrite(socket, path, typeOfRec, agent)
 	var uid = socket.handshake.session.cas_user;
 	var socketissued = socket.handshake.issued;
 
-	fs.readdir('./static/records/' + uid + '/' + socketissued + '/', function (err, files) {
+	fs.readdir('./static/records/ucastudio/' + uid + '/' + socketissued + '/', function (err, files) {
 		if (!files.length) {
 			try {
 				fs.writeFileSync(logFileEvents, 'errorrec;'+uid+';'+getDateNow()+';'+socketissued+';'+typeOfRec+';"'+agent.toString()+'"'+"\n", {flag: 'a'});
@@ -868,7 +868,7 @@ function checkIsFileIsWrite(socket, path, typeOfRec, agent)
 			socket.disconnect();
 		}
 		else if(typeOfRec == 'video-and-desktop'){
-			if(!fs.existsSync('./static/records/' + uid + '/' + socketissued + '/' + socketissued + 'screen.webm') || !fs.existsSync('./static/records/' + uid + '/' + socketissued + '/' + socketissued + '.webm')) {
+			if(!fs.existsSync('./static/records/ucastudio/' + uid + '/' + socketissued + '/' + socketissued + 'screen.webm') || !fs.existsSync('./static/records/ucastudio/' + uid + '/' + socketissued + '/' + socketissued + '.webm')) {
 				try {
 					fs.writeFileSync(logFileEvents, 'errorrec;'+uid+';'+getDateNow()+';'+socketissued+';'+typeOfRec+';"'+agent.toString()+'"'+"\n", {flag: 'a'});
 				} catch (err) {
