@@ -80,21 +80,21 @@ function Communications() {
 
     if ($(".videoDevice").hasClass('active') && $(".desktopDevice").hasClass('active')) {
         videojs("#videoPreview").src([
-          {type: "video/webm", src: "./records/" + uid + '/' + idRecord + '/' + idRecord + ".webm"}
+          {type: "video/webm", src: "./records/ucastudio/" + uid + '/' + idRecord + '/' + idRecord + ".webm"}
         ]);
 
         videojs("#screenPreview").src([
-          {type: "video/webm", src: "./records/" + uid + '/' + idRecord + '/' + idRecord + "screen.webm"}
+          {type: "video/webm", src: "./records/ucastudio/" + uid + '/' + idRecord + '/' + idRecord + "screen.webm"}
         ]);
     }
     else if($(".videoDevice").hasClass('active')) {
         videojs("#videoPreview").src([
-          { type: "video/webm", src: "./records/"+ uid + '/' + idRecord + '/' +idRecord+".webm" }
+          { type: "video/webm", src: "./records/ucastudio/"+ uid + '/' + idRecord + '/' +idRecord+".webm" }
         ]);
     }
     else{
       videojs("#screenPreview").src([
-        {type: "video/webm", src: "./records/" + uid + '/' + idRecord + '/' + idRecord + "screen.webm"}
+        {type: "video/webm", src: "./records/ucastudio/" + uid + '/' + idRecord + '/' + idRecord + "screen.webm"}
       ]);
     }
   });
