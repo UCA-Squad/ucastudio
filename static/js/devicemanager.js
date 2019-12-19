@@ -661,8 +661,8 @@ class Device extends EventEmitter {
           this.emit('record.complete', media);
           this.recorder = null;
         });
-        
-        this.recorder.start(500);
+        this.recorder.start();
+        // this.recorder.start(500);
       }
 
     }
