@@ -203,13 +203,18 @@ App.prototype = {
          $('#alertNoWebcam').show();
      });
    }
-   else
+   else {
+
+     if(deviceMgr.audio[audio.getAttribute('data-id')].stream)
+       deviceMgr.audio[audio.getAttribute('data-id')].stream.getTracks().forEach(track => track.stop());
+
      deviceMgr.connect(e.target.value, 'mustListReso')
-     .catch(function(err){
-       console.log(err);
-       if(e.target.value != 'desktop')
-         $('#alertNoWebcam').show();
-     });
+         .catch(function (err) {
+           console.log(err);
+           if (e.target.value != 'desktop')
+             $('#alertNoWebcam').show();
+         });
+   }
   },
   displayStream: function(stream, value, resSelect = null) {
     audAnalyser.resume();
