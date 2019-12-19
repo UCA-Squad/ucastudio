@@ -254,6 +254,7 @@ io.on('connection', function(socket){
 				} catch (e) {
 					console.warn('killing ffmpeg2 process attempt failed...');
 				}
+			cas.destroy_session;
 		});
 		socket.on('error', function (e) {
 			console.log('socket.io error:' + e);
