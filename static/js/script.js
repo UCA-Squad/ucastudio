@@ -42,7 +42,7 @@ $( document ).ready(function() {
     if(getParameterByName('ent') != null) {
         $('#help').css('color', '#178F96');
         $('#help').css('position', 'absolute');
-        $('#help').css('left', '-3em important!');
+        $('#help').css('left', '-3em !important');
         $('#help').css('z-index', '10');
         $('#UCAStudio').hide();
     	document.getElementsByTagName("header")[0].style.backgroundColor= "#FAF8F5";
