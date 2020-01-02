@@ -36,6 +36,7 @@ io.use(sharedsession(session));
 
 app.get( '/', cas.bounce );
 app.get( '/index.html', cas.bounce );
+app.get( '/logout', cas.logout );
 
 app.use(express.static(__dirname + "/static/"));
 
