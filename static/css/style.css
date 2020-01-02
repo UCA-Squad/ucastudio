@@ -2027,6 +2027,11 @@ input:focus {
   position:relative;
 }
 
+.production .card.card-60{
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
 #language ul li::before{
   content: none;
 }
@@ -2113,4 +2118,8 @@ section{
 
 ul#listMicAvailable li:last-child {
   margin-bottom: 1em;
+}
+
+#help{
+  margin-right: 2rem;
 }
