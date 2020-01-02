@@ -315,7 +315,8 @@ input:checked + section {
 }
 
 .streamControls label {
-  width: 7rem;
+  /*width: 7rem;*/
+  padding-right: 5px;
   height: 2rem;
   line-height: 2rem;
   display: inline-block;
