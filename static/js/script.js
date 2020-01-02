@@ -43,7 +43,7 @@ $( document ).ready(function() {
         $('#help').css('color', '#178F96');
         $('#help').css('position', 'absolute');
         $('#help').css('left', '-2rem', '!important');
-        $('#nextBtn').css('right', '-3rem', '!important');
+        $('#nextBtn').css('right', '3rem', '!important');
         $('#help').css('z-index', '10');
         $('#UCAStudio').hide();
     	document.getElementsByTagName("header")[0].style.backgroundColor= "#FAF8F5";
