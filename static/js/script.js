@@ -42,13 +42,15 @@ $( document ).ready(function() {
     if(getParameterByName('ent') != null) {
         $('#help').css('color', '#178F96');
         $('#help').css('position', 'absolute');
-        $('#help').css('left', '-3em !important');
+        $('#help').css('left', '-3em');
+        $('#help').css('left', '-3em', '!important');
         $('#help').css('z-index', '10');
         $('#UCAStudio').hide();
     	document.getElementsByTagName("header")[0].style.backgroundColor= "#FAF8F5";
 	    document.getElementsByTagName("header")[0].style.boxShadow = "none";
     	document.getElementsByTagName("header")[0].style.position = "absolute";
     }else {
+        $('#help').css('left', '-3em', '!important');
 	    $('#help').css('color', 'white');
     }
     var isFirefox = typeof InstallTrigger !== 'undefined';
