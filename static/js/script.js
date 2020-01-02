@@ -50,7 +50,6 @@ $( document ).ready(function() {
 	    document.getElementsByTagName("header")[0].style.boxShadow = "none";
     	document.getElementsByTagName("header")[0].style.position = "absolute";
     }else {
-        $('#help').css('left', '-3em', '!important');
 	    $('#help').css('color', 'white');
     }
     var isFirefox = typeof InstallTrigger !== 'undefined';
