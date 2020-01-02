@@ -2029,7 +2029,7 @@ input:focus {
 
 .production .card.card-60{
   margin-bottom: 0;
-  /*padding-bottom: 0;*/
+  padding-bottom: 5px;
 }
 
 #language ul li::before{
