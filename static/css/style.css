@@ -149,6 +149,10 @@ main {
   overflow: hidden;
 }
 
+#mainSection{
+  padding-top: 1rem;
+}
+
 #code main {
   overflow-x: hidden;
 }

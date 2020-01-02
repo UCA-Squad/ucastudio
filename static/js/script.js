@@ -42,13 +42,12 @@ $( document ).ready(function() {
     if(getParameterByName('ent') != null) {
         $('#help').css('color', '#178F96');
         $('#help').css('position', 'absolute');
-        $('#help').css('left', '-2em');
+        $('#help').css('left', '-3em');
         $('#help').css('z-index', '10');
         $('#UCAStudio').hide();
     	document.getElementsByTagName("header")[0].style.backgroundColor= "#FAF8F5";
 	    document.getElementsByTagName("header")[0].style.boxShadow = "none";
     	document.getElementsByTagName("header")[0].style.position = "absolute";
-    	$('#mainSection')[0].style.paddingTop = "1rem";
     }else {
 	    $('#help').css('color', 'white');
     }
