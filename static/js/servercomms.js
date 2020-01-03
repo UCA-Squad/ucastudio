@@ -18,6 +18,13 @@ function Communications() {
     $('#moodle').val(url);
   });
 
+ this.socket.on('connexionSpeed',function(speed){
+     if(speed.mbps != '' && speed.mbps != 0  && speed.mbps != null  ){
+       $('.speedNetwork').show();
+       $('.speedNetwork').prepend(speed.mbps+'Mb/s');
+     }
+  });
+
   this.socket.on('fatal',function(e){
     alert("Un problème est survenu sur cette page web, elle va donc être rechargée");
     location.reload();
