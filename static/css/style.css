@@ -1571,7 +1571,7 @@ label, button {
 }
 
 .recording #recordingTime::before {
-  content: 'Enregistrememnt';
+  content: 'Enregistrement';
   font-style: italic;
   color: #fe0001;
 }
