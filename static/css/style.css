@@ -2106,7 +2106,7 @@ section{
   display: none;
 }
 
-#language .fa-question-circle{
+#language .fa-question-circle,#language .fa-sign-out-alt {
   margin-top: 0.25em;
 }
 
@@ -2122,4 +2122,11 @@ ul#listMicAvailable li:last-child {
 
 #help{
   margin-right: 1rem;
+  text-decoration: none;
+}
+
+.logout{
+  margin-right: 1rem;
+  text-decoration: none;
+  color: white !important;
 }

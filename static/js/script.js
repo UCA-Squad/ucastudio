@@ -45,6 +45,7 @@ $( document ).ready(function() {
         $('#help').css('left', '-3rem', '!important');
         $('#help').css('z-index', '10');
         $('#UCAStudio').hide();
+        $('.logout').hide();
     	document.getElementsByTagName("header")[0].style.backgroundColor= "#FAF8F5";
 	    document.getElementsByTagName("header")[0].style.boxShadow = "none";
     	document.getElementsByTagName("header")[0].style.position = "absolute";
