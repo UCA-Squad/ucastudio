@@ -7,8 +7,7 @@ var CASAuthentication = require('connect-cas-uca');
 var useragent = require('useragent');
 var logFileEvents = './static/records/ucastudio/logFileEvents.csv';
 var fs = require('fs');
-const NetworkSpeed = require('network-speed');
-const testNetworkSpeed = new NetworkSpeed();
+
 const server = require('https').createServer({
 	key: fs.readFileSync(config.path_cert_key),
 	cert: fs.readFileSync(config.path_cert)
@@ -359,7 +358,6 @@ io.on('connection', function(socket){
 			}
 		});
 	}
-	getNetworkUploadSpeed(socket);
 });
 
 io.on('error',function(e){
@@ -376,20 +374,6 @@ process.on('uncaughtException', function(err) {
     console.log(err)
     // Note: after client disconnect, the subprocess will cause an Error EPIPE, which can only be caught this way.
 });
-
-
-async function getNetworkUploadSpeed(socket) {
-	const options = {
-		hostname: 'www.google.com',
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json',
-		},
-	};
-	const fileSizeInBytes = 2000000;
-	const speed = await testNetworkSpeed.checkUploadSpeed(options, fileSizeInBytes);
-	socket.emit('connexionSpeed', speed);
-}
 
 /**
  * Réencode les fichiers audio en mp4 pour ingest opencast
