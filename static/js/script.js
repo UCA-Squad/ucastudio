@@ -52,6 +52,10 @@ $( document ).ready(function() {
     }else {
 	    $('#help').css('color', 'white');
     }
+
+    if(getParameterByName('courseid') == null && getParameterByName('ent') == null)
+        $('.logout').show();
+
     var isFirefox = typeof InstallTrigger !== 'undefined';
     var isChrome = !!window.chrome && (!!window.chrome.webstore || !!window.chrome.runtime);
     if(!isFirefox && !isChrome)

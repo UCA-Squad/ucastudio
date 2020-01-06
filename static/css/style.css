@@ -2129,4 +2129,5 @@ ul#listMicAvailable li:last-child {
   margin-right: 1rem;
   text-decoration: none;
   color: white !important;
+  display: none;
 }
