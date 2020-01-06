@@ -2131,3 +2131,10 @@ ul#listMicAvailable li:last-child {
   color: white !important;
   display: none;
 }
+
+.checkWifi{
+  border: none;
+  position: absolute;
+  right: 1em;
+  width: 15em;
+}
