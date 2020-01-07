@@ -635,7 +635,7 @@ App.prototype = {
     let numStreams = Object.keys(deviceMgr.devices)
                        .map(key => deviceMgr.devices[key].stream)
                        .filter(stream => stream).length;
-    if (numStreams === 0) {
+    if (numStreams === 0 || this.isRecording == true) {
       return;
     }
 
