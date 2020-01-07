@@ -27,7 +27,7 @@
             <img alt="Français" src="res/flags/fra.png" />
         </label>
         <ul></ul>
-        <a><iframe src="https://mediasmanager.dsi.uca.fr/test" class="checkWifi"></iframe></a>
+        <a><iframe src="https://mediasmanager.dsi.uca.fr/checkSpeedNtwk" class="checkWifi"></iframe></a>
         <a class="speedNetwork" style="color: white;display: none">
             <i class="fas fa-wifi fa-2x" style="margin-right: 1rem"></i>
         </a>
@@ -201,11 +201,9 @@
                 </label>
             </div>
             <div id="recordingControls">
-                <span id="recordingTime"></span>
-                <button class="fas fa-pause fa-2x" id="pauseRecord" title="Mettre l'enregistrement en pause" data-translatetitle="PAUSE_RECORDING">
-                </button>
+                <button class="fas fa-pause fa-2x" id="pauseRecord" title="Mettre l'enregistrement en pause" data-translatetitle="PAUSE_RECORDING"></button>
                 <button id="startRecord" title="Démarrer l'enregistrement" data-translatetitle="START_RECORDING"></button>
-                <button id="stopRecord" title="Arrêter l'enregistrement" data-translatetitle="STOP_RECORDING"></button>
+                <span id="recordingTime"></span>
             </div>
         </section>
         <input type="radio" id="edit" class="hiddenCheck" name="view" autocomplete="off" />

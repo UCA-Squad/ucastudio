@@ -29,7 +29,7 @@ function App() {
 
   this.recordButton = document.getElementById('startRecord');
   this.pauseButton = document.getElementById('pauseRecord');
-  this.stopButton = document.getElementById('stopRecord');
+  this.stopButton = document.getElementById('startRecord');
 
   this.timeEl = document.getElementById('recordingTime');
   this.recTime = [];
@@ -201,6 +201,8 @@ App.prototype = {
        console.log(err);
        if(e.target.value != 'desktop')
          $('#alertNoWebcam').show();
+     }).then(function () {
+       $("#startRecord").addClass('canRecord');
      });
    }
    else {
@@ -213,6 +215,8 @@ App.prototype = {
            console.log(err);
            if (e.target.value != 'desktop')
              $('#alertNoWebcam').show();
+         }).then(function () {
+           $("#startRecord").addClass('canRecord');
          });
    }
   },
@@ -645,6 +649,9 @@ App.prototype = {
       }
     }
 
+    $('#startRecord').addClass('recording');
+    $('#pauseRecord').show();
+
     if ($(".videoDevice").hasClass('active') && $(".desktopDevice").hasClass('active'))
       comms.emit('start', 'video-and-desktop');
 
@@ -686,6 +693,9 @@ App.prototype = {
       peers[peer].stopRecording();
     }
 
+    $('#pauseRecord').hide();
+    $('#recordingTime').hide()
+    $('#startRecord').removeClass('recording');
 
     //on check si on a select l'upload ou qu'on est dans moodle
     // if(document.getElementById('uploadMedia').checked || !$('#dropdownlistserie').is(':visible')) {
@@ -730,7 +740,9 @@ App.prototype = {
 
     let timeslices = this.recTime.reduce((collect, current, i) => collect += current * (i % 2 ? -1 : 1), 0);
     let duration = timestamp - timeslices;
-    let timeArr = [duration / 3600000 >> 0, (duration / 60000 >> 0) % 60, ((duration / 1000.0) % 60).toFixed(3)]
+    // let timeArr = [duration / 3600000 >> 0, (duration / 60000 >> 0) % 60, ((duration / 1000.0) % 60).toFixed(3)]
+    //                 .map((unit, i) => (unit < 10 ? '0' : '') + unit);
+    let timeArr = [duration / 3600000 >> 0, (duration / 60000 >> 0) % 60, ((duration / 1000.0) % 60).toFixed(0)]
                     .map((unit, i) => (unit < 10 ? '0' : '') + unit);
     this.timeEl.textContent = timeArr.join(':');
   },
