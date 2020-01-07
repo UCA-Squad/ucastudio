@@ -1512,6 +1512,30 @@ label[for=mergestreams]::before {
   outline: none;
 }
 
+/* Safari */
+@-webkit-keyframes spin {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.cantRecord{
+  border: 16px solid #f3f3f3 !important;
+  border-radius: 50% !important;
+  border-top: 16px solid grey !important;
+  -webkit-animation: spin 2s linear infinite; /* Safari */
+  animation: spin 2s linear infinite !important;
+}
+
+.cantRecord::before{
+  display: none;
+}
+
+
 #startRecord::before {
   position: absolute;
   width: 3rem;

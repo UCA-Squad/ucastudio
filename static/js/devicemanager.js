@@ -598,10 +598,18 @@ class Device extends EventEmitter {
       }
     };
 
-    if(cmpt == 1)
+    if(cmpt == 1) {
+      //durant le check de reso, on desactive la possiblite de lancer un rec
+      $('#startRecord').addClass('cantRecord');
+      document.getElementById("startRecord").disabled = true;
       $('main').append('<input type="hidden" id="gumRunning" />')
-    else if(cmpt >= this.candidates.length)
+    }
+    else if(cmpt >= this.candidates.length) {
+      $('#startRecord').removeClass('cantRecord');
+      $('#startRecord').addClass('canRecord');
+      document.getElementById("startRecord").disabled = false;
       $('#gumRunning').remove();
+    }
 
     setTimeout(() => {
       navigator.mediaDevices.getUserMedia(constraints)
