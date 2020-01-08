@@ -481,7 +481,7 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 					'      {\n' +
 					'        "id": "location",\n' +
 					'        "value": "' + location + '"\n' +
-					'      }\n' +
+					'      },\n' +
 					'      {\n' +
 					'        "id": "source",\n' +
 					'        "value": "UCAStudio"\n' +
