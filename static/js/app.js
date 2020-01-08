@@ -202,7 +202,8 @@ App.prototype = {
        if(e.target.value != 'desktop')
          $('#alertNoWebcam').show();
      }).then(function () {
-       $("#startRecord").addClass('canRecord');
+       if(!$('#alertNoWebcam').is(':visible'))
+        $("#startRecord").addClass('canRecord');
      });
    }
    else {
@@ -216,7 +217,8 @@ App.prototype = {
            if (e.target.value != 'desktop')
              $('#alertNoWebcam').show();
          }).then(function () {
-           $("#startRecord").addClass('canRecord');
+           if(!$('#alertNoWebcam').is(':visible'))
+            $("#startRecord").addClass('canRecord');
          });
    }
   },
