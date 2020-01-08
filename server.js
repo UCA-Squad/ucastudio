@@ -699,7 +699,7 @@ function getListSeries(socket, callback)
 {
 	var options = {
 		method: 'GET',
-		url: config.opencast_series_url,
+		url: config.opencast_series_url+'?filter=textFilter:'+socket.handshake.session.cas_user+'&limit=500',
 		rejectUnauthorized: false,
 		headers: {
 			'cache-control': 'no-cache',
