@@ -1507,7 +1507,6 @@ label[for=mergestreams]::before {
   border: none;
   position: relative;
   margin: 0 0.5rem;
-  background: rgb(170, 170, 170);
   box-shadow: 0 1px 2px rgba(0,0,0,0.2);
   outline: none;
 }
@@ -1529,6 +1528,7 @@ label[for=mergestreams]::before {
   border-top: 16px solid grey !important;
   -webkit-animation: spin 2s linear infinite; /* Safari */
   animation: spin 2s linear infinite !important;
+  background: rgb(187, 187, 187) !important;
 }
 
 .cantRecord::before{
@@ -1540,19 +1540,11 @@ label[for=mergestreams]::before {
   position: absolute;
   width: 3rem;
   height: 3rem;
-  /*background: #8d2351;*/
   background: rgb(187, 187, 187);
   border-radius: 50%;
   top: 1rem;
   left: 1rem;
   content: '';
-}
-
-.canRecord{
-  background: rgb(189, 24, 28) !important;
-}
-.canRecord::before {
-  background: rgb(226, 35, 25) !important;
 }
 
 .canRecord.recording{
@@ -1561,11 +1553,11 @@ label[for=mergestreams]::before {
 
 .canRecord.recording::before {
   border-radius: 0 !important;
-  background: white !important;
   width: 2.5rem !important;
   height: 2.5rem !important;
   top: 1.3rem !important;
   left: 1.25rem !important;
+  background: rgb(226, 35, 25) !important;
 }
 
 .recording #startRecord {
