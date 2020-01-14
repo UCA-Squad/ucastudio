@@ -208,7 +208,7 @@ App.prototype = {
    }
    else {
 
-     if(typeof deviceMgr.audio[audio.getAttribute('data-id')] !== 'undefined' && deviceMgr.audio[audio.getAttribute('data-id')].stream)
+     if(e.target.id != 'desktopstream' && typeof deviceMgr.audio[audio.getAttribute('data-id')] !== 'undefined' && deviceMgr.audio[audio.getAttribute('data-id')].stream)
        deviceMgr.audio[audio.getAttribute('data-id')].stream.getTracks().forEach(track => track.stop());
 
      deviceMgr.connect(e.target.value, 'mustListReso')
