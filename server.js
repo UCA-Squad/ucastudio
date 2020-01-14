@@ -7,7 +7,7 @@ var CASAuthentication = require('connect-cas-uca');
 var useragent = require('useragent');
 var logFileEvents = './static/records/ucastudio/logFileEvents.csv';
 var fs = require('fs');
-
+global.hasSendMailError = false;
 const server = require('https').createServer({
 	key: fs.readFileSync(config.path_cert_key),
 	cert: fs.readFileSync(config.path_cert)
@@ -115,7 +115,7 @@ io.on('connection', function(socket){
 				});
 				ffmpeg_process2.on('error', function (e) {
 					console.log('child process error' + e);
-					sendEmail('child process error' + e, uid+' / '+agent.toString());
+					sendEmailError('child process error' + e, uid+' / '+agent.toString());
 					socket.emit('fatal', 'ffmpeg error!' + e);
 					feedStream = false;
 					socket.disconnect();
@@ -147,7 +147,7 @@ io.on('connection', function(socket){
 				});
 				ffmpeg_process.on('error', function (e) {
 					console.log('child process error' + e);
-					sendEmail('child process error' + e, uid+' / '+agent.toString());
+					sendEmailError('child process error' + e, uid+' / '+agent.toString());
 					socket.emit('fatal', 'ffmpeg error!' + e);
 					feedStream = false;
 					socket.disconnect();
@@ -181,8 +181,14 @@ io.on('connection', function(socket){
 				}
 			}
 			else {
-				if (typeof feedStream === "function")
-					feedStream(m);
+				if (typeof feedStream === "function") {
+					try {
+						feedStream(m);
+					}
+					catch (e) {
+						sendEmailError('feedStream error:' + e, uid+' / '+agent.toString())
+					}
+				}
 				else {
 					socket.emit('errorffmpeg');
 					socket.disconnect();
@@ -202,8 +208,14 @@ io.on('connection', function(socket){
 				}
 			}
 			else {
-				if (typeof feedStream2 === "function")
-					feedStream2(m);
+				if (typeof feedStream2 === "function") {
+					try {
+						feedStream2(m);
+					}
+					catch (e) {
+						sendEmailError('feedStream2 error:' + e, uid+' / '+agent.toString())
+					}
+				}
 				else {
 					socket.emit('errorffmpeg');
 					socket.disconnect();
@@ -262,7 +274,7 @@ io.on('connection', function(socket){
 		});
 		socket.on('error', function (e) {
 			console.log('socket.io error:' + e);
-			sendEmail('socket.io error:' + e, uid+' / '+agent.toString())
+			sendEmailError('socket.io error:' + e, uid+' / '+agent.toString())
 		});
 
 		socket.on('zipfiles', function (fusion) {
@@ -408,7 +420,7 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 	if(typeof socket.handshake.session.usermediadatas !== 'undefined') {
 		//on test si c'est pas undefined  ?
 		var usermediainfosToUpload = JSON.parse(socket.handshake.session.usermediadatas);
-
+		const agent = useragent.parse(socket.request.headers['user-agent']);
 		var request = require("request");
 		var d = new Date();
 		var startDate = d.getFullYear() + '-' + ("0" + (d.getMonth() + 1)).slice(-2) + '-' + ("0" + d.getDate()).slice(-2);
@@ -447,210 +459,215 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 			var duration = '00:00:00';
 			fluentFFMPEG.ffprobe(pathMediaToFFprobe, function(err, metadataFFprobe) {
 
-				duration = new Date(metadataFFprobe.format.duration * 1000).toISOString().substr(11, 8);
-
-				var metadata = '[\n' +
-					'  {\n' +
-					'    "flavor": "dublincore/episode",\n' +
-					'    "fields": [\n' +
-					'      {\n' +
-					'        "id": "title",\n' +
-					'        "value": "' + usermediainfosToUpload.titleUpload.replace(/"/g, '\\"') + '"\n' +
-					'      },\n' +
-					'      {\n' +
-					'        "id": "description",\n' +
-					'        "value": "' + desc.replace(/"/g, '\\"') + '"\n' +
-					'      },\n' +
-					'      {\n' +
-					'        "id": "creator",\n' +
-					'        "value": ["' + socket.handshake.session.cn + '"]\n' +
-					'      },\n' +
-					'      {\n' +
-					'        "id": "isPartOf",\n' +
-					'        "value": "' + usermediainfosToUpload.idSerie + '"\n' +
-					'      },\n' +
-					'      {\n' +
-					'        "id": "startDate",\n' +
-					'        "value": "' + startDate + '"\n' +
-					'      },\n' +
-					'      {\n' +
-					'        "id": "startTime",\n' +
-					'        "value": "' + startTime + '"\n' +
-					'      },\n' +
-					'      {\n' +
-					'        "id": "duration",\n' +
-					'        "value": "' + duration + '"\n' +
-					'      },\n' +
-					'      {\n' +
-					'        "id": "location",\n' +
-					'        "value": "' + location + '"\n' +
-					'      },\n' +
-					'      {\n' +
-					'        "id": "source",\n' +
-					'        "value": "UCAStudio"\n' +
-					'      }\n' +
-					'    ]\n' +
-					'  }\n' +
-					']';
-
-
-				var js2xmlparser = require("js2xmlparser");
-                var metadataXML  = js2xmlparser.parse("media", JSON.parse(metadata)[0]);
 				try {
-					fs.writeFileSync('./static/records/ucastudio/'+ uid + '/' + idFileUpload + '/metadata.xml', metadataXML);
-				} catch (err) {
-					console.error(err)
-				}
+					duration = new Date(metadataFFprobe.format.duration * 1000).toISOString().substr(11, 8);
 
-				if(mustBeUpload)
-				{
-					var acl = '[\n' +
+					var metadata = '[\n' +
 						'  {\n' +
-						'    "allow": true,\n' +
-						'    "role": "ROLE_EXTERNAL_APPLICATION",\n' +
-						'    "action": "read"\n' +
-						'  },\n' +
-						'  {\n' +
-						'    "allow": true,\n' +
-						'    "role": "ROLE_EXTERNAL_APPLICATION",\n' +
-						'    "action": "write"\n' +
-						'  },\n' +
-						'  {\n' +
-						'    "allow": true,\n' +
-						'    "role": "ROLE_GROUP_MOODLE",\n' +
-						'    "action": "read"\n' +
-						'  },\n' +
-						'  {\n' +
-						'    "allow": false,\n' +
-						'    "role": "ROLE_GROUP_MOODLE",\n' +
-						'    "action": "write"\n' +
-						'  },\n' +
-						'  {\n' +
-						'    "allow": true,\n' +
-						'    "role": "ROLE_GROUP_MOODLE",\n' +
-						'    "action": "annotate"\n' +
-						'  },\n' +
-						'  {\n' +
-						'    "allow": true,\n' +
-						'    "role": "ROLE_USER_LDAP_' + uid + '",\n' +
-						'    "action": "read"\n' +
-						'  },\n' +
-						'  {\n' +
-						'    "allow": true,\n' +
-						'    "role": "ROLE_USER_LDAP_' + uid + '",\n' +
-						'    "action": "write"\n' +
-						'  }\n' +
-						'  {\n' +
-						'    "allow": true,\n' +
-						'    "role": "ROLE_USER_LDAP_' + uid + '",\n' +
-						'    "action": "annotate-admin"\n' +
+						'    "flavor": "dublincore/episode",\n' +
+						'    "fields": [\n' +
+						'      {\n' +
+						'        "id": "title",\n' +
+						'        "value": "' + usermediainfosToUpload.titleUpload.replace(/"/g, '\\"') + '"\n' +
+						'      },\n' +
+						'      {\n' +
+						'        "id": "description",\n' +
+						'        "value": "' + desc.replace(/"/g, '\\"') + '"\n' +
+						'      },\n' +
+						'      {\n' +
+						'        "id": "creator",\n' +
+						'        "value": ["' + socket.handshake.session.cn + '"]\n' +
+						'      },\n' +
+						'      {\n' +
+						'        "id": "isPartOf",\n' +
+						'        "value": "' + usermediainfosToUpload.idSerie + '"\n' +
+						'      },\n' +
+						'      {\n' +
+						'        "id": "startDate",\n' +
+						'        "value": "' + startDate + '"\n' +
+						'      },\n' +
+						'      {\n' +
+						'        "id": "startTime",\n' +
+						'        "value": "' + startTime + '"\n' +
+						'      },\n' +
+						'      {\n' +
+						'        "id": "duration",\n' +
+						'        "value": "' + duration + '"\n' +
+						'      },\n' +
+						'      {\n' +
+						'        "id": "location",\n' +
+						'        "value": "' + location + '"\n' +
+						'      },\n' +
+						'      {\n' +
+						'        "id": "source",\n' +
+						'        "value": "UCAStudio"\n' +
+						'      }\n' +
+						'    ]\n' +
 						'  }\n' +
 						']';
 
-					var canEncode720p = true;
-					if((hasSecondStream || onlySecondStream) && metadataFFprobe.streams[0].height < 720 ) {
-						canEncode720p = false;
+
+					var js2xmlparser = require("js2xmlparser");
+					var metadataXML  = js2xmlparser.parse("media", JSON.parse(metadata)[0]);
+					try {
+						fs.writeFileSync('./static/records/ucastudio/'+ uid + '/' + idFileUpload + '/metadata.xml', metadataXML);
+					} catch (err) {
+						console.error(err)
 					}
 
-					if (isAudioFile)
+					if(mustBeUpload)
 					{
-						var processing = '{\n' +
-							'  "workflow": "' + config.opencast_workflow_audio + '"\n' +
-							'}';
-					}
-					else
-					{
-						if (canEncode720p)
+						var acl = '[\n' +
+							'  {\n' +
+							'    "allow": true,\n' +
+							'    "role": "ROLE_EXTERNAL_APPLICATION",\n' +
+							'    "action": "read"\n' +
+							'  },\n' +
+							'  {\n' +
+							'    "allow": true,\n' +
+							'    "role": "ROLE_EXTERNAL_APPLICATION",\n' +
+							'    "action": "write"\n' +
+							'  },\n' +
+							'  {\n' +
+							'    "allow": true,\n' +
+							'    "role": "ROLE_GROUP_MOODLE",\n' +
+							'    "action": "read"\n' +
+							'  },\n' +
+							'  {\n' +
+							'    "allow": false,\n' +
+							'    "role": "ROLE_GROUP_MOODLE",\n' +
+							'    "action": "write"\n' +
+							'  },\n' +
+							'  {\n' +
+							'    "allow": true,\n' +
+							'    "role": "ROLE_GROUP_MOODLE",\n' +
+							'    "action": "annotate"\n' +
+							'  },\n' +
+							'  {\n' +
+							'    "allow": true,\n' +
+							'    "role": "ROLE_USER_LDAP_' + uid + '",\n' +
+							'    "action": "read"\n' +
+							'  },\n' +
+							'  {\n' +
+							'    "allow": true,\n' +
+							'    "role": "ROLE_USER_LDAP_' + uid + '",\n' +
+							'    "action": "write"\n' +
+							'  }\n' +
+							'  {\n' +
+							'    "allow": true,\n' +
+							'    "role": "ROLE_USER_LDAP_' + uid + '",\n' +
+							'    "action": "annotate-admin"\n' +
+							'  }\n' +
+							']';
+
+						var canEncode720p = true;
+						if((hasSecondStream || onlySecondStream) && metadataFFprobe.streams[0].height < 720 ) {
+							canEncode720p = false;
+						}
+
+						if (isAudioFile)
 						{
 							var processing = '{\n' +
-								'  "workflow": "' + config.opencast_workflow + '"\n' +
-								'    "flagQuality480p": "true",\n' +
-								'    "flagQuality720p": "true",\n' +
+								'  "workflow": "' + config.opencast_workflow_audio + '"\n' +
 								'}';
 						}
 						else
 						{
-							var processing = '{\n' +
-								'  "workflow": "' + config.opencast_workflow + '",\n' +
-								'  "configuration": {\n' +
-								'    "flagQuality480p": "true",\n' +
-								'    "flagQuality720p": "false",\n' +
-								'  }\n' +
-								'}'
+							if (canEncode720p)
+							{
+								var processing = '{\n' +
+									'  "workflow": "' + config.opencast_workflow + '"\n' +
+									'    "flagQuality480p": "true",\n' +
+									'    "flagQuality720p": "true",\n' +
+									'}';
+							}
+							else
+							{
+								var processing = '{\n' +
+									'  "workflow": "' + config.opencast_workflow + '",\n' +
+									'  "configuration": {\n' +
+									'    "flagQuality480p": "true",\n' +
+									'    "flagQuality720p": "false",\n' +
+									'  }\n' +
+									'}'
+							}
 						}
-					}
 
-					if (hasSecondStream) {
-						var options = {
-							method: "POST",
-							url: config.opencast_events_url,
-							ca: fs.readFileSync(config.opencast_cert),
-							headers:
-								{
-									'cache-control': 'no-cache',
-									'Authorization': 'Basic ' + config.opencast_authentication,
-									'content-type': 'multipart/form-data;'
-								},
-							formData:
-								{
-									presenter:
-										{
-											value: fs.createReadStream('./static/records/ucastudio/' + uid + '/' + idFileUpload + '/' + idFileUpload + ".webm"),
-											options:
-												{
-													filename: 'metadata/' + idFileUpload + '.webm'
-												}
-										},
-									presentation:
-										{
-											value: fs.createReadStream('./static/records/ucastudio/' + uid + '/' + idFileUpload + '/' + idFileUpload + "screen.webm"),
-											options:
-												{
-													filename: 'metadata/' + idFileUpload + 'screen.webm'
-												}
-										},
-									processing,
-									metadata,
-									acl
-								}
-						};
-					} else {
-						var options = {
-							method: "POST",
-							url: config.opencast_events_url,
-							ca: fs.readFileSync(config.opencast_cert),
-							headers:
-								{
-									'cache-control': 'no-cache',
-									'Authorization': 'Basic ' + config.opencast_authentication,
-									'content-type': 'multipart/form-data;'
-								},
-							formData:
-								{
-									presenter:
-										{
-											value: fs.createReadStream("./static/records/ucastudio/" + nameFile),
-											options:
-												{
-													filename: 'metadata/' + nameFile
-												}
-										},
-									processing,
-									metadata,
-									acl
-								}
-						};
-					}
+						if (hasSecondStream) {
+							var options = {
+								method: "POST",
+								url: config.opencast_events_url,
+								ca: fs.readFileSync(config.opencast_cert),
+								headers:
+									{
+										'cache-control': 'no-cache',
+										'Authorization': 'Basic ' + config.opencast_authentication,
+										'content-type': 'multipart/form-data;'
+									},
+								formData:
+									{
+										presenter:
+											{
+												value: fs.createReadStream('./static/records/ucastudio/' + uid + '/' + idFileUpload + '/' + idFileUpload + ".webm"),
+												options:
+													{
+														filename: 'metadata/' + idFileUpload + '.webm'
+													}
+											},
+										presentation:
+											{
+												value: fs.createReadStream('./static/records/ucastudio/' + uid + '/' + idFileUpload + '/' + idFileUpload + "screen.webm"),
+												options:
+													{
+														filename: 'metadata/' + idFileUpload + 'screen.webm'
+													}
+											},
+										processing,
+										metadata,
+										acl
+									}
+							};
+						} else {
+							var options = {
+								method: "POST",
+								url: config.opencast_events_url,
+								ca: fs.readFileSync(config.opencast_cert),
+								headers:
+									{
+										'cache-control': 'no-cache',
+										'Authorization': 'Basic ' + config.opencast_authentication,
+										'content-type': 'multipart/form-data;'
+									},
+								formData:
+									{
+										presenter:
+											{
+												value: fs.createReadStream("./static/records/ucastudio/" + nameFile),
+												options:
+													{
+														filename: 'metadata/' + nameFile
+													}
+											},
+										processing,
+										metadata,
+										acl
+									}
+							};
+						}
 
-					request(options, function (error, response, body) {
-						if (error)
-							throw new Error(error);
-						else
-							socket.emit('endupload', 1);
-					});
+						request(options, function (error, response, body) {
+							if (error)
+								throw new Error(error);
+							else
+								socket.emit('endupload', 1);
+						});
+					}
+					else
+						socket.emit('endupload', 0); // pas nécessaire si on force l'upload
 				}
-				else
-					socket.emit('endupload', 0); // pas nécessaire si on force l'upload
+				catch (e) {
+					sendEmailError(' errorrec ' + e, uid + ' / ' + agent.toString());
+				}
 			});
 		});
 		socket.emit('idRecord', socket.handshake.session.cas_user, socket.handshake.issued);
@@ -867,25 +884,32 @@ function checkIsFileIsWrite(socket, path, typeOfRec, agent)
 	var socketissued = socket.handshake.issued;
 
 	fs.readdir('./static/records/ucastudio/' + uid + '/' + socketissued + '/', function (err, files) {
-		if (!files.length) {
-			try {
-				fs.writeFileSync(logFileEvents, 'errorrec;'+uid+';'+getDateNow()+';'+socketissued+';'+typeOfRec+';"'+agent.toString()+'"'+"\n", {flag: 'a'});
-			} catch (err) {
-				console.error(err)
-			}
-			socket.emit('errorffmpeg');
-			socket.disconnect();
-		}
-		else if(typeOfRec == 'video-and-desktop'){
-			if(!fs.existsSync('./static/records/ucastudio/' + uid + '/' + socketissued + '/' + socketissued + 'screen.webm') || !fs.existsSync('./static/records/ucastudio/' + uid + '/' + socketissued + '/' + socketissued + '.webm')) {
+		try {
+			if (!files.length) {
 				try {
-					fs.writeFileSync(logFileEvents, 'errorrec;'+uid+';'+getDateNow()+';'+socketissued+';'+typeOfRec+';"'+agent.toString()+'"'+"\n", {flag: 'a'});
+					fs.writeFileSync(logFileEvents, 'errorrec;' + uid + ';' + getDateNow() + ';' + socketissued + ';' + typeOfRec + ';"' + agent.toString() + '"' + "\n", {flag: 'a'});
 				} catch (err) {
+					sendEmailError('ffmpeg errorrec' + err, uid + ' / ' + agent.toString());
 					console.error(err)
 				}
 				socket.emit('errorffmpeg');
 				socket.disconnect();
+			} else if (typeOfRec == 'video-and-desktop') {
+				if (!fs.existsSync('./static/records/ucastudio/' + uid + '/' + socketissued + '/' + socketissued + 'screen.webm') || !fs.existsSync('./static/records/ucastudio/' + uid + '/' + socketissued + '/' + socketissued + '.webm')) {
+					try {
+						fs.writeFileSync(logFileEvents, 'errorrec;' + uid + ';' + getDateNow() + ';' + socketissued + ';' + typeOfRec + ';"' + agent.toString() + '"' + "\n", {flag: 'a'});
+					} catch (err) {
+						sendEmailError('ffmpeg errorrec' + err, uid + ' / ' + agent.toString());
+						console.error(err)
+					}
+					socket.emit('errorffmpeg');
+					socket.disconnect();
+				}
 			}
+		}
+		catch (err) {
+			sendEmailError('file length error' + err, uid+' / '+agent.toString());
+			console.error(err)
 		}
 	});
 }
@@ -899,29 +923,33 @@ function getDateNow() {
 	return dateNow;
 }
 
-function sendEmail(err, user) {
-	var transporter = nodemailer.createTransport({
-	  	host: "mtarelay.dsi.uca.fr",
-	  	port: 25,
-	  	secure: false,
-	  	tls: {
-  		  	// do not fail on invalid certs
-    		rejectUnauthorized: false
-  		}
-	});
+/**
+ * @param err
+ * @param user
+ * @param subject
+ */
+function sendEmailError(err, user) {
+	if(!hasSendMailError) {
+		const nodemailer = require("nodemailer");
+		var transporter = nodemailer.createTransport({
+			host: config.mail_host,
+			port: config.mail_port,
+			secure: false,
+			tls: {rejectUnauthorized: false}
+		});
 
-	var mailOptions = {
-	  	from: 'ucastudio@uca.fr',
-	 	to: 'lylian.blaud@uca.fr',
-	  	subject: '[Warn] UCAStudio Error',
-	  	text: 'Une erreur a été détectée \nDate : '+getDateNow()+'\nUser : '+user+'\nErreur : \n'+err
-	};
+		var mailOptions = {
+			from: config.mail_from,
+			to: config.mail_to,
+			subject: '[Warn] UCAStudio Error',
+			text: 'Une erreur a été détectée \nDate : ' + getDateNow() + '\nUser : ' + user + '\nErreur : \n' + err
+		};
 
-	transporter.sendMail(mailOptions, function(error, info){
-	  	if (error) {
-	    	console.log(error);
-	  	} else {
-	    	console.log('Email sent: ' + info.response);
-	  	}
-	}); 
+		transporter.sendMail(mailOptions, function (error, info) {
+			if (error)
+				console.log(error);
+		});
+
+		hasSendMailError = true;
+	}
 }
