@@ -13,7 +13,6 @@
     "ldapjs": "^1.0.2",
     "nodemailer": "^6.4.2",
     "request": "^2.88.0",
-    "sendemail": "^3.4.0",
     "socket.io": "^2.3.0",
     "useragent": "^2.3.0"
   }
