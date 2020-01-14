@@ -2150,7 +2150,7 @@ section{
 
 
 #listMicAvailable{
-  height: 10em !important;
+  height: 6em;
   overflow-y: auto;
 }
 
