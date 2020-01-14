@@ -115,6 +115,7 @@ io.on('connection', function(socket){
 				});
 				ffmpeg_process2.on('error', function (e) {
 					console.log('child process error' + e);
+					sendEmail('child process error' + e, uid+' / '+agent.toString());
 					socket.emit('fatal', 'ffmpeg error!' + e);
 					feedStream = false;
 					socket.disconnect();
@@ -146,6 +147,7 @@ io.on('connection', function(socket){
 				});
 				ffmpeg_process.on('error', function (e) {
 					console.log('child process error' + e);
+					sendEmail('child process error' + e, uid+' / '+agent.toString());
 					socket.emit('fatal', 'ffmpeg error!' + e);
 					feedStream = false;
 					socket.disconnect();
@@ -260,6 +262,7 @@ io.on('connection', function(socket){
 		});
 		socket.on('error', function (e) {
 			console.log('socket.io error:' + e);
+			sendEmail('socket.io error:' + e, uid+' / '+agent.toString())
 		});
 
 		socket.on('zipfiles', function (fusion) {
@@ -894,4 +897,31 @@ function getDateNow() {
 	var dateNowTmp = new Date();
 	var dateNow = dateNowTmp.getDate()+'-'+(dateNowTmp.getMonth()+1)+'-'+dateNowTmp.getFullYear()+' ('+dateNowTmp.getHours()+':'+dateNowTmp.getMinutes()+':'+dateNowTmp.getSeconds()+')';
 	return dateNow;
+}
+
+function sendEmail(err, user) {
+	var transporter = nodemailer.createTransport({
+	  	host: "mtarelay.dsi.uca.fr",
+	  	port: 25,
+	  	secure: false,
+	  	tls: {
+  		  	// do not fail on invalid certs
+    		rejectUnauthorized: false
+  		}
+	});
+
+	var mailOptions = {
+	  	from: 'ucastudio@uca.fr',
+	 	to: 'lylian.blaud@uca.fr',
+	  	subject: '[Warn] UCAStudio Error',
+	  	text: 'Une erreur a été détectée \nDate : '+getDateNow()+'\nUser : '+user+'\nErreur : \n'+err
+	};
+
+	transporter.sendMail(mailOptions, function(error, info){
+	  	if (error) {
+	    	console.log(error);
+	  	} else {
+	    	console.log('Email sent: ' + info.response);
+	  	}
+	}); 
 }
