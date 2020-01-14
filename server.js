@@ -58,6 +58,7 @@ io.on('connection', function(socket){
 			//on check si l'user est co via cas, et on créer un folder si existe pas
 			fs.existsSync('./static/records/ucastudio/' + uid) || fs.mkdirSync('./static/records/ucastudio/' + uid);
 		} catch(err) {
+			sendEmailError('error create new folder user' + err, uid+' / '+agent.toString());
 			console.error(err)
 		}
 
@@ -115,7 +116,7 @@ io.on('connection', function(socket){
 				});
 				ffmpeg_process2.on('error', function (e) {
 					console.log('child process error' + e);
-					sendEmailError('child process error' + e, uid+' / '+agent.toString());
+					sendEmailError('ffmpeg child process error' + e, uid+' / '+agent.toString());
 					socket.emit('fatal', 'ffmpeg error!' + e);
 					feedStream = false;
 					socket.disconnect();
@@ -147,7 +148,7 @@ io.on('connection', function(socket){
 				});
 				ffmpeg_process.on('error', function (e) {
 					console.log('child process error' + e);
-					sendEmailError('child process error' + e, uid+' / '+agent.toString());
+					sendEmailError('ffmpeg child process error' + e, uid+' / '+agent.toString());
 					socket.emit('fatal', 'ffmpeg error!' + e);
 					feedStream = false;
 					socket.disconnect();
@@ -164,6 +165,7 @@ io.on('connection', function(socket){
 			try {
 				fs.writeFileSync(logFileEvents, 'startrec;'+uid+';'+getDateNow()+';'+socketissued+';'+m+';"'+agent.toString()+'"'+"\n", {flag: 'a'});
 			} catch (err) {
+				sendEmailError('error write logFileEvents' + err, uid+' / '+agent.toString());
 				console.error(err)
 			}
 
@@ -182,12 +184,8 @@ io.on('connection', function(socket){
 			}
 			else {
 				if (typeof feedStream === "function") {
-					try {
-						feedStream(m);
-					}
-					catch (e) {
-						sendEmailError('feedStream error:' + e, uid+' / '+agent.toString())
-					}
+					try { feedStream(m); }
+					catch (e) { sendEmailError('feedStream error:' + e, uid+' / '+agent.toString()); }
 				}
 				else {
 					socket.emit('errorffmpeg');
@@ -209,12 +207,8 @@ io.on('connection', function(socket){
 			}
 			else {
 				if (typeof feedStream2 === "function") {
-					try {
-						feedStream2(m);
-					}
-					catch (e) {
-						sendEmailError('feedStream2 error:' + e, uid+' / '+agent.toString())
-					}
+					try { feedStream2(m); }
+					catch (e) { sendEmailError('feedStream2 error:' + e, uid+' / '+agent.toString()); }
 				}
 				else {
 					socket.emit('errorffmpeg');
@@ -232,6 +226,7 @@ io.on('connection', function(socket){
 					try {
 						ffmpeg_process.stdin.end();
 					} catch (e) {
+						sendEmailError('End ffmpeg process attempt failed ' + e, uid+' / '+agent.toString());
 						console.warn('End ffmpeg process attempt failed...');
 					}
 				}
@@ -251,6 +246,7 @@ io.on('connection', function(socket){
 			try {
 				fs.writeFileSync(logFileEvents, 'stoprec;'+uid+';'+getDateNow()+';'+socketissued+';'+m+';"'+agent.toString()+'"'+"\n", {flag: 'a'});
 			} catch (err) {
+				sendEmailError('error write logFileEvents' + err, uid+' / '+agent.toString());
 				console.error(err)
 			}
 		});
@@ -289,6 +285,7 @@ io.on('connection', function(socket){
 				if (fs.existsSync(webcamMedia))
 					zip.file(socketissued + '.webm', fs.createReadStream(webcamMedia));
 			} catch(err) {
+				sendEmailError('zip file' + err, uid+' / '+agent.toString());
 				console.error(err);
 			}
 
@@ -296,6 +293,7 @@ io.on('connection', function(socket){
 				if (fs.existsSync(screenMedia))
 					zip.file(socketissued + 'screen.webm', fs.createReadStream(screenMedia));
 			} catch(err) {
+				sendEmailError('zip file' + err, uid+' / '+agent.toString());
 				console.error(err);
 			}
 
@@ -303,6 +301,7 @@ io.on('connection', function(socket){
 				if (fs.existsSync(metadataXML))
 					zip.file('metadata.xml', fs.createReadStream(metadataXML));
 			} catch(err) {
+				sendEmailError('zip file' + err, uid+' / '+agent.toString());
 				console.error(err);
 			}
 
@@ -512,6 +511,7 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 					try {
 						fs.writeFileSync('./static/records/ucastudio/'+ uid + '/' + idFileUpload + '/metadata.xml', metadataXML);
 					} catch (err) {
+						sendEmailError('write file metadata' + err, uid+' / '+agent.toString());
 						console.error(err)
 					}
 
