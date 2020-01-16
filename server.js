@@ -127,7 +127,7 @@ io.on('connection', function(socket){
                         if(m == 'onlyaudio')
                             encodeAudioToMp4(socket)
 					    else
-                            uploadFile(socket, false, true);
+                            uploadFile(socket, false, true, false, true);
                     }
 				});
 			}
@@ -414,7 +414,7 @@ function encodeAudioToMp4(socket)
  * Permet d'uploader un média
  * @param socket
  */
-function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFile = false)
+function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFile = false, onlydesktop = false)
 {
 	if(typeof socket.handshake.session.usermediadatas !== 'undefined') {
 		//on test si c'est pas undefined  ?
@@ -429,6 +429,7 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 		var uid = socket.handshake.session.cas_user;
 		var mustBeUpload = usermediainfosToUpload.mustBeUpload;
 		var desc = 'N/R';
+		var typeOfFlavor = "presenter";
 		if(usermediainfosToUpload.descUpload != '')
 			desc = usermediainfosToUpload.descUpload;
 		var location = 'N/R';
@@ -565,6 +566,8 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 							canEncode720p = false;
 						}
 
+
+
 						if (isAudioFile)
 						{
 							var processing = '{\n' +
@@ -591,6 +594,10 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 									'  }\n' +
 									'}'
 							}
+						}
+
+						if(onlydesktop) {
+							typeOfFlavor = "presentation";
 						}
 
 						if (hasSecondStream) {
@@ -627,7 +634,7 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 										acl
 									}
 							};
-						} else {
+						} else if(!hasSecondStream && typeOfFlavor == "presenter") {
 							var options = {
 								method: "POST",
 								url: config.opencast_events_url,
@@ -641,6 +648,32 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 								formData:
 									{
 										presenter:
+											{
+												value: fs.createReadStream("./static/records/ucastudio/" + nameFile),
+												options:
+													{
+														filename: 'metadata/' + nameFile
+													}
+											},
+										processing,
+										metadata,
+										acl
+									}
+							};
+						} else {
+							var options = {
+								method: "POST",
+								url: config.opencast_events_url,
+								ca: fs.readFileSync(config.opencast_cert),
+								headers:
+									{
+										'cache-control': 'no-cache',
+										'Authorization': 'Basic ' + config.opencast_authentication,
+										'content-type': 'multipart/form-data;'
+									},
+								formData:
+									{
+										presentation:
 											{
 												value: fs.createReadStream("./static/records/ucastudio/" + nameFile),
 												options:
