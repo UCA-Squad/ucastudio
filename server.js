@@ -59,7 +59,7 @@ io.on('connection', function(socket){
 			fs.existsSync('./static/records/ucastudio/' + uid) || fs.mkdirSync('./static/records/ucastudio/' + uid);
 		} catch(err) {
 			sendEmailError('error create new folder user' + err, uid+' / '+agent.toString());
-			console.error(err)
+			console.error(getDateNow()+' : '+err);
 		}
 
 		socket.on('start', function (m) {
@@ -166,7 +166,7 @@ io.on('connection', function(socket){
 				fs.writeFileSync(logFileEvents, 'startrec;'+uid+';'+getDateNow()+';'+socketissued+';'+m+';"'+agent.toString()+'"'+"\n", {flag: 'a'});
 			} catch (err) {
 				sendEmailError('error write logFileEvents' + err, uid+' / '+agent.toString());
-				console.error(err)
+				console.error(getDateNow()+' : '+err)
 			}
 
 		});
@@ -247,7 +247,7 @@ io.on('connection', function(socket){
 				fs.writeFileSync(logFileEvents, 'stoprec;'+uid+';'+getDateNow()+';'+socketissued+';'+m+';"'+agent.toString()+'"'+"\n", {flag: 'a'});
 			} catch (err) {
 				sendEmailError('error write logFileEvents' + err, uid+' / '+agent.toString());
-				console.error(err)
+				console.error(getDateNow()+' : '+err)
 			}
 		});
 		socket.on('disconnect', function () {
@@ -286,7 +286,7 @@ io.on('connection', function(socket){
 					zip.file(socketissued + '.webm', fs.createReadStream(webcamMedia));
 			} catch(err) {
 				sendEmailError('zip file' + err, uid+' / '+agent.toString());
-				console.error(err);
+				console.error(getDateNow()+' : '+err);
 			}
 
 			try {
@@ -294,7 +294,7 @@ io.on('connection', function(socket){
 					zip.file(socketissued + 'screen.webm', fs.createReadStream(screenMedia));
 			} catch(err) {
 				sendEmailError('zip file' + err, uid+' / '+agent.toString());
-				console.error(err);
+				console.error(getDateNow()+' : '+err);
 			}
 
 			try {
@@ -302,7 +302,7 @@ io.on('connection', function(socket){
 					zip.file('metadata.xml', fs.createReadStream(metadataXML));
 			} catch(err) {
 				sendEmailError('zip file' + err, uid+' / '+agent.toString());
-				console.error(err);
+				console.error(getDateNow()+' : '+err);
 			}
 
 			if(fusion && (fs.existsSync(webcamMedia) && fs.existsSync(screenMedia))) //si deux flux alors on merge
@@ -512,7 +512,7 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 						fs.writeFileSync('./static/records/ucastudio/'+ uid + '/' + idFileUpload + '/metadata.xml', metadataXML);
 					} catch (err) {
 						sendEmailError('write file metadata' + err, uid+' / '+agent.toString());
-						console.error(err)
+						console.error(getDateNow()+' : '+err)
 					}
 
 					if(mustBeUpload)
@@ -890,7 +890,7 @@ function checkIsFileIsWrite(socket, path, typeOfRec, agent)
 					fs.writeFileSync(logFileEvents, 'errorrec;' + uid + ';' + getDateNow() + ';' + socketissued + ';' + typeOfRec + ';"' + agent.toString() + '"' + "\n", {flag: 'a'});
 				} catch (err) {
 					sendEmailError('ffmpeg errorrec' + err, uid + ' / ' + agent.toString());
-					console.error(err)
+					console.error(getDateNow()+' : '+err)
 				}
 				socket.emit('errorffmpeg');
 				socket.disconnect();
@@ -900,7 +900,7 @@ function checkIsFileIsWrite(socket, path, typeOfRec, agent)
 						fs.writeFileSync(logFileEvents, 'errorrec;' + uid + ';' + getDateNow() + ';' + socketissued + ';' + typeOfRec + ';"' + agent.toString() + '"' + "\n", {flag: 'a'});
 					} catch (err) {
 						sendEmailError('ffmpeg errorrec' + err, uid + ' / ' + agent.toString());
-						console.error(err)
+						console.error(getDateNow()+' : '+err)
 					}
 					socket.emit('errorffmpeg');
 					socket.disconnect();
@@ -909,7 +909,7 @@ function checkIsFileIsWrite(socket, path, typeOfRec, agent)
 		}
 		catch (err) {
 			sendEmailError('file length error' + err, uid+' / '+agent.toString());
-			console.error(err)
+			console.error(getDateNow()+' : '+err)
 		}
 	});
 }
