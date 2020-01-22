@@ -27,9 +27,11 @@ $( document ).ready(function() {
     //Add by lylblaud
     $(document).on('click', '#pauseRecord', function(event){
         if(document.getElementById("pauseRecord").className == "fas fa-pause fa-2x") {
+            document.getElementById("pauseRecord").title = "Reprendre l'enregistrement";
             document.getElementById("pauseRecord").className = "fas fa-play fa-2x";
         } else {
-            document.getElementById("pauseRecord").className = "fas fa-pause fa-2x"
+            document.getElementById("pauseRecord").className = "fas fa-pause fa-2x";
+            document.getElementById("pauseRecord").title = "Mettre l'enregistrement en pause";
         }
         
     });
