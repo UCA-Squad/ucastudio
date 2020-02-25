@@ -46,12 +46,15 @@ function Communications() {
   this.socket.on('listseries',function(listSeries, uid){
     var html = '<option value="" disabled selected>Sélectionner votre bibliothèque</option>';
 
-    html += "<option value='myfolder'>Mon dossier</option>";
     if (typeof listSeries !== 'undefined' && listSeries.length > 0) {
+      html += "<option value='myfolder'>Mon dossier</option>";
       $.each(listSeries, function (index, item) {
+        if(item.title != uid && item.title != 'etd_'+uid)
           html += "<option value='" + item.identifier + "'>" + item.title + "</option>";
       });
     }
+    else
+      html += "<option value='myfolder'>Mon dossier</option>";
 
       $('#listseries').append(html);
   });
