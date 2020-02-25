@@ -752,11 +752,12 @@ function getListSeries(socket, callback)
 {
 	var options = {
 		method: 'GET',
-		url: config.opencast_series_url+'?filter=textFilter:'+socket.handshake.session.cas_user+'&limit=500',
+		url: config.opencast_series_url,
 		rejectUnauthorized: false,
 		headers: {
 			'cache-control': 'no-cache',
-			Authorization: 'Basic '+config.opencast_authentication
+			'Authorization': 'Basic '+config.opencast_authentication,
+			'X-RUN-WITH-ROLES': 'ROLE_USER_LDAP_'+socket.handshake.session.cas_user
 		}
 	};
 	var request = require("request");
