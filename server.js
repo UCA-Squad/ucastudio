@@ -843,12 +843,12 @@ function createSerie(uid, mail, idSerieSelect, mustBeUpload, isEtudiant)
 				'  {\n' +
 				'    "allow": true,\n' +
 				'    "action": "read"\n' +
-				'    "role": "ROLE_USER_LDAP_' + uid.toUpperCase() + '",\n' +
+				'    "role": "ROLE_USER_LDAP_' + uid.toLowerCase() + '",\n' +
 				'  },\n' +
 				'  {\n' +
 				'    "allow": true,\n' +
 				'    "action": "write"\n' +
-				'    "role": "ROLE_USER_LDAP_' + uid.toUpperCase() + '",\n' +
+				'    "role": "ROLE_USER_LDAP_' + uid.toLowerCase() + '",\n' +
 				'  }\n' +
 				']';
 
