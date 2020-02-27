@@ -45,13 +45,22 @@ function Communications() {
 
   this.socket.on('listseries',function(listSeries, uid){
     var html = '<option value="" disabled selected>Sélectionner votre bibliothèque</option>';
-
+    var htmlTmp;
     if (typeof listSeries !== 'undefined' && listSeries.length > 0) {
-      html += "<option value='myfolder'>Mon dossier</option>";
+      var hasMyFodler = false;
       $.each(listSeries, function (index, item) {
-        if(item.title != uid && item.title != 'etd_'+uid)
-          html += "<option value='" + item.identifier + "'>" + item.title + "</option>";
+        if(item.title == uid || item.title == 'etd_'+uid){
+          hasMyFodler = true;
+          html += "<option value='" + item.identifier + "'>Mon dossier</option>";
+        }
+        else
+          htmlTmp += "<option value='" + item.identifier + "'>" + item.title + "</option>";
       });
+
+      if(!hasMyFodler)
+        html += "<option value='myfolder'>Mon dossier</option>";
+
+      html += htmlTmp;
     }
     else
       html += "<option value='myfolder'>Mon dossier</option>";
