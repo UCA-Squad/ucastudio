@@ -535,11 +535,6 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 							'    "action": "read"\n' +
 							'  },\n' +
 							'  {\n' +
-							'    "allow": false,\n' +
-							'    "role": "ROLE_GROUP_MOODLE",\n' +
-							'    "action": "write"\n' +
-							'  },\n' +
-							'  {\n' +
 							'    "allow": true,\n' +
 							'    "role": "ROLE_GROUP_MOODLE",\n' +
 							'    "action": "annotate"\n' +
