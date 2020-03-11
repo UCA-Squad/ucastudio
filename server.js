@@ -806,7 +806,7 @@ function checkSerieAcl(uid, serieinfo)
 		request(options, function (error, response, listSeries2) {
 			serieInfo = JSON.parse(listSeries2);
 			for (var j = 0, len = serieInfo.length; j < len; j++)
-				if (serieInfo[j].allow == true && serieInfo[j].role.indexOf(uid) > -1)
+				if (serieInfo[j].action == 'write' && serieInfo[j].allow == true && serieInfo[j].role.indexOf(uid) > -1)
 					resolve(serieinfo);
 			resolve();
 		});
