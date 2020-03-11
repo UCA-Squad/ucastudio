@@ -541,17 +541,17 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 							'  },\n' +
 							'  {\n' +
 							'    "allow": true,\n' +
-							'    "role": "ROLE_USER_LDAP_' + uid + '",\n' +
+							'    "role": "ROLE_USER_LDAP_' + uid.toUpperCase() + '",\n' +
 							'    "action": "read"\n' +
 							'  },\n' +
 							'  {\n' +
 							'    "allow": true,\n' +
-							'    "role": "ROLE_USER_LDAP_' + uid + '",\n' +
+							'    "role": "ROLE_USER_LDAP_' + uid.toUpperCase() + '",\n' +
 							'    "action": "write"\n' +
 							'  }\n' +
 							'  {\n' +
 							'    "allow": true,\n' +
-							'    "role": "ROLE_USER_LDAP_' + uid + '",\n' +
+							'    "role": "ROLE_USER_LDAP_' + uid.toUpperCase() + '",\n' +
 							'    "action": "annotate-admin"\n' +
 							'  }\n' +
 							']';
@@ -745,6 +745,7 @@ function getLdapInfos(uid, callback)
  */
 function getListSeries(socket, callback)
 {
+	var uid = socket.handshake.session.cas_user.toUpperCase();
 	var options = {
 		method: 'GET',
 		url: config.opencast_series_url,
@@ -752,13 +753,13 @@ function getListSeries(socket, callback)
 		headers: {
 			'cache-control': 'no-cache',
 			'Authorization': 'Basic '+config.opencast_authentication,
-			'X-RUN-WITH-ROLES': 'ROLE_USER_LDAP_'+socket.handshake.session.cas_user
+			'X-RUN-WITH-ROLES': 'ROLE_USER_LDAP_'+uid
 		}
 	};
 	var request = require("request");
 	request(options, function (error, response, listSeriesTmp) {
 		var listSeries = JSON.parse(listSeriesTmp);
-		getListSeriresWritable(socket.handshake.session.cas_user, listSeries).then(function(result) {
+		getListSeriresWritable(uid, listSeries).then(function(result) {
 			callback(result);
 		}, function(err) {
 			console.log(err);
@@ -805,7 +806,7 @@ function checkSerieAcl(uid, serieinfo)
 		request(options, function (error, response, listSeries2) {
 			serieInfo = JSON.parse(listSeries2);
 			for (var j = 0, len = serieInfo.length; j < len; j++)
-				if (serieInfo[j].allow == true && serieInfo[j].role.toLocaleLowerCase().indexOf(uid) > -1)
+				if (serieInfo[j].allow == true && serieInfo[j].role.indexOf(uid) > -1)
 					resolve(serieinfo);
 			resolve();
 		});
@@ -838,12 +839,12 @@ function createSerie(uid, mail, idSerieSelect, mustBeUpload, isEtudiant)
 				'  {\n' +
 				'    "allow": true,\n' +
 				'    "action": "read"\n' +
-				'    "role": "ROLE_USER_LDAP_' + uid.toLowerCase() + '",\n' +
+				'    "role": "ROLE_USER_LDAP_' + uid.toUpperCase() + '",\n' +
 				'  },\n' +
 				'  {\n' +
 				'    "allow": true,\n' +
 				'    "action": "write"\n' +
-				'    "role": "ROLE_USER_LDAP_' + uid.toLowerCase() + '",\n' +
+				'    "role": "ROLE_USER_LDAP_' + uid.toUpperCase() + '",\n' +
 				'  }\n' +
 				']';
 
