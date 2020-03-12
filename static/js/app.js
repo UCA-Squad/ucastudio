@@ -675,6 +675,10 @@ App.prototype = {
 
   },
   pauseRecord: function(e) {
+    if (!this.isRecording || this.timeEl.textContent < '00:00:04.000') {
+      return;
+    }
+
     deviceMgr.pauseRecording();
     compositor.pauseRecording();
     for (let peer in peers) {

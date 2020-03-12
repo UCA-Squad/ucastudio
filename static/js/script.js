@@ -26,6 +26,10 @@ $( document ).ready(function() {
 
     //Add by lylblaud
     $(document).on('click', '#pauseRecord', function(event){
+
+        if (document.getElementById('recordingTime').textContent < '00:00:04.000')
+            return;
+
         if(document.getElementById("pauseRecord").className == "fas fa-pause fa-2x") {
             document.getElementById("pauseRecord").title = "Reprendre l'enregistrement";
             document.getElementById("pauseRecord").className = "fas fa-play fa-2x";
