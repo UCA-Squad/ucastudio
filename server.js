@@ -363,7 +363,7 @@ io.on('connection', function(socket){
 		});
 
 		getListSeries(socket, function (displayName) {
-			socket.emit('listseries', displayName, uid);
+			socket.emit('listseries', displayName, uid, socket.handshake.session.mail);
 			if(typeof socket.handshake.headers.referer !== 'undefined' && socket.handshake.headers.referer.indexOf('serieid') > -1)
 			{
 				let infos = socket.handshake.headers.referer.split( '?' );

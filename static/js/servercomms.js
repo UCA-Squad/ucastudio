@@ -43,7 +43,7 @@ function Communications() {
     saveAs(file);
   });
 
-  this.socket.on('listseries',function(listSeries, uid){
+  this.socket.on('listseries',function(listSeries, uid, email){
     var html = '<option value="" disabled selected>Sélectionner votre bibliothèque</option>';
     var htmlTmp;
     if (typeof listSeries !== 'undefined' && listSeries.length > 0) {
@@ -53,9 +53,21 @@ function Communications() {
           hasMyFodler = true;
           html += "<option value='" + item.identifier + "'>Mon dossier</option>";
         }
-        else
+      })
+
+      htmlTmp += '<optgroup label="Mes bibliothèques liées à un cours Moodle">';
+      $.each(listSeries, function (index, item) {
+          if(item.description == "Moodle" && item.subjects[0] == email && item.title != uid && item.title != 'etd_'+uid)
+            htmlTmp += "<option value='" + item.identifier + "'>" + item.title + "</option>";
+      });
+      htmlTmp += '</optgroup>';
+
+      htmlTmp += '<optgroup label="Partagées avec moi">';
+      $.each(listSeries, function (index, item) {
+        if(item.subjects[0] != email && (item.title != uid || item.title != 'etd_'+uid))
           htmlTmp += "<option value='" + item.identifier + "'>" + item.title + "</option>";
       });
+      htmlTmp += '</optgroup>';
 
       if(!hasMyFodler)
         html += "<option value='myfolder'>Mon dossier</option>";
