@@ -122,7 +122,7 @@ io.on('connection', function(socket){
 					socket.disconnect();
 				});
 				ffmpeg_process2.on('exit', function (e) {
-					console.log('child process desktop exit '+ uid +' - '+ socketissued +' '+ 'status '+e);
+					console.log('child process desktop exit - '+ uid +' - '+ socketissued +' - status '+e);
 					if(m == 'onlyaudio' || m == 'onlydesktop' || m == 'audio-and-desktop') {
                         if(m == 'onlyaudio')
                             encodeAudioToMp4(socket)
@@ -154,7 +154,7 @@ io.on('connection', function(socket){
 					socket.disconnect();
 				});
 				ffmpeg_process.on('exit', function (e) {
-					console.log('child process video exit - '+ uid +' - '+ socketissued +' '+ 'status '+e);
+					console.log('child process video exit - '+ uid +' - '+ socketissued +' - status '+e);
 					if(m == 'video-and-desktop')
 						uploadFile(socket, true);
 					else
