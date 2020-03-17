@@ -476,7 +476,7 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 						'      },\n' +
 						'      {\n' +
 						'        "id": "creator",\n' +
-						'        "value": ["' + socket.handshake.session.cn + '"]\n' +
+						'        "value": ["' + usermediainfosToUpload.presenterUpload.replace(/"/g, '\\"')  + '"]\n' +
 						'      },\n' +
 						'      {\n' +
 						'        "id": "isPartOf",\n' +
