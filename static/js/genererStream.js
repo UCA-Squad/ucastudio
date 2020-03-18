@@ -41,6 +41,6 @@ function genLive() {
 	xhr.setRequestHeader("cache-control", "no-cache");
 
 	xhr.send(data);
-	document.getElementById("idStream").innerHTML = "OK !";
-	document.getElementById("email").innerHTML = "Un mail contenant les informations a été envoyé.";
+	document.getElementById("idStream").innerHTML = "Clé du stream : " + courseid +"<br /> URL : rtmp://openstream.dsi.uca.fr/app";
+	document.getElementById("email").innerHTML = "Si la section Live n'a pas encore été créée, un mail contenant les informations a été envoyé.";
 }
