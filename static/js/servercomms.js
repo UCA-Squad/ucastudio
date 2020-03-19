@@ -86,10 +86,7 @@ function Communications() {
   });
 
    this.socket.on('isEtudiant',function(isEtudiant){
-      if(!isEtudiant) {
-        $('#live').show();
-        $('.bigButton:first-child')[0].style.marginLeft = "38%";
-      }
+     $('#isEtudiant').val(isEtudiant);
   });
 
   this.socket.on('insidemoodle',function(idSerieToselectTmp) {

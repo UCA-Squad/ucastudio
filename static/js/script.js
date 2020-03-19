@@ -41,7 +41,7 @@ $( document ).ready(function() {
     });
 
 
-    if(getParameterByName('courseid') == null) {
+    if(getParameterByName('courseid') == null || document.getElementById('isEtudiant') == true) {
         $('#live').hide();
         $('.bigButton:first-child')[0].style.marginLeft = "38%";
     }
