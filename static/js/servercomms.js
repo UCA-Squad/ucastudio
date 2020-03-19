@@ -85,6 +85,13 @@ function Communications() {
       $('#presenterUpload').val(displayName);
   });
 
+   this.socket.on('isEtudiant',function(isEtudiant){
+      if(!isEtudiant) {
+        $('#live').show();
+        $('.bigButton:first-child')[0].style.marginLeft = "38%";
+      }
+  });
+
   this.socket.on('insidemoodle',function(idSerieToselectTmp) {
     idSerieToselectTmp = idSerieToselectTmp.split( '&' );
     idSerieToselect = idSerieToselectTmp[0].split( '=' );

@@ -360,6 +360,7 @@ io.on('connection', function(socket){
 			else
 				socket.handshake.session.isEtudiant = false;
 			socket.emit('displayName', displayName);
+			socket.emit('isEtudiant', socket.handshake.session.isEtudiant);
 		});
 
 		getListSeries(socket, function (displayName) {
