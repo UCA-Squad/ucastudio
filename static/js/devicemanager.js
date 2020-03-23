@@ -180,6 +180,13 @@ class Device extends EventEmitter {
         "ratio": "16:9"
       },
       {
+        "id" : "hd+",
+        "label": "900p(HD+)",
+        "width": 1600,
+        "height": 900,
+        "ratio": "16:9"
+      },
+      {
         "id" : "hd",
         "label": "720p(HD)",
         "width": 1280,
@@ -520,10 +527,11 @@ class Device extends EventEmitter {
 
   connectDisplayMedia(opts) {
     return new Promise((resolve, reject) => {
+      var constraints = this.constraints;
       if(typeof opts != 'undefined') {
         var constraints = {  video: { width: opts.width, height: opts.height } };
       }
-      return navigator.mediaDevices.getDisplayMedia(this.constraints)
+      return navigator.mediaDevices.getDisplayMedia(constraints)
                .then(stream => {
                  this.stream = stream;
                  this.cachedAudioTracks.forEach(track => this.stream.addTrack(track));
@@ -634,7 +642,13 @@ class Device extends EventEmitter {
 
   changeResolution(res) {
     if (typeof res === 'string' && this.deviceType == 'desktop') {
-      res = {width: parseInt(res) * 4 / 3, height: parseInt(res)};
+      // res = {width: parseInt(res) * 4 / 3, height: parseInt(res)};
+      for(var i = 0; i < this.candidates.length; i++) {
+        if(this.candidates[i].id == res) {
+          res = {width: {ideal: this.candidates[i].width }, height: {ideal: this.candidates[i].height }};
+          break;
+        }
+      }
     }
     else {
       for(var i = 0; i < this.candidates.length; i++) {
