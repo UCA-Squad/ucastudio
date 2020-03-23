@@ -562,7 +562,10 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 							canEncode720p = false;
 						}
 
-
+						var canEncode1080p = true;
+						if((hasSecondStream || onlySecondStream) && metadataFFprobe.streams[0].height < 1080 ) {
+							canEncode1080p = false;
+						}
 
 						if (isAudioFile)
 						{
@@ -572,7 +575,16 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 						}
 						else
 						{
-							if (canEncode720p)
+							if (canEncode1080p)
+							{
+								var processing = '{\n' +
+									'  "workflow": "' + config.opencast_workflow + '"\n' +
+									'    "flagQuality480p": "true",\n' +
+									'    "flagQuality720p": "true",\n' +
+									'    "flagQuality1080p": "true",\n' +
+									'}';
+							}
+							else if (canEncode720p)
 							{
 								var processing = '{\n' +
 									'  "workflow": "' + config.opencast_workflow + '"\n' +
