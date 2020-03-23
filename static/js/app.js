@@ -421,6 +421,14 @@ App.prototype = {
     parent.querySelector('.streamControls input:nth-of-type(1)').checked = false;
     let change = this.changeResolution(streamId, res);
     change.then(streamObj => this.displayStream(streamObj.stream, streamId === 'desktop' ? 'desktop' : 'video', res));
+
+    if(e.target.className == 'desktopReso' && !$(".videoDevice").hasClass('active') && $(".audioDevice ").hasClass('active'))
+    {
+      deviceMgr.connect(audio.getAttribute('data-id'))
+          .catch(function(err){
+            console.log(err);
+          }).then(function () {});
+    }
   },
   changeResolution: function(id, res) {
     if (peers.hasOwnProperty(id)) {
