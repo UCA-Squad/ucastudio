@@ -422,7 +422,8 @@ App.prototype = {
     let change = this.changeResolution(streamId, res);
     change.then(streamObj => this.displayStream(streamObj.stream, streamId === 'desktop' ? 'desktop' : 'video', res));
 
-    if(e.target.className == 'desktopReso' && !$(".videoDevice").hasClass('active') && $(".audioDevice ").hasClass('active'))
+    if(e.target.className == 'desktopReso' && !$(".videoDevice").hasClass('active') && $(".audioDevice ").hasClass('active')
+        && deviceMgr.desktop.cachedAudioTracks && deviceMgr.desktop.cachedAudioTracks.length == 0)
     {
       deviceMgr.connect(audio.getAttribute('data-id'))
           .catch(function(err){
