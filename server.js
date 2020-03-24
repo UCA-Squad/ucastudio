@@ -579,17 +579,22 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 							{
 								var processing = '{\n' +
 									'  "workflow": "' + config.opencast_workflow + '"\n' +
+									'  "configuration": {\n' +
 									'    "flagQuality480p": "true",\n' +
 									'    "flagQuality720p": "true",\n' +
 									'    "flagQuality1080p": "true",\n' +
+									'  }\n' +
 									'}';
 							}
 							else if (canEncode720p)
 							{
 								var processing = '{\n' +
 									'  "workflow": "' + config.opencast_workflow + '"\n' +
+									'  "configuration": {\n' +
 									'    "flagQuality480p": "true",\n' +
 									'    "flagQuality720p": "true",\n' +
+									'    "flagQuality1080p": "false",\n' +
+									'  }\n' +
 									'}';
 							}
 							else
@@ -599,6 +604,7 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 									'  "configuration": {\n' +
 									'    "flagQuality480p": "true",\n' +
 									'    "flagQuality720p": "false",\n' +
+									'    "flagQuality1080p": "false",\n' +
 									'  }\n' +
 									'}'
 							}
