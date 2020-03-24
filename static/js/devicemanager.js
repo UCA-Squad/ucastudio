@@ -583,12 +583,14 @@ class Device extends EventEmitter {
         this.cachedAudioTracks.push(audioTrack);
       }
       else {
+        //correction pb share son chrome ?
+        /*
         if (this.isChrome) {
           this.stream.addTrack(audioTrack);
         }
-        else {
+        else {*/
           this.stream = new MediaStream([audioTrack, ...this.stream.getVideoTracks(), ...this.stream.getAudioTracks()])
-        }
+        //}
         this.emit('stream.mute');
       }
     } catch(e) {
