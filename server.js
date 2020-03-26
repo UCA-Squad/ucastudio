@@ -363,10 +363,9 @@ io.on('connection', function(socket){
 			socket.emit('isEtudiant', socket.handshake.session.isEtudiant);
 		});
 
-		getListSeries(socket, function (displayName) {
-			socket.emit('listseries', displayName, uid, socket.handshake.session.mail);
-			if(typeof socket.handshake.headers.referer !== 'undefined' && socket.handshake.headers.referer.indexOf('serieid') > -1)
-			{
+		getListSeries(socket, function (listSeries) {
+			socket.emit('listseries', listSeries, uid, socket.handshake.session.mail);
+			if(typeof socket.handshake.headers.referer !== 'undefined' && socket.handshake.headers.referer.indexOf('serieid') > -1) {
 				let infos = socket.handshake.headers.referer.split( '?' );
 				if(infos[1])
 					socket.emit('insidemoodle', infos[1]);
@@ -446,7 +445,7 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 			nameFile = uid + '/' + idFileUpload + '/' + idFileUpload + "screen.mp4";
 
 		//on check si l'user à select une serie ou son dossier, si son dossier et exist pas alors on le créer
-		createSerie(uid, socket.handshake.session.mail, usermediainfosToUpload.idSerie, mustBeUpload, socket.handshake.session.isEtudiant).then( function (idSerie) {
+		createSerie(uid, socket, usermediainfosToUpload.idSerie, mustBeUpload).then( function (idSerie) {
 
 			usermediainfosToUpload.idSerie = idSerie;
 
@@ -838,7 +837,7 @@ function checkSerieAcl(uid, serieinfo)
  * @param idSerieSelect
  * @returns {Promise<any>}
  */
-function createSerie(uid, mail, idSerieSelect, mustBeUpload, isEtudiant)
+function createSerie(uid, socket, idSerieSelect, mustBeUpload)
 {
 	return new Promise(function (resolve, reject) {
 
@@ -867,51 +866,64 @@ function createSerie(uid, mail, idSerieSelect, mustBeUpload, isEtudiant)
 				'  }\n' +
 				']';
 
-			if(isEtudiant)
+			if(socket.handshake.session.isEtudiant)
 				uid = 'etd_'+uid;
 
-			var metadata = '[\n' +
-				'  {\n' +
-				'    "label": "Opencast Series DublinCore",\n' +
-				'    "flavor": "dublincore/series",\n' +
-				'    "fields": [\n' +
-				'      {\n' +
-				'        "id": "title",\n' +
-				'        "value": "' + uid + '"\n' +
-				'      },\n' +
-				'      {\n' +
-				'        "id": "subject",\n' +
-				'        "value": "' + mail + '"\n' +
-				'      }\n' +
-				'    ]\n' +
-				'  }\n' +
-				']';
+			var idSerieMyFolder = null;
+			getListSeries(socket, function (listSeries) {
+				listSeries.forEach(function (serie) {
+					if(serie.title == uid)
+						idSerieMyFolder = serie.identifier;
+				});
+
+				if(idSerieMyFolder !== null)
+					resolve(idSerieMyFolder);
+				else
+				{
+					var metadata = '[\n' +
+						'  {\n' +
+						'    "label": "Opencast Series DublinCore",\n' +
+						'    "flavor": "dublincore/series",\n' +
+						'    "fields": [\n' +
+						'      {\n' +
+						'        "id": "title",\n' +
+						'        "value": "' + uid + '"\n' +
+						'      },\n' +
+						'      {\n' +
+						'        "id": "subject",\n' +
+						'        "value": "' + socket.handshake.session.mail + '"\n' +
+						'      }\n' +
+						'    ]\n' +
+						'  }\n' +
+						']';
 
 
-			var options = {
-				method: "POST",
-				url: config.opencast_series_url,
-				ca: fs.readFileSync(config.opencast_cert),
-				headers:
-					{
-						'cache-control': 'no-cache',
-						'Authorization': 'Basic ' + config.opencast_authentication,
-						'content-type': 'multipart/form-data;'
-					},
-				formData:
-					{
-						metadata,
-						acl
-					}
-			};
+					var options = {
+						method: "POST",
+						url: config.opencast_series_url,
+						ca: fs.readFileSync(config.opencast_cert),
+						headers:
+							{
+								'cache-control': 'no-cache',
+								'Authorization': 'Basic ' + config.opencast_authentication,
+								'content-type': 'multipart/form-data;'
+							},
+						formData:
+							{
+								metadata,
+								acl
+							}
+					};
 
-			var request = require("request");
-			request(options, function (error, response, body) {
-				if (error) {
-					throw new Error(error);
-				} else {
-					var obj = JSON.parse(body);
-					resolve(obj.identifier);
+					var request = require("request");
+					request(options, function (error, response, body) {
+						if (error) {
+							throw new Error(error);
+						} else {
+							var obj = JSON.parse(body);
+							resolve(obj.identifier);
+						}
+					});
 				}
 			});
 		}
