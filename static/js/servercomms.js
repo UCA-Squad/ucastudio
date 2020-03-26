@@ -45,7 +45,7 @@ function Communications() {
 
   this.socket.on('listseries',function(listSeries, uid, email){
     var html = '<option value="" disabled selected>Sélectionner votre bibliothèque</option>';
-    var htmlTmp;
+    var htmlTmp = '';
     if (typeof listSeries !== 'undefined' && listSeries.length > 0) {
       var hasMyFodler = false;
       $.each(listSeries, function (index, item) {
