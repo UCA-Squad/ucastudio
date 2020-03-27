@@ -19,6 +19,26 @@ $("#alertNoWebcam > .close").on('click', function () {
 
 $( document ).ready(function() {
 
+    function receiveMessage(event){
+
+        if(Number(event.data) < 20)
+        {
+            $('#listResoDesktop li.hd').hide();
+            $('#listResoDesktop li.hdplus').hide();
+            $('#listResoDesktop li.fullhd').hide();
+
+
+            $('#listResoWebCam li.hd').hide();
+            console.log($('#listResoDesktop').find('li:visible:last'))
+            // $('#listResoWebCam li.fullhd').hide();
+            // console.log($('#listResoWebCam').find('li:visible:last'))
+        }
+
+        $('#debitValue').val(Number(event.data));
+    }
+    window.addEventListener("message", receiveMessage, false);
+
+
     $(document).on('click','label.mediadevice.action.audioDevice.active',function(event){
         if($(event.target).attr('class') == 'streamControls' || $(event.target).attr('class') == 'mediadevice action audioDevice active')
             event.preventDefault();
