@@ -75,7 +75,7 @@ io.on('connection', function(socket){
 				'-c:v', 'copy', '-preset', 'fast',
 				'-use_wallclock_as_timestamps', '1',
 				'-async', '1',
-				'-b:a', '192k', '-strict', '-2',
+				'-b:a', '96k', '-strict', '-2',
 				'./static/records/ucastudio/' + uid + '/' + socketissued + '/' + socketissued + '.webm'
 			];
 
@@ -95,7 +95,7 @@ io.on('connection', function(socket){
 					'-c:v', 'copy', '-preset', 'fast',
 					'-use_wallclock_as_timestamps', '1',
 					'-async', '1',
-					'-b:a', '192k', '-strict', '-2',
+					'-b:a', '96k', '-strict', '-2',
 					'./static/records/ucastudio/' + uid + '/' + socketissued + '/' + socketissued + 'screen.webm'
 				];
 			}
