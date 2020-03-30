@@ -251,20 +251,14 @@ class Device extends EventEmitter {
     let _audConstraints = {audio: {exact: device.deviceId}};
     let _vidConstraints = {audio: true, video: {exact: device.deviceId, width: {exact: 640}, height: {exact: 480}, facingMode: "user"} };
 
-    var videoValue = { width: {ideal: 1280}, height: {ideal: 720}};
-
-    if($("#debitValue").val() < 20)
-      videoValue = { width: {ideal: 640}, height: {ideal: 480}};
-
-
     let _desktop = {
       firefox: {
         audio: false,
-        video: videoValue
+        video: {mediaSource: 'screen', width: {ideal: 1280}, height: {ideal: 720}}
       },
       chrome: {
         audio: false,
-        video:  videoValue
+        video: { width: {ideal: 1280}, height: {ideal: 720}}
       },
       other: null
     }
@@ -413,8 +407,6 @@ class Device extends EventEmitter {
                 }
 
                 resolve(stream);
-
-                console.log($('#listResoDesktop').find('li:visible:last').find('button').html());
 
                 document.querySelector('label.labelVideoResolution:first-of-type span').textContent = 'VGA (480p,4:3)';
                 $('.videoDevice').removeClass('seizeneuvieme').addClass('quartretiers');
@@ -639,17 +631,12 @@ class Device extends EventEmitter {
             stream.getTracks().forEach(track => track.stop());
 
             if (cmpt < this.candidates.length) {
-              console.log(candidate.id);
-              // $('body').append('<input type="hidden" id="debitValue" value="'+Number(event.data)+'"');
-              if($('#debitValue').val() < 20 && (candidate.id == 'svga' || candidate.id == 'hd' || candidate.id == 'hdplus' || candidate.id == 'fullhd'))
-                $('#listResoWebCam .' + candidate.id).hide();
-
               this.gum(this.candidates[cmpt++], device, cmpt);
             }
           })
           .catch((error) => {
             if(candidate.id)
-              $('#listResoWebCam .' + candidate.id).hide();
+              $('.' + candidate.id).hide();
             if (cmpt < this.candidates.length)
               this.gum(this.candidates[cmpt++], device, cmpt);
           });

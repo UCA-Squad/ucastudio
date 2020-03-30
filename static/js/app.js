@@ -115,7 +115,7 @@ function App() {
 
   this.attachEvents();
   setTimeout(() => {
-    // document.body.classList.remove('loading');
+    document.body.classList.remove('loading');
   }, 500);
 }
 
@@ -254,8 +254,6 @@ App.prototype = {
         //calcul resolutio
 
         let resolution = stream.getVideoTracks()[0].getSettings().height + 'p';
-
-        console.log(resolution);
 
         if(resSelect != null)
           videoControls.querySelector('label:first-of-type span').textContent = $('#listResoDesktop').find('button[value="'+resSelect+'"]').html();

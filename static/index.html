@@ -27,7 +27,7 @@
             <img alt="Français" src="res/flags/fra.png" />
         </label>
         <ul></ul>
-        <a><iframe src="https://ent.uca.fr/mediamanager/checkSpeedNtwk" class="checkWifi" onload="$('body').removeClass('loading');"></iframe></a>
+<!--        <a><iframe src="https://ent.uca.fr/mediamanager/checkSpeedNtwk" class="checkWifi" onload="$('body').removeClass('loading');"></iframe></a>-->
         <a class="speedNetwork" style="color: white;" title="Testez votre débit" href="https://www.speedtest.net/" target="_blank"><i class="fas fa-wifi fa-2x" style="margin-right: 1rem"></i></a>
         <a href="https://ippa.uca.fr/medias/fichier/ucamedia-enregistrement-et-generation-de-live_1575468327476-pdf" target="_blank" id="help" title="Accéder à la documentation UCAMedia">
             <i class="fas fa-question-circle fa-2x"></i>
@@ -45,9 +45,7 @@
             <circle r="82" cx="96" cy="96" fill="none" stroke="#00bdc4" stroke-width="8" stroke-dashoffset="0" stroke-dasharray="515"></circle>
             <circle r="82" cx="96" cy="96" fill="none" stroke="white" stroke-width="14" stroke-dashoffset="20" stroke-dasharray="515"></circle>
         </svg>
-<!--        <span class="loaderText" data-translate="LOADING">Chargement...</span>-->
-        <span class="loaderText" >Test de votre débit en cours...</span>
-
+        <span class="loaderText" data-translate="LOADING">Chargement...</span>
     </div>
 </div>
 <div id="uploadProgress" style="display: none"></div>
@@ -307,7 +305,6 @@
             <p><a href="#" id="saveRecordings" data-translate="PRODUCTION_SAVE">Télécharger une archive de vos médias</a></p>
             <p class="linkFusion"><a href="#" id="saveRecordingsFusion" data-translate="PRODUCTION_SAVE_FUSION">Télécharger une archive et fusionner vos médias (traitement long...)</a></p>
         </div>
-        <input type="hidden" id="debitValue" value="" />
     </div>
     <div class="modalFooter">
         <a href="https://ent.uca.fr/mediamanager/" target="_blank"><label class="button button-blue">Gérer mes vidéos</label></a>
