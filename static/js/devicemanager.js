@@ -180,7 +180,7 @@ class Device extends EventEmitter {
         "ratio": "16:9"
       },
       {
-        "id" : "hd+",
+        "id" : "hdplus",
         "label": "900p(HD+)",
         "width": 1600,
         "height": 900,
