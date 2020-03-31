@@ -253,9 +253,11 @@ App.prototype = {
       {
         //calcul resolutio
 
-        let resolution = stream.getVideoTracks()[0].getSettings().height + 'p';
-
-        console.log(resolution);
+        // let resolution = stream.getVideoTracks()[0].getSettings().height + 'p';
+        if($("#debitValue").val() < 20)
+          resolution = 'qhd';
+        else
+          resolution = 'hd';
 
         if(resSelect != null)
           videoControls.querySelector('label:first-of-type span').textContent = $('#listResoDesktop').find('button[value="'+resSelect+'"]').html();
