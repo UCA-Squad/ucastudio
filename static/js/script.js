@@ -23,13 +23,11 @@ $( document ).ready(function() {
 
         if(Number(event.data) < 20)
         {
-            $('#listResoDesktop li.hd').hide();
-            $('#listResoDesktop li.hdplus').hide();
-            $('#listResoDesktop li.fullhd').hide();
-
+            $('#listResoDesktop li.hd').css("background-color", "red");
+            $('#listResoDesktop li.hdplus').css("background-color", "red");
+            $('#listResoDesktop li.fullhd').css("background-color", "red");
 
             $('#listResoWebCam li.hd').hide();
-            console.log($('#listResoDesktop').find('li:visible:last'))
             // $('#listResoWebCam li.fullhd').hide();
             // console.log($('#listResoWebCam').find('li:visible:last'))
         }
