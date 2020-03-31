@@ -30,8 +30,10 @@ $( document ).ready(function() {
             $('#listResoDesktop li.fullhd').css("background-color", "red");
             $('#listResoDesktop li.fullhd').attr("title", "Résolution non conseillée pour votre débit");
 
-            $('#listResoWebCam li.hd').hide();
-            // $('#listResoWebCam li.fullhd').hide();
+            $('#listResoWebCam li.hd').css("background-color", "red");
+            $('#listResoWebCam li.hd').attr("title", "Résolution non conseillée pour votre débit");
+            $('#listResoWebCam li.fullhd').css("background-color", "red");
+            $('#listResoWebCam li.fullhd').attr("title", "Résolution non conseillée pour votre débit");
             // console.log($('#listResoWebCam').find('li:visible:last'))
         }
 
