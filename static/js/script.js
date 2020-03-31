@@ -33,6 +33,7 @@ $( document ).ready(function() {
         }
 
         $('#debitValue').val(Number(event.data));
+        $('body').removeClass('loading');
     }
     window.addEventListener("message", receiveMessage, false);
 
