@@ -199,22 +199,7 @@ class Device extends EventEmitter {
         "width": 800,
         "height": 600,
         "ratio": "4:3"
-      },
-      {
-        "id" : "nhd",
-        "label": "360p(nHD)",
-        "width": 640,
-        "height": 360,
-        "ratio": "16:9"
-      },
-      {
-        "id" : "qvga",
-        "label": "QVGA",
-        "width": 320,
-        "height": 240,
-        "ratio": "4:3"
       }
-
     ];
 
     Object.defineProperty(this, 'candidates', {
@@ -671,7 +656,7 @@ class Device extends EventEmitter {
       for(var i = 0; i < this.candidates.length; i++) {
         if(this.candidates[i].id == res) {
 
-          if (res == 'nhd' || res == 'hd' || res == 'fullhd')
+          if (res == 'hd' || res == 'fullhd')
             $('.videoDevice').removeClass('quartretiers').addClass('seizeneuvieme');
           else
             $('.videoDevice').removeClass('seizeneuvieme').addClass('quartretiers');
