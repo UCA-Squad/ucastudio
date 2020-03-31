@@ -199,6 +199,13 @@ class Device extends EventEmitter {
         "width": 800,
         "height": 600,
         "ratio": "4:3"
+      },
+      {
+        "id" : "qhd",
+        "label": "qHD",
+        "width": 960,
+        "height": 540,
+        "ratio": "16:9"
       }
     ];
 
@@ -234,12 +241,12 @@ class Device extends EventEmitter {
     this.deviceType = device.deviceType || (device.kind === 'audioinput' ? 'audio' : 'video');
 
     let _audConstraints = {audio: {exact: device.deviceId}};
-    let _vidConstraints = {audio: true, video: {exact: device.deviceId, width: {exact: 640}, height: {exact: 480}, facingMode: "user"} };
+    let _vidConstraints = {audio: true, video: { exact: device.deviceId, width: {exact: 640}, height: {exact: 480}, facingMode: "user" , frameRate: { max: 25 } } };
 
-    var videoValue = { width: {ideal: 1280}, height: {ideal: 720}};
+    var videoValue = { width: {ideal: 1280}, height: {ideal: 720} , frameRate: { max: 25 }};
 
     if($("#debitValue").val() < 20)
-      videoValue = { width: {ideal: 640}, height: {ideal: 480}};
+      videoValue = { width: {ideal: 960}, height: {ideal: 540} , frameRate: { max: 25 }};
 
 
     let _desktop = {
@@ -451,11 +458,11 @@ class Device extends EventEmitter {
 
         let constraintMedia = this.constraints;
         if(opts == "mustListReso")
-          constraintMedia = {audio: {deviceId: {exact: deviceAudioIdTmp}}, video: { deviceId: { exact: deviceVideoIdTmp, width: {exact: 640}, height: {exact: 480}, facingMode: "user"} } };
+          constraintMedia = {audio: {deviceId: {exact: deviceAudioIdTmp}}, video: { deviceId: { exact: deviceVideoIdTmp }, width: {exact: 640}, height: {exact: 480}, facingMode: "user", frameRate: { max: 25 } } };
         else{
           //new add
           if(this.deviceType == 'video')
-            this.constraints['video'] = { deviceId: { exact: deviceVideoIdTmp, width: {exact: 640}, height: {exact: 480}, facingMode: "user"} };
+            this.constraints['video'] = { deviceId: { exact: deviceVideoIdTmp }, width: {exact: 640}, height: {exact: 480}, facingMode: "user" , frameRate: { max: 25 }} ;
 
           this.constraints['audio'] = {deviceId: {exact: deviceAudioIdTmp}};
 
@@ -523,7 +530,7 @@ class Device extends EventEmitter {
     return new Promise((resolve, reject) => {
       var constraints = this.constraints;
       if(typeof opts != 'undefined') {
-        var constraints = {  video: { width: opts.width, height: opts.height } };
+        var constraints = {  video: { width: opts.width, height: opts.height, frameRate: { max: 25 } } };
       }
       return navigator.mediaDevices.getDisplayMedia(constraints)
                .then(stream => {
@@ -624,7 +631,6 @@ class Device extends EventEmitter {
             stream.getTracks().forEach(track => track.stop());
 
             if (cmpt < this.candidates.length) {
-              console.log(candidate.id);
               // $('body').append('<input type="hidden" id="debitValue" value="'+Number(event.data)+'"');
               if($('#debitValue').val() < 20 && (candidate.id == 'svga' || candidate.id == 'hd' || candidate.id == 'hdplus' || candidate.id == 'fullhd'))
                 $('#listResoWebCam .' + candidate.id).hide();
@@ -647,7 +653,7 @@ class Device extends EventEmitter {
       // res = {width: parseInt(res) * 4 / 3, height: parseInt(res)};
       for(var i = 0; i < this.candidates.length; i++) {
         if(this.candidates[i].id == res) {
-          res = {width: {ideal: this.candidates[i].width }, height: {ideal: this.candidates[i].height }};
+          res = {width: {ideal: this.candidates[i].width }, height: {ideal: this.candidates[i].height }, frameRate: { max: 25 } };
           break;
         }
       }
@@ -661,7 +667,7 @@ class Device extends EventEmitter {
           else
             $('.videoDevice').removeClass('seizeneuvieme').addClass('quartretiers');
 
-          res = {width: {exact: this.candidates[i].width }, height: {exact: this.candidates[i].height }};
+          res = {width: {exact: this.candidates[i].width }, height: {exact: this.candidates[i].height }, frameRate: { max: 25 }};
           break;
         }
       }
