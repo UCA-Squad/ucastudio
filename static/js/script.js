@@ -24,8 +24,11 @@ $( document ).ready(function() {
         if(Number(event.data) < 20)
         {
             $('#listResoDesktop li.hd').css("background-color", "red");
+            $('#listResoDesktop li.hd').attr("title", "Résolution non conseillée pour votre débit");
             $('#listResoDesktop li.hdplus').css("background-color", "red");
+            $('#listResoDesktop li.hdplus').attr("title", "Résolution non conseillée pour votre débit");
             $('#listResoDesktop li.fullhd').css("background-color", "red");
+            $('#listResoDesktop li.fullhd').attr("title", "Résolution non conseillée pour votre débit");
 
             $('#listResoWebCam li.hd').hide();
             // $('#listResoWebCam li.fullhd').hide();
