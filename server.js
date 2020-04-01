@@ -6,6 +6,7 @@ var fluentFFMPEG = require('fluent-ffmpeg');
 var CASAuthentication = require('connect-cas-uca');
 var useragent = require('useragent');
 var logFileEvents = './static/records/ucastudio/logFileEvents.csv';
+var debitValue = null;
 var fs = require('fs');
 global.hasSendMailError = false;
 const server = require('https').createServer({
@@ -44,7 +45,11 @@ app.use(express.static(__dirname + "/static/"));
 
 io.on('connection', function(socket){
 
-	socket.emit('moodle', config.moodle); 
+	socket.on('debitValue', function (debit) {
+		debitValue = debit;
+	});
+
+	socket.emit('moodle', config.moodle);
 	var ffmpeg_process, feedStream=false;
 	var ffmpeg_process2, feedStream2=false;
 	var hasCheckFileIsWrite = false,  hasCheckFileIsWrite2 = false;
@@ -163,7 +168,7 @@ io.on('connection', function(socket){
 			}
 
 			try {
-				fs.writeFileSync(logFileEvents, 'startrec;'+uid+';'+getDateNow()+';'+socketissued+';'+m+';"'+agent.toString()+'"'+"\n", {flag: 'a'});
+				fs.writeFileSync(logFileEvents, 'startrec;'+uid+';'+getDateNow()+';'+socketissued+';'+m+';debit:'+debitValue+'Mbps'+';"'+agent.toString()+'"'+"\n", {flag: 'a'});
 			} catch (err) {
 				sendEmailError('error write logFileEvents' + err, uid+' / '+agent.toString());
 				console.error(getDateNow()+' : '+err)

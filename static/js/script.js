@@ -38,7 +38,8 @@ $( document ).ready(function() {
     
 
     function receiveMessage(event){
-	$('body').removeClass('loading');
+	    $('body').removeClass('loading');
+        comms.emit('debitValue', Number(event.data));
         if(Number(event.data) < 2)
         {
             $('#listResoDesktop li.hd').attr("title", "Résolution non conseillée pour votre débit");
