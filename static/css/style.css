@@ -2176,3 +2176,7 @@ ul#listMicAvailable li:last-child {
   right: 1em;
   width: 15em;
 }
+
+#listResoDesktop li, #listResoWebCam li{
+  border-bottom: 1px solid #FAF8F5;
+}
