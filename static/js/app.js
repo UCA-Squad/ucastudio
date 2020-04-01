@@ -254,7 +254,7 @@ App.prototype = {
         //calcul resolutio
 
         // let resolution = stream.getVideoTracks()[0].getSettings().height + 'p';
-        if($("#debitValue").val() < 20)
+        if($("#debitValue").val() < 3)
           resolution = 'qhd';
         else
           resolution = 'hd';

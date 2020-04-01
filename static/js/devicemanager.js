@@ -245,10 +245,9 @@ class Device extends EventEmitter {
 
     var videoValue = { width: {ideal: 1280}, height: {ideal: 720} , frameRate: { ideal :25, max: 30 } };
 
-    if($("#debitValue").val() < 20)
+    if($("#debitValue").val() < 3)
       videoValue = { width: {ideal: 960}, height: {ideal: 540} , frameRate: { ideal :25, max: 30 } };
-
-
+    
     let _desktop = {
       firefox: {
         audio: false,
