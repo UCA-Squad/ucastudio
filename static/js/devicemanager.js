@@ -243,19 +243,19 @@ class Device extends EventEmitter {
     let _audConstraints = {audio: {exact: device.deviceId}};
     let _vidConstraints = {audio: true, video: { exact: device.deviceId, width: {exact: 640}, height: {exact: 480}, facingMode: "user" , frameRate: { ideal :25, max: 30 } } };
 
-    var videoValue = { width: {ideal: 1280}, height: {ideal: 720} , frameRate: { ideal :25, max: 30 } };
+    var desktopValue = { width: {ideal: 1280}, height: {ideal: 720} , frameRate: { ideal :25, max: 30 } };
 
     if($("#debitValue").val() < 3)
-      videoValue = { width: {ideal: 960}, height: {ideal: 540} , frameRate: { ideal :25, max: 30 } };
+      desktopValue = { width: {ideal: 960}, height: {ideal: 540} , frameRate: { ideal :25, max: 30 } };
     
     let _desktop = {
       firefox: {
         audio: false,
-        video: videoValue
+        video: desktopValue
       },
       chrome: {
         audio: false,
-        video:  videoValue
+        video:  desktopValue
       },
       other: null
     }
