@@ -42,21 +42,24 @@
 <input type="checkbox" class="toggleCover hiddenCheck" id="toggleSaveCreationModal" autocomplete="off" />
 <div id="introCover">
     <div class="loader">
-        <!--<svg width="192" height="192">
-            <circle r="82" cx="96" cy="96" fill="none" stroke="#00bdc4" stroke-width="8" stroke-dashoffset="0" stroke-dasharray="515"></circle>
-            <circle r="82" cx="96" cy="96" fill="none" stroke="white" stroke-width="14" stroke-dashoffset="20" stroke-dasharray="515"></circle>
-        </svg>-->
-<!--        <span class="loaderText" data-translate="LOADING">Chargement...</span>-->
-        <!--<span class="loaderText" >Test de votre débit en cours...</span>-->
-	<div id="debitBar" class="c100 p0 big" style="right: 20px; margin-bottom: 20px;">
-                <span id="debitPercent">0%</span>
-        	<div class="slice"><div class="bar"></div><div class="fill"></div></div>
+        <div class="statutLoading" style="display: none">
+            <svg width="192" height="192">
+                <circle r="82" cx="96" cy="96" fill="none" stroke="#00bdc4" stroke-width="8" stroke-dashoffset="0" stroke-dasharray="515"></circle>
+                <circle r="82" cx="96" cy="96" fill="none" stroke="white" stroke-width="14" stroke-dashoffset="20" stroke-dasharray="515"></circle>
+            </svg>
+            <span class="loaderText" data-translate="LOADING">Chargement...</span>
         </div>
-	<span>Test de votre débit en cours...</span>
+        <div class="debitCircle">
+            <div id="debitBar" class="c100 p0 big" style="right: 20px; margin-bottom: 20px;">
+                <span id="debitPercent">0%</span>
+                <div class="slice">
+                    <div class="bar"></div>
+                    <div class="fill"></div>
+                </div>
+            </div>
+            <span>Test de votre débit en cours...</span>
+        </div>
     </div>
-  <!--<div class="progress">
-  <div id="debitBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>-->
-</div>
 </div>
 <div id="uploadProgress" style="display: none"></div>
 <div id="cover"></div>
