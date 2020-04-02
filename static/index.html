@@ -5,19 +5,19 @@
     <meta name="viewport" content="width=device-width">
     <title>UCAStudio</title>
     <link rel="stylesheet"  href="css/circle.css">
-    <link rel="stylesheet" type="text/css" href="https://cdn.uca.fr/css/uca.min.last.css">
+    <link rel="stylesheet" type="text/css" href="css/cdn.uca.fr.css">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" media="screen and (max-width: 1300px)" href="css/screen.css">
     <link rel="chrome-webstore-item" href="https://chrome.google.com/webstore/detail/oghkihildgnkedhlolgjomnbfmjpmddm">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
-    <link rel="stylesheet" href="//vjs.zencdn.net/7.3.0/video-js.min.css" >
+    <link rel="stylesheet" href="css/video-js.min.css" >
     <link rel="stylesheet" href="css/videojs-vjsdownload.css" >
 </head>
 <body class="loading translating">
 <header>
     <a href="index.html" id="UCAStudio">
         <span>
-            <img src="https://cdn.uca.fr/images/logos/logo_uca_mini_light.png" height="30px"  style="margin-top: 0.25em">
+            <img src="img/logo_uca_mini_light.png" height="30px"  style="margin-top: 0.25em">
             <span style="position:absolute;padding-left: 5px">Studio</span>
         </span>
     </a>
@@ -29,7 +29,6 @@
         </label>
         <ul></ul>
         <a><iframe src="https://mediasmanager.dsi.uca.fr/checkSpeedNtwk" class="checkWifi"></iframe></a>
-        <a class="speedNetwork" style="color: white;" title="Testez votre débit" href="https://www.speedtest.net/" target="_blank"><i class="fas fa-wifi fa-2x" style="margin-right: 1rem"></i></a>
         <a href="https://ippa.uca.fr/medias/fichier/ucamedia-enregistrement-et-generation-de-live_1575468327476-pdf" target="_blank" id="help" title="Accéder à la documentation UCAMedia">
             <i class="fas fa-question-circle fa-2x"></i>
         </a>
@@ -157,7 +156,7 @@
                             <span></span>
                             <ul id="listResoDesktop">
                                 <li class="vga"><button type="button" value="vga" class="desktopReso">VGA (480p,4:3)</button></li>
-                                <li class="svga"><button type="button" value="qhd" class="desktopReso">qHD (540p,16:9)</button></li>
+                                <li class="qhd"><button type="button" value="qhd" class="desktopReso">qHD (540p,16:9)</button></li>
                                 <li class="svga"><button type="button" value="svga" class="desktopReso">SVGA (600p,4:3)</button></li>
                                 <li class="hd"><button type="button" value="hd" class="desktopReso">HD (720p,16:9)</button></li>
                                 <li class="hdplus"><button type="button" value="hdplus" class="desktopReso">HD+ (900p,16:9)</button></li>
@@ -198,6 +197,7 @@
                         <label for="videoResolution" class="labelVideoResolution">
                             <span></span>
                             <ul  id="listResoWebCam">
+                                <li class="nhd" style="display: none"><button type="button" value="nhd">nHD (360p,16:9)</button></li>
                                 <li class="vga" style="display: none"><button type="button" value="vga">VGA (480p,4:3)</button></li>
                                 <li class="qhd" style="display: none"><button type="button" value="qhd">qHD (540p,16:9)</button></li>
                                 <li class="svga" style="display: none"><button type="button" value="svga">SVGA (600p,4:3)</button></li>
@@ -307,7 +307,7 @@
                     <p class='vjs-no-js'>
                     To view this video please enable JavaScript, and consider upgrading to a web browser that
                     <a href='https://videojs.com/html5-video-support/' target='_blank'>supports HTML5 video</a>
-                </p>
+                    </p>
                 </video>
                 <video
                         id="videoPreview"
@@ -336,7 +336,7 @@
 <script src="js/genererStream.js"></script>
 <script src="js/jquery.min.js"></script>
 <script src="js/adapter-latest.js"></script>
-<script src="//vjs.zencdn.net/7.3.0/video.min.js"></script>
+<script src="js/video.min.js"></script>
 <script src="js/FileSaver.min.js"></script>
 <script src="js/script.js"></script>
 <script src="js/utils.js"></script>
