@@ -108,7 +108,7 @@ io.on('connection', function(socket){
 			if(m != "onlyaudio") {
 				var i = 6;
 				getRate('webcam').forEach(function (element) {
-					ops.splice(i, 0, );
+					ops.splice(i, 0, element);
 					i++;
 				});
 				var i = 6;
@@ -1041,28 +1041,9 @@ function sendEmailError(err, user) {
  */
 function getRate(type, reso)
 {
-	var rateValue = null;
+	var rateValue;
 
 	if(type == 'webcam') {
-		switch (reso) {
-			case 'qhd':
-			case 'svga': //à tester
-				rateValue = ['-maxrate', '1500k', '-bufsize', '3000k'];
-				break;
-			case 'hd':
-				rateValue = ['-maxrate', '2400k', '-bufsize', '4800k'];
-				break;
-			case 'xga':  //à tester
-				rateValue = ['-maxrate', '2060k', '-bufsize', '4120k'];
-				break;
-			case 'hdplus': //à tester
-				rateValue = ['-maxrate', '3500k', '-bufsize', '7000k'];
-				break;
-			default:
-				rateValue = '';
-		}
-	}
-	else {
 		switch (reso) {
 			case 'qhd':
 			case 'svga':
@@ -1078,7 +1059,23 @@ function getRate(type, reso)
 				rateValue = ['-maxrate', '3500k', '-bufsize', '7000k'];
 				break;
 			default:
-				rateValue = '';
+				rateValue = [];
+		}
+	}
+	else {
+		switch (reso) {
+			case 'qhd':
+			case 'svga':
+				rateValue = ['-maxrate', '1500k', '-bufsize', '3000k'];
+				break;
+			case 'hd':
+				rateValue = ['-maxrate', '2400k', '-bufsize', '4800k'];
+				break;
+			case 'hdplus':
+				rateValue = ['-maxrate', '3500k', '-bufsize', '7000k'];
+				break;
+			default:
+				rateValue = [];
 		}
 	}
 
