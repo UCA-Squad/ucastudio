@@ -1045,56 +1045,40 @@ function getRate(type, reso)
 
 	if(type == 'webcam') {
 		switch (reso) {
-			case 'vga':
-				rateValue = ['-maxrate', '2500k', '-bufsize', '5000k']
-				break;
 			case 'qhd':
-				rateValue = ['-maxrate', '1500k', '-bufsize', '1900k']
-				break;
 			case 'svga': //à tester
-				rateValue = ['-maxrate', '1500k', '-bufsize', '1900k']
+				rateValue = ['-maxrate', '1500k', '-bufsize', '3000k'];
 				break;
 			case 'hd':
-				rateValue = ['-maxrate', '2496k', '-bufsize', '3000k']
+				rateValue = ['-maxrate', '2400k', '-bufsize', '4800k'];
 				break;
 			case 'xga':  //à tester
-				rateValue = ['-maxrate', '2496k', '-bufsize', '3000k']
+				rateValue = ['-maxrate', '2060k', '-bufsize', '4120k'];
 				break;
 			case 'hdplus': //à tester
-				rateValue = ['-maxrate', '2496k', '-bufsize', '3000k']
-				break;
-			case 'fullhd':
-				rateValue = ['-maxrate', '2800k', '-bufsize', '2800k']
+				rateValue = ['-maxrate', '3500k', '-bufsize', '7000k'];
 				break;
 			default:
-				rateValue = ['-maxrate', '2500k', '-bufsize', '5000k']
+				rateValue = '';
 		}
 	}
 	else {
 		switch (reso) {
-			case 'vga':
-				rateValue = ['-maxrate', '2500k', '-bufsize', '5000k']
-				break;
 			case 'qhd':
-				rateValue = ['-maxrate', '1500k', '-bufsize', '1900k']
-				break;
-			case 'svga': //à tester
-				rateValue = ['-maxrate', '1500k', '-bufsize', '1900k']
+			case 'svga':
+				rateValue = ['-maxrate', '1500k', '-bufsize', '3000k'];
 				break;
 			case 'hd':
-				rateValue = ['-maxrate', '2496k', '-bufsize', '3000k']
+				rateValue = ['-maxrate', '2400k', '-bufsize', '4800k'];
 				break;
 			case 'xga':  //à tester
-				rateValue = ['-maxrate', '2496k', '-bufsize', '3000k']
+				rateValue = ['-maxrate', '2060k', '-bufsize', '4120k'];
 				break;
 			case 'hdplus': //à tester
-				rateValue = ['-maxrate', '2496k', '-bufsize', '3000k']
-				break;
-			case 'fullhd':
-				rateValue = ['-maxrate', '2800k', '-bufsize', '2800k']
+				rateValue = ['-maxrate', '3500k', '-bufsize', '7000k'];
 				break;
 			default:
-				rateValue = ['-maxrate', '2500k', '-bufsize', '5000k']
+				rateValue = '';
 		}
 	}
 
