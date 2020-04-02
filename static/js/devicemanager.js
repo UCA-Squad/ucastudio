@@ -194,6 +194,13 @@ class Device extends EventEmitter {
         "ratio": "16:9"
       },
       {
+        "id" : "xga",
+        "label": "768p",
+        "width": 1024,
+        "height": 768,
+        "ratio": "4:3"
+      },
+      {
         "id" : "svga",
         "label": "SVGA",
         "width": 800,
@@ -457,10 +464,7 @@ class Device extends EventEmitter {
 
         let constraintMedia = this.constraints;
         if(opts == "mustListReso")
-        {
-          console.log('share webcam ?');
           constraintMedia = {audio: {deviceId: {exact: deviceAudioIdTmp}}, video: { deviceId: { exact: deviceVideoIdTmp }, width: {exact: 640}, height: {exact: 480}, facingMode: "user", frameRate: { ideal :25, max: 30 } } };
-          }
         else{
           //new add
           if(this.deviceType == 'video')
@@ -622,6 +626,7 @@ class Device extends EventEmitter {
       $('#startRecord').addClass('canRecord');
       document.getElementById("startRecord").disabled = false;
       $('#gumRunning').remove();
+      $('#listResoWebCam > li:visible:last').addClass('last-visible-li');
     }
 
     setTimeout(() => {
