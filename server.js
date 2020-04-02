@@ -67,7 +67,7 @@ io.on('connection', function(socket){
 			console.error(getDateNow()+' : '+err);
 		}
 
-		socket.on('start', function (m) {
+		socket.on('start', function (m, resDesktop = null, resWebCam = null) {
 
 			fs.mkdirSync('./static/records/ucastudio/' + uid + '/'+socketissued+'/');
 
@@ -103,6 +103,19 @@ io.on('connection', function(socket){
 					'-b:a', '96k', '-strict', '-2',
 					'./static/records/ucastudio/' + uid + '/' + socketissued + '/' + socketissued + 'screen.webm'
 				];
+			}
+
+			if(m != "onlyaudio") {
+				var i = 6;
+				getRate('webcam').forEach(function (element) {
+					ops.splice(i, 0, );
+					i++;
+				});
+				var i = 6;
+				getRate('desktop').forEach(function (element) {
+					ops2.splice(i, 0, element);
+					i++;
+				});
 			}
 
 			if(m == 'video-and-desktop' || m == 'audio-and-desktop' || m == 'onlyaudio' || m == 'onlydesktop') {
@@ -1018,4 +1031,124 @@ function sendEmailError(err, user) {
 
 		hasSendMailError = true;
 	}
+}
+
+/**
+ *
+ * @param type
+ * @param reso
+ * @returns {string[]}
+ */
+function getRate(type, reso)
+{
+	var rateValue = null;
+
+	let _candidates = [
+		{
+			"id" : "vga",
+			"label": "VGA",
+			"width": 640,
+			"height": 480,
+			"ratio": "4:3"
+		},
+		{
+			"id" : "fullhd",
+			"label": "1080p(FHD)",
+			"width": 1920,
+			"height": 1080,
+			"ratio": "16:9"
+		},
+		{
+			"id" : "hdplus",
+			"label": "900p(HD+)",
+			"width": 1600,
+			"height": 900,
+			"ratio": "16:9"
+		},
+		{
+			"id" : "hd",
+			"label": "720p(HD)",
+			"width": 1280,
+			"height": 720,
+			"ratio": "16:9"
+		},
+		{
+			"id" : "xga",
+			"label": "768p",
+			"width": 1024,
+			"height": 768,
+			"ratio": "4:3"
+		},
+		{
+			"id" : "svga",
+			"label": "SVGA",
+			"width": 800,
+			"height": 600,
+			"ratio": "4:3"
+		},
+		{
+			"id" : "qhd",
+			"label": "qHD",
+			"width": 960,
+			"height": 540,
+			"ratio": "16:9"
+		}
+	];
+
+	if(type == 'webcam') {
+		switch (reso) {
+			case 'vga':
+				rateValue = ['-maxrate', '2500k', '-bufsize', '5000k']
+				break;
+			case 'qhd':
+				rateValue = ['-maxrate', '1500k', '-bufsize', '1900k']
+				break;
+			case 'svga': //à tester
+				rateValue = ['-maxrate', '1500k', '-bufsize', '1900k']
+				break;
+			case 'hd':
+				rateValue = ['-maxrate', '2496k', '-bufsize', '3000k']
+				break;
+			case 'xga':  //à tester
+				rateValue = ['-maxrate', '2496k', '-bufsize', '3000k']
+				break;
+			case 'hdplus': //à tester
+				rateValue = ['-maxrate', '2496k', '-bufsize', '3000k']
+				break;
+			case 'fullhd':
+				rateValue = ['-maxrate', '2800k', '-bufsize', '2800k']
+				break;
+			default:
+				rateValue = ['-maxrate', '2500k', '-bufsize', '5000k']
+		}
+	}
+	else {
+		switch (reso) {
+			case 'vga':
+				rateValue = ['-maxrate', '2500k', '-bufsize', '5000k']
+				break;
+			case 'qhd':
+				rateValue = ['-maxrate', '1500k', '-bufsize', '1900k']
+				break;
+			case 'svga': //à tester
+				rateValue = ['-maxrate', '1500k', '-bufsize', '1900k']
+				break;
+			case 'hd':
+				rateValue = ['-maxrate', '2496k', '-bufsize', '3000k']
+				break;
+			case 'xga':  //à tester
+				rateValue = ['-maxrate', '2496k', '-bufsize', '3000k']
+				break;
+			case 'hdplus': //à tester
+				rateValue = ['-maxrate', '2496k', '-bufsize', '3000k']
+				break;
+			case 'fullhd':
+				rateValue = ['-maxrate', '2800k', '-bufsize', '2800k']
+				break;
+			default:
+				rateValue = ['-maxrate', '2500k', '-bufsize', '5000k']
+		}
+	}
+
+	return 	rateValue;
 }

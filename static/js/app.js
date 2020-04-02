@@ -259,6 +259,8 @@ App.prototype = {
         else
           resolution = 'hd';
 
+      $("#resoDesktopChoose").val(resolution);
+
         if(resSelect != null)
           videoControls.querySelector('label:first-of-type span').textContent = $('#listResoDesktop').find('button[value="'+resSelect+'"]').html();
         else
@@ -662,20 +664,23 @@ App.prototype = {
     $('#startRecord').addClass('recording');
     $('#pauseRecord').show();
 
+    var resDesktop = $('#resoDesktopChoose');
+    var resWebCam = $('#resoWebCamChoose');
+
     if ($(".videoDevice").hasClass('active') && $(".desktopDevice").hasClass('active'))
-      comms.emit('start', 'video-and-desktop');
+      comms.emit('start', 'video-and-desktop', resDesktop, resWebCam);
 
     if($(".audioDevice").hasClass('active') && !$(".videoDevice").hasClass('active') && !$(".desktopDevice").hasClass('active'))
       comms.emit('start', 'onlyaudio');
 
     if($(".desktopDevice").hasClass('active') && $(".audioDevice").hasClass('active') && !$(".videoDevice").hasClass('active'))
-      comms.emit('start', 'audio-and-desktop');
+      comms.emit('start', 'audio-and-desktop', resDesktop);
 
     if($(".desktopDevice").hasClass('active') && !$(".audioDevice").hasClass('active') && !$(".videoDevice").hasClass('active'))
-      comms.emit('start', 'onlydesktop');
+      comms.emit('start', 'onlydesktop', resDesktop);
 
     if($(".audioDevice").hasClass('active') && $(".videoDevice").hasClass('active') && !$(".desktopDevice").hasClass('active'))
-      comms.emit('start', 'onlyvideo');
+      comms.emit('start', 'onlyvideo', null, resDesktop);
 
     [...document.querySelectorAll('#recordingList a')].forEach(anchor => anchor.parentNode.removeChild(anchor));
 
@@ -710,6 +715,7 @@ App.prototype = {
     $('#pauseRecord').hide();
     $('#recordingTime').hide()
     $('#startRecord').removeClass('recording');
+    $(".statutLoading").show();
 
     //on check si on a select l'upload ou qu'on est dans moodle
     // if(document.getElementById('uploadMedia').checked || !$('#dropdownlistserie').is(':visible')) {

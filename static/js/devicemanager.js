@@ -411,9 +411,6 @@ class Device extends EventEmitter {
                 }
 
                 resolve(stream);
-
-                console.log($('#listResoDesktop').find('li:visible:last').find('button').html());
-
                 document.querySelector('label.labelVideoResolution:first-of-type span').textContent = 'VGA (480p,4:3)';
                 $('.videoDevice').removeClass('seizeneuvieme').addClass('quartretiers');
 
@@ -638,7 +635,6 @@ class Device extends EventEmitter {
             stream.getTracks().forEach(track => track.stop());
 
             if (cmpt < this.candidates.length) {
-              // $('body').append('<input type="hidden" id="debitValue" value="'+Number(event.data)+'"');
               if($('#debitValue').val() < 20 && (candidate.id == 'svga' || candidate.id == 'hd' || candidate.id == 'hdplus' || candidate.id == 'fullhd'))
                 $('#listResoWebCam .' + candidate.id).hide();
 
@@ -664,6 +660,7 @@ class Device extends EventEmitter {
           break;
         }
       }
+      $("#resoDesktopChoose").val(res);
     }
     else {
       for(var i = 0; i < this.candidates.length; i++) {
@@ -678,6 +675,7 @@ class Device extends EventEmitter {
           break;
         }
       }
+      $('#resoWebCamChoose').val(res);
     }
 
     this.stream.getVideoTracks().forEach(track => track.stop());
