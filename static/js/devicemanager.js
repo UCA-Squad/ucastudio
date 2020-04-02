@@ -213,6 +213,13 @@ class Device extends EventEmitter {
         "width": 960,
         "height": 540,
         "ratio": "16:9"
+      },
+      {
+        "id" : "nhd",
+        "label": "360p(nHD)",
+        "width": 640,
+        "height": 360,
+        "ratio": "16:9"
       }
     ];
 
@@ -666,7 +673,7 @@ class Device extends EventEmitter {
       for(var i = 0; i < this.candidates.length; i++) {
         if(this.candidates[i].id == res) {
 
-          if (res == 'hd' || res == 'fullhd')
+          if (res == 'nhd' ||res == 'hd' || res == 'fullhd')
             $('.videoDevice').removeClass('quartretiers').addClass('seizeneuvieme');
           else
             $('.videoDevice').removeClass('seizeneuvieme').addClass('quartretiers');

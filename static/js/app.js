@@ -304,14 +304,26 @@ App.prototype = {
 
         let resolution = null;
         switch (stream.getVideoTracks()[0].getSettings().height) {
+          case 360:
+            resolution = 'nHD (360p,16:9)';
+            break;
           case 480:
             resolution = 'VGA (480p,4:3)';
+            break;
+          case 540:
+            resolution = 'qHD (540p,16:9)';
             break;
           case 600:
             resolution = 'SVGA (600p,4:3)';
             break;
           case 720:
             resolution = 'HD (720p,16:9)';
+            break;
+          case 768:
+            resolution = 'XGA (768p,4:3)';
+            break;
+          case 900:
+            resolution = 'HD+ (900p,16:9)';
             break;
           case 1080:
             resolution = 'Full HD (1080p, 16:9)';
