@@ -168,7 +168,7 @@ io.on('connection', function(socket){
 			}
 
 			try {
-				fs.writeFileSync(logFileEvents, 'startrec;'+uid+';'+getDateNow()+';'+socketissued+';'+m+';debit:'+debitValue+'Mbps'+';"'+agent.toString()+'"'+"\n", {flag: 'a'});
+				fs.writeFileSync(logFileEvents, 'startrec;'+uid+';'+getDateNow()+';'+socketissued+';'+m+';'+debitValue+'Mbps'+';"'+agent.toString()+'"'+"\n", {flag: 'a'});
 			} catch (err) {
 				sendEmailError('error write logFileEvents' + err, uid+' / '+agent.toString());
 				console.error(getDateNow()+' : '+err)
@@ -985,7 +985,7 @@ function checkIsFileIsWrite(socket, path, typeOfRec, agent)
  */
 function getDateNow() {
 	var dateNowTmp = new Date();
-	var dateNow = dateNowTmp.getDate()+'-'+(dateNowTmp.getMonth()+1)+'-'+dateNowTmp.getFullYear()+' ('+dateNowTmp.getHours()+':'+dateNowTmp.getMinutes()+':'+dateNowTmp.getSeconds()+')';
+	var dateNow = dateNowTmp.getDate()+'-'+(dateNowTmp.getMonth()+1)+'-'+dateNowTmp.getFullYear()+';'+dateNowTmp.getHours()+':'+dateNowTmp.getMinutes()+':'+dateNowTmp.getSeconds();
 	return dateNow;
 }
 
