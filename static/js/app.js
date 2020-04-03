@@ -676,8 +676,8 @@ App.prototype = {
     $('#startRecord').addClass('recording');
     $('#pauseRecord').show();
 
-    var resDesktop = $('#resoDesktopChoose');
-    var resWebCam = $('#resoWebCamChoose');
+    var resDesktop = $('#resoDesktopChoose').val();
+    var resWebCam = $('#resoWebCamChoose').val();
 
     if ($(".videoDevice").hasClass('active') && $(".desktopDevice").hasClass('active'))
       comms.emit('start', 'video-and-desktop', resDesktop, resWebCam);

@@ -107,12 +107,12 @@ io.on('connection', function(socket){
 
 			if(m != "onlyaudio") {
 				var i = 6;
-				getRate('webcam').forEach(function (element) {
+				getRate('webcam', resWebCam).forEach(function (element) {
 					ops.splice(i, 0, element);
 					i++;
 				});
 				var i = 6;
-				getRate('desktop').forEach(function (element) {
+				getRate('desktop', resDesktop).forEach(function (element) {
 					ops2.splice(i, 0, element);
 					i++;
 				});
