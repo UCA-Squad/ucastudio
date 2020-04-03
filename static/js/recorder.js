@@ -20,7 +20,10 @@ class Recorder extends EventEmitter {
     let _recData = [];
 
     let chosenCodec = stream.getVideoTracks().length ? _vidCodecs[0] : _audioCodecs[0];
-    this.recorder = new MediaRecorder(stream, {mimeType: chosenCodec});
+
+    // this.recorder = new MediaRecorder(stream, {mimeType: chosenCodec});
+    var opts = {mimeType: chosenCodec, videoBitsPerSecond : getRate(typeDevice)};
+    this.recorder = new MediaRecorder(stream, opts);
     this.recorder.ondataavailable = function(e) {
           var isAudioDesktopRec = false;
           if($(".desktopDevice").hasClass('active') && $(".audioDevice").hasClass('active') && !$(".videoDevice").hasClass('active'))
@@ -96,4 +99,58 @@ class Recorder extends EventEmitter {
     this.recorder.stop();
     this.isRecording = false;
   }
+}
+
+/**
+ * @param type
+ * @returns {string}
+ */
+function getRate(type)
+{
+  var rateValue;
+
+  if(type == 'webcam') {
+    var reso = $("#resoWebCamChoose").val();
+    switch (reso) {
+      case 'qhd':
+      case 'svga':
+        rateValue = '1500000';
+        break;
+      case 'hd':
+        rateValue = '2400000';
+        break;
+      case 'xga':  //à tester
+        rateValue = '2060000';
+        break;
+      case 'hdplus': //à tester
+        rateValue = '3500000';
+        break;
+      case 'fullhd':
+        rateValue = '4000000';
+      default:
+        rateValue = '';
+    }
+  }
+  else {
+    var reso = $("#resoDesktopChoose").val();
+    switch (reso) {
+      case 'qhd':
+      case 'svga':
+        rateValue = '1500000';
+        break;
+      case 'hd':
+        rateValue = '2400000';
+        break;
+      case 'hdplus':
+        rateValue = '3500000';
+        break;
+      case 'fullhd':
+        rateValue = '4000000';
+        break;
+      default:
+        rateValue = '';
+    }
+  }
+
+  return rateValue;
 }
