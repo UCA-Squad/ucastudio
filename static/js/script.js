@@ -63,6 +63,8 @@ $( document ).ready(function() {
             $(document).on('click', '#listResoDesktop li.qhd, #listResoDesktop li.vga, #listResoDesktop li.svga', function() {
                 document.getElementById("alertWrongReso").style.display = "none";
             });
+
+            document.getElementById("alertLowDebit").style.display = "block";
         }
         else if(Number(event.data) < 3 && Number(event.data) >= 2)
         {
