@@ -642,9 +642,9 @@ class Device extends EventEmitter {
             stream.getTracks().forEach(track => track.stop());
 
             if (cmpt < this.candidates.length) {
-              if($('#debitValue').val() < 20 && (candidate.id == 'svga' || candidate.id == 'hd' || candidate.id == 'hdplus' || candidate.id == 'fullhd'))
-                $('#listResoWebCam .' + candidate.id).hide();
-
+              //Plus nécessaire ?
+              // if($('#debitValue').val() < 20 && (candidate.id == 'svga' || candidate.id == 'hd' || candidate.id == 'hdplus' || candidate.id == 'fullhd'))
+              //   $('#listResoWebCam .' + candidate.id).hide();
               this.gum(this.candidates[cmpt++], device, cmpt);
             }
           })
@@ -659,11 +659,12 @@ class Device extends EventEmitter {
   }
 
   changeResolution(res) {
+    var objectOpts;
     if (typeof res === 'string' && this.deviceType == 'desktop') {
       // res = {width: parseInt(res) * 4 / 3, height: parseInt(res)};
       for(var i = 0; i < this.candidates.length; i++) {
         if(this.candidates[i].id == res) {
-          res = {width: {ideal: this.candidates[i].width }, height: {ideal: this.candidates[i].height }, frameRate: { ideal :25, max: 30 } };
+          objectOpts = {width: {ideal: this.candidates[i].width }, height: {ideal: this.candidates[i].height }, frameRate: { ideal :25, max: 30 } };
           break;
         }
       }
@@ -678,7 +679,7 @@ class Device extends EventEmitter {
           else
             $('.videoDevice').removeClass('seizeneuvieme').addClass('quartretiers');
 
-          res = {width: {exact: this.candidates[i].width }, height: {exact: this.candidates[i].height }, frameRate: { ideal :25, max: 30 } };
+          objectOpts = {width: {exact: this.candidates[i].width }, height: {exact: this.candidates[i].height }, frameRate: { ideal :25, max: 30 } };
           break;
         }
       }
@@ -687,7 +688,7 @@ class Device extends EventEmitter {
 
     this.stream.getVideoTracks().forEach(track => track.stop());
     this.stream = null;
-    return this.connect(res);
+    return this.connect(objectOpts);
   }
 
   record() {

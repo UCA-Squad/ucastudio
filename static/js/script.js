@@ -85,6 +85,7 @@ $( document ).ready(function() {
         }
         else if(Number(event.data) < 4 &&  Number(event.data) >= 3)
         {
+            $('#resoDesktopChoose').val('hd');
             $('#listResoDesktop li.fullhd').css("background-color", "rgb(127, 26, 26)");
             $('#listResoDesktop li.fullhd').attr("title", "Résolution non conseillée pour votre débit");
 
@@ -98,6 +99,9 @@ $( document ).ready(function() {
                 document.getElementById("alertWrongReso").style.display = "none";
             });
         }
+        else if(Number(event.data) > 4)
+            $('#resoDesktopChoose').val('hd');
+
         $('#debitValue').val(Number(event.data));
     }
     window.addEventListener("message", receiveMessage, false);
