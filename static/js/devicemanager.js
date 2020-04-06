@@ -257,11 +257,14 @@ class Device extends EventEmitter {
     let _audConstraints = {audio: {exact: device.deviceId}};
     let _vidConstraints = {audio: true, video: { exact: device.deviceId, width: {exact: 640}, height: {exact: 480}, facingMode: "user" , frameRate: { ideal :25, max: 30 } } };
 
+    //hd
     var desktopValue = { width: {ideal: 1280}, height: {ideal: 720} , frameRate: { ideal :25, max: 30 } };
 
-    if($("#debitValue").val() < 3)
+    if($("#debitValue").val() < 3)    {
+      //svga
       desktopValue = { width: {ideal: 960}, height: {ideal: 540} , frameRate: { ideal :25, max: 30 } };
-    
+    }
+
     let _desktop = {
       firefox: {
         audio: false,
@@ -641,12 +644,8 @@ class Device extends EventEmitter {
 
             stream.getTracks().forEach(track => track.stop());
 
-            if (cmpt < this.candidates.length) {
-              //Plus nécessaire ?
-              // if($('#debitValue').val() < 20 && (candidate.id == 'svga' || candidate.id == 'hd' || candidate.id == 'hdplus' || candidate.id == 'fullhd'))
-              //   $('#listResoWebCam .' + candidate.id).hide();
+            if (cmpt < this.candidates.length)
               this.gum(this.candidates[cmpt++], device, cmpt);
-            }
           })
           .catch((error) => {
             if(candidate.id)

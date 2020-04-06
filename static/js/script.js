@@ -35,15 +35,20 @@ function prog()
 setInterval(prog, 500);
 
 $( document ).ready(function() {
-    
 
+    $('#debitValue').val('');
+
+    /**
+     * Réception debit depuis l'iframe checkSpeedNtwk
+     * @param event
+     */
     function receiveMessage(event){
 
         $('body').removeClass('loading');
         $('.debitCircle').remove();
         comms.emit('debitValue', Number(event.data));
 
-        if(Number(event.data) < 2)
+        if(Number(event.data) < 3)
         {
             $('#listResoDesktop li.hd').attr("title", "Résolution non conseillée pour votre débit");
             $('#listResoDesktop li.hd').css("background-color", "rgb(127, 26, 26)");
@@ -66,8 +71,9 @@ $( document ).ready(function() {
 
             document.getElementById("alertLowDebit").style.display = "block";
         }
-        else if(Number(event.data) < 3 && Number(event.data) >= 2)
+        else if(Number(event.data) < 4 && Number(event.data) >= 3)
         {
+            $('#resoDesktopChoose').val('hd');
             $('#listResoDesktop li.hdplus').css("background-color", "rgb(127, 26, 26)");
             $('#listResoDesktop li.hdplus').attr("title", "Résolution non conseillée pour votre débit");
             $('#listResoDesktop li.fullhd').css("background-color", "rgb(127, 26, 26)");
@@ -83,7 +89,7 @@ $( document ).ready(function() {
                 document.getElementById("alertWrongReso").style.display = "none";
             });
         }
-        else if(Number(event.data) < 4 &&  Number(event.data) >= 3)
+        else if(Number(event.data) < 5 &&  Number(event.data) >= 4)
         {
             $('#resoDesktopChoose').val('hd');
             $('#listResoDesktop li.fullhd').css("background-color", "rgb(127, 26, 26)");
@@ -99,8 +105,6 @@ $( document ).ready(function() {
                 document.getElementById("alertWrongReso").style.display = "none";
             });
         }
-        else if(Number(event.data) > 4)
-            $('#resoDesktopChoose').val('hd');
 
         $('#debitValue').val(Number(event.data));
     }
