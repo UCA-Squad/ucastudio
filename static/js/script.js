@@ -105,6 +105,8 @@ $( document ).ready(function() {
                 document.getElementById("alertWrongReso").style.display = "none";
             });
         }
+        else if(Number(event.data) > 5)
+            $('#resoDesktopChoose').val('hd');
 
         $('#debitValue').val(Number(event.data));
     }
