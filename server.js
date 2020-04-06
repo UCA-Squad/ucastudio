@@ -6,6 +6,7 @@ var fluentFFMPEG = require('fluent-ffmpeg');
 var CASAuthentication = require('connect-cas-uca');
 var useragent = require('useragent');
 var logFileEvents = './static/records/ucastudio/logFileEvents.csv';
+var debitValue = null;
 var fs = require('fs');
 global.hasSendMailError = false;
 const server = require('https').createServer({
@@ -44,7 +45,11 @@ app.use(express.static(__dirname + "/static/"));
 
 io.on('connection', function(socket){
 
-	socket.emit('moodle', config.moodle); 
+	socket.on('debitValue', function (debit) {
+		debitValue = debit;
+	});
+
+	socket.emit('moodle', config.moodle);
 	var ffmpeg_process, feedStream=false;
 	var ffmpeg_process2, feedStream2=false;
 	var hasCheckFileIsWrite = false,  hasCheckFileIsWrite2 = false;
@@ -62,7 +67,7 @@ io.on('connection', function(socket){
 			console.error(getDateNow()+' : '+err);
 		}
 
-		socket.on('start', function (m) {
+		socket.on('start', function (m, resDesktop = null, resWebCam = null) {
 
 			fs.mkdirSync('./static/records/ucastudio/' + uid + '/'+socketissued+'/');
 
@@ -98,6 +103,19 @@ io.on('connection', function(socket){
 					'-b:a', '96k', '-strict', '-2',
 					'./static/records/ucastudio/' + uid + '/' + socketissued + '/' + socketissued + 'screen.webm'
 				];
+			}
+
+			if(m != "onlyaudio") {
+				var i = 6;
+				getRate('webcam', resWebCam).forEach(function (element) {
+					ops.splice(i, 0, element);
+					i++;
+				});
+				var i = 6;
+				getRate('desktop', resDesktop).forEach(function (element) {
+					ops2.splice(i, 0, element);
+					i++;
+				});
 			}
 
 			if(m == 'video-and-desktop' || m == 'audio-and-desktop' || m == 'onlyaudio' || m == 'onlydesktop') {
@@ -163,7 +181,7 @@ io.on('connection', function(socket){
 			}
 
 			try {
-				fs.writeFileSync(logFileEvents, 'startrec;'+uid+';'+getDateNow()+';'+socketissued+';'+m+';"'+agent.toString()+'"'+"\n", {flag: 'a'});
+				fs.writeFileSync(logFileEvents, 'startrec;'+uid+';'+getDateNow()+';'+socketissued+';'+m+';'+debitValue+'Mbps'+';"'+agent.toString()+'"'+"\n", {flag: 'a'});
 			} catch (err) {
 				sendEmailError('error write logFileEvents' + err, uid+' / '+agent.toString());
 				console.error(getDateNow()+' : '+err)
@@ -980,7 +998,7 @@ function checkIsFileIsWrite(socket, path, typeOfRec, agent)
  */
 function getDateNow() {
 	var dateNowTmp = new Date();
-	var dateNow = dateNowTmp.getDate()+'-'+(dateNowTmp.getMonth()+1)+'-'+dateNowTmp.getFullYear()+' ('+dateNowTmp.getHours()+':'+dateNowTmp.getMinutes()+':'+dateNowTmp.getSeconds()+')';
+	var dateNow = dateNowTmp.getDate()+'-'+(dateNowTmp.getMonth()+1)+'-'+dateNowTmp.getFullYear()+';'+dateNowTmp.getHours()+':'+dateNowTmp.getMinutes()+':'+dateNowTmp.getSeconds();
 	return dateNow;
 }
 
@@ -1013,4 +1031,53 @@ function sendEmailError(err, user) {
 
 		hasSendMailError = true;
 	}
+}
+
+/**
+ *
+ * @param type
+ * @param reso
+ * @returns {string[]}
+ */
+function getRate(type, reso)
+{
+	var rateValue;
+
+	if(type == 'webcam') {
+		switch (reso) {
+			case 'qhd':
+			case 'svga':
+				rateValue = ['-maxrate', '1500k', '-bufsize', '3000k'];
+				break;
+			case 'hd':
+				rateValue = ['-maxrate', '2400k', '-bufsize', '4800k'];
+				break;
+			case 'xga':  //à tester
+				rateValue = ['-maxrate', '2060k', '-bufsize', '4120k'];
+				break;
+			case 'hdplus': //à tester
+				rateValue = ['-maxrate', '3500k', '-bufsize', '7000k'];
+				break;
+			default:
+				rateValue = [];
+		}
+	}
+	else {
+		switch (reso) {
+			case 'qhd':
+			case 'svga':
+				rateValue = ['-maxrate', '1500k', '-bufsize', '3000k'];
+				break;
+			case 'hd':
+				rateValue = ['-maxrate', '2400k', '-bufsize', '4800k'];
+				break;
+			case 'hdplus':
+				rateValue = ['-maxrate', '3500k', '-bufsize', '7000k'];
+				break;
+			default:
+				rateValue = [];
+		}
+	}
+
+	return 	rateValue;
 }

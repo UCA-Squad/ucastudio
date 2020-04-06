@@ -114,9 +114,9 @@ function App() {
   this.listingPeer = [];
 
   this.attachEvents();
-  setTimeout(() => {
-    document.body.classList.remove('loading');
-  }, 500);
+  // setTimeout(() => {
+  //   document.body.classList.remove('loading');
+  // }, 500);
 }
 
 App.prototype = {
@@ -253,8 +253,8 @@ App.prototype = {
       {
         //calcul resolutio
 
-        let resolution = stream.getVideoTracks()[0].getSettings().height + 'p';
-
+        // let resolution = stream.getVideoTracks()[0].getSettings().height + 'p';
+        let resolution = $("#resoDesktopChoose").val();
         if(resSelect != null)
           videoControls.querySelector('label:first-of-type span').textContent = $('#listResoDesktop').find('button[value="'+resSelect+'"]').html();
         else
@@ -298,20 +298,26 @@ App.prototype = {
 
         let resolution = null;
         switch (stream.getVideoTracks()[0].getSettings().height) {
-          case 240:
-            resolution = 'QVGA (240p,4:3)';
-            break;
           case 360:
             resolution = 'nHD (360p,16:9)';
             break;
           case 480:
             resolution = 'VGA (480p,4:3)';
             break;
+          case 540:
+            resolution = 'qHD (540p,16:9)';
+            break;
           case 600:
             resolution = 'SVGA (600p,4:3)';
             break;
           case 720:
             resolution = 'HD (720p,16:9)';
+            break;
+          case 768:
+            resolution = 'XGA (768p,4:3)';
+            break;
+          case 900:
+            resolution = 'HD+ (900p,16:9)';
             break;
           case 1080:
             resolution = 'Full HD (1080p, 16:9)';
@@ -664,20 +670,23 @@ App.prototype = {
     $('#startRecord').addClass('recording');
     $('#pauseRecord').show();
 
+    var resDesktop = $('#resoDesktopChoose').val();
+    var resWebCam = $('#resoWebCamChoose').val();
+
     if ($(".videoDevice").hasClass('active') && $(".desktopDevice").hasClass('active'))
-      comms.emit('start', 'video-and-desktop');
+      comms.emit('start', 'video-and-desktop', resDesktop, resWebCam);
 
     if($(".audioDevice").hasClass('active') && !$(".videoDevice").hasClass('active') && !$(".desktopDevice").hasClass('active'))
       comms.emit('start', 'onlyaudio');
 
     if($(".desktopDevice").hasClass('active') && $(".audioDevice").hasClass('active') && !$(".videoDevice").hasClass('active'))
-      comms.emit('start', 'audio-and-desktop');
+      comms.emit('start', 'audio-and-desktop', resDesktop);
 
     if($(".desktopDevice").hasClass('active') && !$(".audioDevice").hasClass('active') && !$(".videoDevice").hasClass('active'))
-      comms.emit('start', 'onlydesktop');
+      comms.emit('start', 'onlydesktop', resDesktop);
 
     if($(".audioDevice").hasClass('active') && $(".videoDevice").hasClass('active') && !$(".desktopDevice").hasClass('active'))
-      comms.emit('start', 'onlyvideo');
+      comms.emit('start', 'onlyvideo', null, resDesktop);
 
     [...document.querySelectorAll('#recordingList a')].forEach(anchor => anchor.parentNode.removeChild(anchor));
 
@@ -712,6 +721,7 @@ App.prototype = {
     $('#pauseRecord').hide();
     $('#recordingTime').hide()
     $('#startRecord').removeClass('recording');
+    $(".statutLoading").show();
 
     //on check si on a select l'upload ou qu'on est dans moodle
     // if(document.getElementById('uploadMedia').checked || !$('#dropdownlistserie').is(':visible')) {

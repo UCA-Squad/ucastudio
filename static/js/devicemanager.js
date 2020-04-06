@@ -194,6 +194,13 @@ class Device extends EventEmitter {
         "ratio": "16:9"
       },
       {
+        "id" : "xga",
+        "label": "768p",
+        "width": 1024,
+        "height": 768,
+        "ratio": "4:3"
+      },
+      {
         "id" : "svga",
         "label": "SVGA",
         "width": 800,
@@ -201,18 +208,18 @@ class Device extends EventEmitter {
         "ratio": "4:3"
       },
       {
+        "id" : "qhd",
+        "label": "qHD",
+        "width": 960,
+        "height": 540,
+        "ratio": "16:9"
+      },
+      {
         "id" : "nhd",
         "label": "360p(nHD)",
         "width": 640,
         "height": 360,
         "ratio": "16:9"
-      },
-      {
-        "id" : "qvga",
-        "label": "QVGA",
-        "width": 320,
-        "height": 240,
-        "ratio": "4:3"
       }
 
     ];
@@ -249,16 +256,25 @@ class Device extends EventEmitter {
     this.deviceType = device.deviceType || (device.kind === 'audioinput' ? 'audio' : 'video');
 
     let _audConstraints = {audio: {exact: device.deviceId}};
-    let _vidConstraints = {audio: true, video: {exact: device.deviceId, width: {exact: 640}, height: {exact: 480}, facingMode: "user"} };
+    let _vidConstraints = {audio: true, video: { exact: device.deviceId, width: {exact: 640}, height: {exact: 480}, facingMode: "user" , frameRate: { ideal :25, max: 30 } } };
+
+    //hd
+    var desktopValue = { width: {ideal: 1280}, height: {ideal: 720} , frameRate: { ideal :25, max: 30 } };
+
+    if($("#debitValue").val() < 3)    {
+      //svga
+      desktopValue = { width: {ideal: 960}, height: {ideal: 540} , frameRate: { ideal :25, max: 30 } };
+    }
+
 
     let _desktop = {
       firefox: {
         audio: false,
-        video: {mediaSource: 'screen', width: {ideal: 1280}, height: {ideal: 720}}
+          video: desktopValue
       },
       chrome: {
         audio: false,
-        video: { width: {ideal: 1280}, height: {ideal: 720}}
+        video: desktopValue
       },
       other: null
     }
@@ -458,11 +474,11 @@ class Device extends EventEmitter {
 
         let constraintMedia = this.constraints;
         if(opts == "mustListReso")
-          constraintMedia = {audio: {deviceId: {exact: deviceAudioIdTmp}}, video: { deviceId: { exact: deviceVideoIdTmp, width: {exact: 640}, height: {exact: 480}, facingMode: "user"} } };
+          constraintMedia = {audio: {deviceId: {exact: deviceAudioIdTmp}}, video: { deviceId: { exact: deviceVideoIdTmp }, width: {exact: 640}, height: {exact: 480}, facingMode: "user", frameRate: { ideal :25, max: 30 } } };
         else{
           //new add
           if(this.deviceType == 'video')
-            this.constraints['video'] = { deviceId: { exact: deviceVideoIdTmp, width: {exact: 640}, height: {exact: 480}, facingMode: "user"} };
+            this.constraints['video'] = { deviceId: { exact: deviceVideoIdTmp }, width: {exact: 640}, height: {exact: 480}, facingMode: "user" , frameRate: { ideal :25, max: 30 } } ;
 
           this.constraints['audio'] = {deviceId: {exact: deviceAudioIdTmp}};
 
@@ -530,7 +546,7 @@ class Device extends EventEmitter {
     return new Promise((resolve, reject) => {
       var constraints = this.constraints;
       if(typeof opts != 'undefined') {
-        var constraints = {  video: { width: opts.width, height: opts.height } };
+        var constraints = {  video: { width: opts.width, height: opts.height, frameRate: { ideal :25, max: 30 } } };
       }
       return navigator.mediaDevices.getDisplayMedia(constraints)
                .then(stream => {
@@ -620,6 +636,7 @@ class Device extends EventEmitter {
       $('#startRecord').addClass('canRecord');
       document.getElementById("startRecord").disabled = false;
       $('#gumRunning').remove();
+      $('#listResoWebCam > li:visible:last').addClass('last-visible-li');
     }
 
     setTimeout(() => {
@@ -630,13 +647,12 @@ class Device extends EventEmitter {
 
             stream.getTracks().forEach(track => track.stop());
 
-            if (cmpt < this.candidates.length) {
+            if (cmpt < this.candidates.length)
               this.gum(this.candidates[cmpt++], device, cmpt);
-            }
           })
           .catch((error) => {
             if(candidate.id)
-              $('.' + candidate.id).hide();
+              $('#listResoWebCam .' + candidate.id).hide();
             if (cmpt < this.candidates.length)
               this.gum(this.candidates[cmpt++], device, cmpt);
           });
@@ -645,33 +661,36 @@ class Device extends EventEmitter {
   }
 
   changeResolution(res) {
+    var objectOpts;
     if (typeof res === 'string' && this.deviceType == 'desktop') {
       // res = {width: parseInt(res) * 4 / 3, height: parseInt(res)};
       for(var i = 0; i < this.candidates.length; i++) {
         if(this.candidates[i].id == res) {
-          res = {width: {ideal: this.candidates[i].width }, height: {ideal: this.candidates[i].height }};
+          objectOpts = {width: {ideal: this.candidates[i].width }, height: {ideal: this.candidates[i].height }, frameRate: { ideal :25, max: 30 } };
           break;
         }
       }
+      $("#resoDesktopChoose").val(res);
     }
     else {
       for(var i = 0; i < this.candidates.length; i++) {
         if(this.candidates[i].id == res) {
 
-          if (res == 'nhd' || res == 'hd' || res == 'fullhd')
+          if (res == 'nhd' ||res == 'hd' || res == 'fullhd')
             $('.videoDevice').removeClass('quartretiers').addClass('seizeneuvieme');
           else
             $('.videoDevice').removeClass('seizeneuvieme').addClass('quartretiers');
 
-          res = {width: {exact: this.candidates[i].width }, height: {exact: this.candidates[i].height }};
+          objectOpts = {width: {exact: this.candidates[i].width }, height: {exact: this.candidates[i].height }, frameRate: { ideal :25, max: 30 } };
           break;
         }
       }
+      $('#resoWebCamChoose').val(res);
     }
 
     this.stream.getVideoTracks().forEach(track => track.stop());
     this.stream = null;
-    return this.connect(res);
+    return this.connect(objectOpts);
   }
 
   record() {

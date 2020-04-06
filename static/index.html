@@ -4,19 +4,20 @@
     <meta charset="utf8">
     <meta name="viewport" content="width=device-width">
     <title>UCAStudio</title>
-    <link rel="stylesheet" type="text/css" href="https://cdn.uca.fr/css/uca.min.last.css">
+    <link rel="stylesheet"  href="css/circle.css">
+    <link rel="stylesheet" type="text/css" href="css/cdn.uca.fr.css">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" media="screen and (max-width: 1300px)" href="css/screen.css">
     <link rel="chrome-webstore-item" href="https://chrome.google.com/webstore/detail/oghkihildgnkedhlolgjomnbfmjpmddm">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
-    <link rel="stylesheet" href="//vjs.zencdn.net/7.3.0/video-js.min.css" >
+    <link rel="stylesheet" href="css/video-js.min.css" >
     <link rel="stylesheet" href="css/videojs-vjsdownload.css" >
 </head>
 <body class="loading translating">
 <header>
     <a href="index.html" id="UCAStudio">
         <span>
-            <img src="https://cdn.uca.fr/images/logos/logo_uca_mini_light.png" height="30px"  style="margin-top: 0.25em">
+            <img src="img/logo_uca_mini_light.png" height="30px"  style="margin-top: 0.25em">
             <span style="position:absolute;padding-left: 5px">Studio</span>
         </span>
     </a>
@@ -27,8 +28,7 @@
             <img alt="Français" src="res/flags/fra.png" />
         </label>
         <ul></ul>
-<!--        <a><iframe src="https://ent.uca.fr/mediamanager/checkSpeedNtwk" class="checkWifi" onload="$('body').removeClass('loading');"></iframe></a>-->
-        <a class="speedNetwork" style="color: white;" title="Testez votre débit" href="https://www.speedtest.net/" target="_blank"><i class="fas fa-wifi fa-2x" style="margin-right: 1rem"></i></a>
+        <a><iframe src="https://mediasmanager.dsi.uca.fr/checkSpeedNtwk" class="checkWifi"></iframe></a>
         <a href="https://ippa.uca.fr/medias/fichier/ucamedia-enregistrement-et-generation-de-live_1575468327476-pdf" target="_blank" id="help" title="Accéder à la documentation UCAMedia">
             <i class="fas fa-question-circle fa-2x"></i>
         </a>
@@ -41,11 +41,23 @@
 <input type="checkbox" class="toggleCover hiddenCheck" id="toggleSaveCreationModal" autocomplete="off" />
 <div id="introCover">
     <div class="loader">
-        <svg width="192" height="192">
-            <circle r="82" cx="96" cy="96" fill="none" stroke="#00bdc4" stroke-width="8" stroke-dashoffset="0" stroke-dasharray="515"></circle>
-            <circle r="82" cx="96" cy="96" fill="none" stroke="white" stroke-width="14" stroke-dashoffset="20" stroke-dasharray="515"></circle>
-        </svg>
-        <span class="loaderText" data-translate="LOADING">Chargement...</span>
+        <div class="statutLoading" style="display: none">
+            <svg width="192" height="192">
+                <circle r="82" cx="96" cy="96" fill="none" stroke="#00bdc4" stroke-width="8" stroke-dashoffset="0" stroke-dasharray="515"></circle>
+                <circle r="82" cx="96" cy="96" fill="none" stroke="white" stroke-width="14" stroke-dashoffset="20" stroke-dasharray="515"></circle>
+            </svg>
+            <span class="loaderText" data-translate="LOADING">Chargement...</span>
+        </div>
+        <div class="debitCircle">
+            <div id="debitBar" class="c100 p0 big" style="right: 20px; margin-bottom: 20px;">
+                <span id="debitPercent">0%</span>
+                <div class="slice">
+                    <div class="bar"></div>
+                    <div class="fill"></div>
+                </div>
+            </div>
+            <span>Test de votre débit en cours...</span>
+        </div>
     </div>
 </div>
 <div id="uploadProgress" style="display: none"></div>
@@ -122,7 +134,13 @@
             <input type="checkbox" id="minimiseStreams" class="hiddenCheck" />
             <input name="userView" type="radio" value="simple" class="hiddenCheck" id="simpleUserView" autocomplete="off" />
             <input name="userView" type="radio" value="advanced" class="hiddenCheck" checked id="advancedUserView" autocomplete="off" />
-            <div id="alertNoWebcam" style="" class="alert alert-orange card-100 ">
+            <div id="alertLowDebit" class="alert alert-orange card-60 hiddenCheck" style="text-align: center;">
+                Attention, nous vous recommandons de n'enregistrer qu'un flux vidéo (écran ou webcam) avec ou sans microphone, car votre débit n'est pas suffisant.
+            </div>
+            <div id="alertWrongReso" class="alert alert-orange card-60 hiddenCheck" style="text-align: center;">
+                La résolution sélectionnée n'est pas recommandée car votre débit est insuffisant.
+            </div>
+	    <div id="alertNoWebcam" style="" class="alert alert-orange card-100 ">
                 <a href="#" class="close"></a>
                 <span style="padding: 10em">
                     Impossible de trouver un périphérique multimédia. Il est très probable que votre navigateur n'autorise pas l'accès à ce périphérique ou qu'il n'est pas connecté.
@@ -140,13 +158,14 @@
                         <label for="desktopResolution" class="labelDesktopResolution">
                             <span></span>
                             <ul id="listResoDesktop">
-                                <li class="nhd"><button type="button" value="nhd" class="desktopReso">nHD (360p,16:9)</button></li>
                                 <li class="vga"><button type="button" value="vga" class="desktopReso">VGA (480p,4:3)</button></li>
+                                <li class="qhd"><button type="button" value="qhd" class="desktopReso">qHD (540p,16:9)</button></li>
                                 <li class="svga"><button type="button" value="svga" class="desktopReso">SVGA (600p,4:3)</button></li>
                                 <li class="hd"><button type="button" value="hd" class="desktopReso">HD (720p,16:9)</button></li>
                                 <li class="hdplus"><button type="button" value="hdplus" class="desktopReso">HD+ (900p,16:9)</button></li>
                                 <li class="fullhd"><button type="button" value="fullhd" class="desktopReso">FHD (1080p,16:9)</button></li>
                             </ul>
+                            <input type="hidden" id="resoDesktopChoose" value="qhd" />
                             <i class="fas fa-retweet switchDevice"></i>
                         </label>
                         <input type="checkbox" id="inputSource1" class="hiddenCheck" />
@@ -181,14 +200,17 @@
                         <label for="videoResolution" class="labelVideoResolution">
                             <span></span>
                             <ul  id="listResoWebCam">
-                                <li class="qvga" style="display: none"><button type="button" value="qvga">QVGA (240p,4:3)</button></li>
                                 <li class="nhd" style="display: none"><button type="button" value="nhd">nHD (360p,16:9)</button></li>
                                 <li class="vga" style="display: none"><button type="button" value="vga">VGA (480p,4:3)</button></li>
+                                <li class="qhd" style="display: none"><button type="button" value="qhd">qHD (540p,16:9)</button></li>
                                 <li class="svga" style="display: none"><button type="button" value="svga">SVGA (600p,4:3)</button></li>
                                 <li class="hd" style="display: none"><button type="button" value="hd">HD (720p,16:9)</button></li>
+                                <li class="xga" style="display: none"><button type="button" value="xga">XGA (768p,4:3)</button></li>
+                                <li class="hdplus" style="display: none"><button type="button" value="hdplus">HD+ (900p,16:9)</button></li>
                                 <li class="fullhd" style="display: none"><button type="button" value="fullhd">Full HD (1080p, 16:9)</button></li>
                             </ul>
                             <i class="fas fa-retweet switchDevice"></i>
+                            <input type="hidden" id="resoWebCamChoose" value="vga" />
                         </label>
                         <input type="checkbox" id="inputSource2" class="hiddenCheck" />
                         <label for="inputSource2" class="pull-left inputSource labelWebcam">
@@ -288,7 +310,7 @@
                     <p class='vjs-no-js'>
                     To view this video please enable JavaScript, and consider upgrading to a web browser that
                     <a href='https://videojs.com/html5-video-support/' target='_blank'>supports HTML5 video</a>
-                </p>
+                    </p>
                 </video>
                 <video
                         id="videoPreview"
@@ -306,6 +328,7 @@
             <p><a href="#" id="saveRecordings" data-translate="PRODUCTION_SAVE">Télécharger une archive de vos médias</a></p>
             <p class="linkFusion"><a href="#" id="saveRecordingsFusion" data-translate="PRODUCTION_SAVE_FUSION">Télécharger une archive et fusionner vos médias (traitement long...)</a></p>
         </div>
+        <input type="hidden" id="debitValue" value="" />
     </div>
     <div class="modalFooter">
         <a href="https://ent.uca.fr/mediamanager/" target="_blank"><label class="button button-blue">Gérer mes vidéos</label></a>
@@ -316,7 +339,7 @@
 <script src="js/genererStream.js"></script>
 <script src="js/jquery.min.js"></script>
 <script src="js/adapter-latest.js"></script>
-<script src="//vjs.zencdn.net/7.3.0/video.min.js"></script>
+<script src="js/video.min.js"></script>
 <script src="js/FileSaver.min.js"></script>
 <script src="js/script.js"></script>
 <script src="js/utils.js"></script>
