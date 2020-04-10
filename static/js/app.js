@@ -669,6 +669,7 @@ App.prototype = {
 
     $('#startRecord').addClass('recording');
     $('#pauseRecord').show();
+    $('#startTitle').hide();
 
     var resDesktop = $('#resoDesktopChoose').val();
     var resWebCam = $('#resoWebCamChoose').val();
