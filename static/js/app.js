@@ -75,9 +75,11 @@ function App() {
 
         if (bool) {
           document.body.classList.add('paused');
+          $("#pauseTitle").html("Reprendre");
         }
         else {
           document.body.classList.remove('paused');
+          $("#pauseTitle").html("Pause");
         }
       }
     }
@@ -204,6 +206,8 @@ App.prototype = {
      }).then(function () {
        if(!$('#alertNoWebcam').is(':visible'))
         $("#startRecord").addClass('canRecord');
+       if(!$('#startTitle').is(':visible'))
+         $('#startTitle').show();
      });
    }
    else {
@@ -219,6 +223,8 @@ App.prototype = {
          }).then(function () {
            if(!$('#alertNoWebcam').is(':visible'))
             $("#startRecord").addClass('canRecord');
+           if(!$('#startTitle').is(':visible'))
+             $('#startTitle').show();
          });
    }
   },
@@ -670,6 +676,8 @@ App.prototype = {
     $('#startRecord').addClass('recording');
     $('#pauseRecord').show();
     $('#startTitle').hide();
+    $('#stopTitle').show();
+    $('#pauseTitle').show();
 
     var resDesktop = $('#resoDesktopChoose').val();
     var resWebCam = $('#resoWebCamChoose').val();
@@ -723,6 +731,8 @@ App.prototype = {
     $('#recordingTime').hide()
     $('#startRecord').removeClass('recording');
     $(".statutLoading").show();
+    $('#stopTitle').hide();
+    $('#pauseTitle').hide();
 
     //on check si on a select l'upload ou qu'on est dans moodle
     // if(document.getElementById('uploadMedia').checked || !$('#dropdownlistserie').is(':visible')) {

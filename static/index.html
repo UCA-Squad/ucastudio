@@ -56,7 +56,7 @@
                     <div class="fill"></div>
                 </div>
             </div>
-            <span>Test de votre débit en cours...</span>
+            <span>Test de votre débit en cours... Merci de patienter</span>
         </div>
     </div>
 </div>
@@ -226,7 +226,9 @@
                 <button id="startRecord" title="Démarrer l'enregistrement" data-translatetitle="START_RECORDING"></button>
                 <span id="recordingTime"></span>
                 <br />
-                <span id="startTitle">Démarrer l'enregistrement</span>
+                <span id="pauseTitle" style="right: 64.5em;position:absolute;display: none">Pause</span>
+                <span id="startTitle" style="padding-top: 0.5em;display: none">Démarrer</span>
+                <span id="stopTitle" style="padding-top: 0.5em;display: none">Arrêter</span>
             </div>
         </section>
         <input type="radio" id="edit" class="hiddenCheck" name="view" autocomplete="off" />
