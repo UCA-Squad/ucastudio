@@ -1224,8 +1224,8 @@ svg {
   opacity: 0;
   visibility: hidden;
   text-align: center;
-  width: 14rem;
-  height: 12rem;
+  width: 15rem;
+  height: 15rem;
   transition: opacity 0.5s 0.5s, visibility 0s 1s;
 }
 
@@ -1576,6 +1576,12 @@ label[for=mergestreams]::before {
   left: -2.5rem;
 }
 
+#pauseTitle{
+  position: absolute;
+  margin-top: 5.5em;
+  margin-left: -6.2em;
+}
+
 #stopRecord::before {
   position: absolute;
   width: 1.5rem;
@@ -1595,11 +1601,12 @@ label, button {
 }
 
 #recordingTime {
-  line-height: 4rem; 
+  line-height: 2rem;
   position: absolute;
   bottom: 0.5em;
   font-family: monospace;
   margin-left: -1.5rem;
+  left: 45%;
 }
 
 #recordingTime::before {

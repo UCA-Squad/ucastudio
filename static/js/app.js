@@ -76,10 +76,13 @@ function App() {
         if (bool) {
           document.body.classList.add('paused');
           $("#pauseTitle").html("Reprendre");
+          $("#pauseTitle").css("margin-left","-7.2em");
         }
         else {
           document.body.classList.remove('paused');
           $("#pauseTitle").html("Pause");
+          $("#pauseTitle").css("margin-left","-6.2em");
+
         }
       }
     }

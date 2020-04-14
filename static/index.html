@@ -42,21 +42,21 @@
 <div id="introCover">
     <div class="loader">
         <div class="statutLoading" style="display: none">
-            <svg width="192" height="192">
-                <circle r="82" cx="96" cy="96" fill="none" stroke="#00bdc4" stroke-width="8" stroke-dashoffset="0" stroke-dasharray="515"></circle>
-                <circle r="82" cx="96" cy="96" fill="none" stroke="white" stroke-width="14" stroke-dashoffset="20" stroke-dasharray="515"></circle>
+            <svg width="240" height="240">
+                <circle r="82" cx="120" cy="120" fill="none" stroke="#00bdc4" stroke-width="8" stroke-dashoffset="0" stroke-dasharray="515"></circle>
+                <circle r="82" cx="120" cy="120" fill="none" stroke="white" stroke-width="14" stroke-dashoffset="20" stroke-dasharray="515"></circle>
             </svg>
             <span class="loaderText" data-translate="LOADING">Chargement...</span>
         </div>
         <div class="debitCircle">
-            <div id="debitBar" class="c100 p0 big" style="right: 20px; margin-bottom: 20px;">
+            <div id="debitBar" class="c100 p0 big" style="margin-bottom: 20px;">
                 <span id="debitPercent">0%</span>
                 <div class="slice">
                     <div class="bar"></div>
                     <div class="fill"></div>
                 </div>
             </div>
-            <span>Test de votre débit en cours... Merci de patienter</span>
+            <span style="text-align: center">Test de votre débit en cours... <br>Merci de patienter</span>
         </div>
     </div>
 </div>
@@ -220,13 +220,13 @@
                         <span class="labelCamSelect pull-left"></span>
                     </div>
                 </label>
+                <span id="recordingTime"></span>
             </div>
             <div id="recordingControls">
                 <button class="fas fa-pause fa-2x" id="pauseRecord" title="Mettre l'enregistrement en pause" data-translatetitle="PAUSE_RECORDING"></button>
+                <span id="pauseTitle" style="display: none">Pause</span>
                 <button id="startRecord" title="Démarrer l'enregistrement" data-translatetitle="START_RECORDING"></button>
-                <span id="recordingTime"></span>
-                <br />
-                <span id="pauseTitle" style="right: 64.5em;position:absolute;display: none">Pause</span>
+                <br>
                 <span id="startTitle" style="padding-top: 0.5em;display: none">Démarrer</span>
                 <span id="stopTitle" style="padding-top: 0.5em;display: none">Arrêter</span>
             </div>
