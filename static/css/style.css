@@ -1547,10 +1547,6 @@ label[for=mergestreams]::before {
   content: '';
 }
 
-.canRecord.recording{
-  left: -2.1rem !important;
-}
-
 .canRecord.recording::before {
   border-radius: 0 !important;
   width: 2.5rem !important;
@@ -1564,22 +1560,47 @@ label[for=mergestreams]::before {
   box-shadow: inset 0 2px 3px rgba(0,0,0,0.2);
 }
 
-/* add by lylblaud*/
 #pauseRecord {
   color: white;
   background-color: black !important;
-  top: 1rem;
+  top: 1.5rem;
   font-size: 1.7em;
   width: 3rem !important;
   height: 3rem !important;
   display: none;
-  left: -2.5rem;
+  margin-left: -2.5em !important;
+  position: absolute !important;
 }
 
 #pauseTitle{
-  position: absolute;
-  margin-top: 5.5em;
-  margin-left: -6.2em;
+  position: relative;
+  top: 1.9em;
+  color: #5E5C5C;
+  font: 12pt "Merriweather Sans",sans-serif;
+  font-weight: normal;
+  margin-left: -0.40em;
+}
+
+.fa-play::before{
+  padding: 7px;
+}
+
+#startStopTitle{
+  color: #5E5C5C;
+  font: 12pt "Merriweather Sans",sans-serif;
+  font-weight: normal;
+  display: none;
+}
+
+#startStopTitle{
+  position: relative;
+  top: 3.8em;
+  margin-left: -0.25em;
+}
+
+#pauseRecord::before{
+  position: relative;
+  top:0.35em;
 }
 
 #stopRecord::before {
@@ -1605,8 +1626,7 @@ label, button {
   position: absolute;
   bottom: 0.5em;
   font-family: monospace;
-  margin-left: -1.5rem;
-  left: 45%;
+  left: 44%;
 }
 
 #recordingTime::before {

@@ -74,15 +74,16 @@ function App() {
         this.logNextTick = true;
 
         if (bool) {
+          $("#recordingTime").css("left", "45%");
           document.body.classList.add('paused');
           $("#pauseTitle").html("Reprendre");
-          $("#pauseTitle").css("margin-left","-7.2em");
+          $("#pauseTitle").css("margin-left","-1.5em");
         }
         else {
+          $("#recordingTime").css("left", "44%");
           document.body.classList.remove('paused');
           $("#pauseTitle").html("Pause");
-          $("#pauseTitle").css("margin-left","-6.2em");
-
+          $("#pauseTitle").css("margin-left","-0.16em");
         }
       }
     }
@@ -209,8 +210,8 @@ App.prototype = {
      }).then(function () {
        if(!$('#alertNoWebcam').is(':visible'))
         $("#startRecord").addClass('canRecord');
-       if(!$('#startTitle').is(':visible'))
-         $('#startTitle').show();
+       if(!$('#startStopTitle').is(':visible'))
+         $('#startStopTitle').show();
      });
    }
    else {
@@ -226,8 +227,8 @@ App.prototype = {
          }).then(function () {
            if(!$('#alertNoWebcam').is(':visible'))
             $("#startRecord").addClass('canRecord');
-           if(!$('#startTitle').is(':visible'))
-             $('#startTitle').show();
+           if(!$('#startStopTitle').is(':visible'))
+             $('#startStopTitle').show();
          });
    }
   },
@@ -678,8 +679,7 @@ App.prototype = {
 
     $('#startRecord').addClass('recording');
     $('#pauseRecord').show();
-    $('#startTitle').hide();
-    $('#stopTitle').show();
+    $('#startStopTitle').html("Arrêter");
     $('#pauseTitle').show();
 
     var resDesktop = $('#resoDesktopChoose').val();
@@ -734,8 +734,9 @@ App.prototype = {
     $('#recordingTime').hide()
     $('#startRecord').removeClass('recording');
     $(".statutLoading").show();
-    $('#stopTitle').hide();
     $('#pauseTitle').hide();
+    $('#startStopTitle').hide();
+
 
     //on check si on a select l'upload ou qu'on est dans moodle
     // if(document.getElementById('uploadMedia').checked || !$('#dropdownlistserie').is(':visible')) {
