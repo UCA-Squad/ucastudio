@@ -1642,7 +1642,7 @@ label, button {
 }
 
 .paused.recording #recordingTime::before {
-  content: 'Paused';
+  content: 'Pause';
   font-style: normal;
   color: teal;
 }
