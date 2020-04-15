@@ -574,13 +574,18 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 							'  }\n' +
 							']';
 
+						var canEncode540p = false;
+						if((hasSecondStream || onlySecondStream) && metadataFFprobe.streams[0].height >= 520 && metadataFFprobe.streams[0].height <= 700) {
+							canEncode540p = true;
+						}
+
 						var canEncode720p = true;
-						if((hasSecondStream || onlySecondStream) && metadataFFprobe.streams[0].height < 720 ) {
+						if((hasSecondStream || onlySecondStream) && metadataFFprobe.streams[0].height < 700 ) {
 							canEncode720p = false;
 						}
 
 						var canEncode1080p = true;
-						if((hasSecondStream || onlySecondStream) && metadataFFprobe.streams[0].height < 1080 ) {
+						if((hasSecondStream || onlySecondStream) && metadataFFprobe.streams[0].height < 1000 ) {
 							canEncode1080p = false;
 						}
 
@@ -599,7 +604,7 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 									'  "configuration": {\n' +
 									'    "flagQuality480p": "true",\n' +
 									'    "flagQuality720p": "true",\n' +
-									'    "flagQuality1080p": "true",\n' +
+									'    "flagQuality1080p": "true"\n' +
 									'  }\n' +
 									'}';
 							}
@@ -610,7 +615,19 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 									'  "configuration": {\n' +
 									'    "flagQuality480p": "true",\n' +
 									'    "flagQuality720p": "true",\n' +
-									'    "flagQuality1080p": "false",\n' +
+									'    "flagQuality1080p": "false"\n' +
+									'  }\n' +
+									'}';
+							}
+							else if (canEncode540p)
+							{
+								var processing = '{\n' +
+									'  "workflow": "' + config.opencast_workflow + '"\n' +
+									'  "configuration": {\n' +
+									'    "flagQuality480p": "true",\n' +
+									'    "flagQuality540p": "true",\n' +
+									'    "flagQuality720p": "false",\n' +
+									'    "flagQuality1080p": "false"\n' +
 									'  }\n' +
 									'}';
 							}
@@ -620,8 +637,9 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 									'  "workflow": "' + config.opencast_workflow + '",\n' +
 									'  "configuration": {\n' +
 									'    "flagQuality480p": "true",\n' +
+									'    "flagQuality540p": "false",\n' +
 									'    "flagQuality720p": "false",\n' +
-									'    "flagQuality1080p": "false",\n' +
+									'    "flagQuality1080p": "false"\n' +
 									'  }\n' +
 									'}'
 							}
@@ -1069,7 +1087,7 @@ function getRate(type, reso)
 				rateValue = ['-maxrate', '1500k', '-bufsize', '3000k'];
 				break;
 			case 'hd':
-				rateValue = ['-maxrate', '2400k', '-bufsize', '4800k'];
+				rateValue = ['-maxrate', '2400k', '-bufsize', '4800k']; 
 				break;
 			case 'hdplus':
 				rateValue = ['-maxrate', '3500k', '-bufsize', '7000k'];
