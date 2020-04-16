@@ -623,13 +623,17 @@ class Device extends EventEmitter {
       //durant le check de reso, on desactive la possiblite de lancer un rec
       $('#startRecord').addClass('cantRecord');
       document.getElementById("startRecord").disabled = true;
-      $('main').append('<input type="hidden" id="gumRunning" />')
+      if($('#startStopTitle').is(':visible'))
+        $('#startStopTitle').hide();
+      $('main').append('<input type="hidden" id="gumRunning" />');
     }
     else if(cmpt >= this.candidates.length) {
       $('#startRecord').removeClass('cantRecord');
       $('#startRecord').addClass('canRecord');
       document.getElementById("startRecord").disabled = false;
       $('#gumRunning').remove();
+      if(!$('#startStopTitle').is(':visible'))
+        $('#startStopTitle').show();
       $('#listResoWebCam > li:visible:last').addClass('last-visible-li');
     }
 
