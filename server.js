@@ -575,17 +575,17 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 							']';
 
 						var canEncode540p = false;
-						if((hasSecondStream || onlySecondStream) && metadataFFprobe.streams[0].height >= 520 && metadataFFprobe.streams[0].height <= 700) {
+						if((!isAudioFile) && metadataFFprobe.streams[0].height >= 520 && metadataFFprobe.streams[0].height <= 700) {
 							canEncode540p = true;
 						}
 
 						var canEncode720p = true;
-						if((hasSecondStream || onlySecondStream) && metadataFFprobe.streams[0].height < 700 ) {
+						if((!isAudioFile) && metadataFFprobe.streams[0].height < 700 ) {
 							canEncode720p = false;
 						}
 
 						var canEncode1080p = true;
-						if((hasSecondStream || onlySecondStream) && metadataFFprobe.streams[0].height < 1000 ) {
+						if((!isAudioFile) && metadataFFprobe.streams[0].height < 1000 ) {
 							canEncode1080p = false;
 						}
 
