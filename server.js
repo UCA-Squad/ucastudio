@@ -28,7 +28,7 @@ var cas = new CASAuthentication({
 
 var session = require("express-session")({
 	secret: config.session_secret_key,
-	resave: true,
+	resave: false,
 	saveUninitialized: true
 });
 
