@@ -30,14 +30,14 @@ To build Studio yourself, execute these commands:
 
 The following table depicts the current state of browser support.
 
-| OS      | Browser    | Capture Camera | Capture Screen | Record
-| --------| ---------- | -------------- | -------------- | ------
-| Win   | Chrome 65  | ✔   | ✔ | ✔   |
-| Win   | Firefox 60 | ✔   | ✔ | ✔   |
-| Linux   | Chrome 64  | ✔   | ✔ | ✔   |
-| Linux   | Firefox 60 | ✔   | ✔ | ✔   |
-| macOS   | Chrome 65  | ✔   | ✔ | ✔   |
-| macOS   | Firefox 70 | ✔   | ✔ | ✔   |
+| OS      | Browser    | Capture Camera | Capture Screen | Capture Audio | Record
+| --------| ---------- | -------------- | -------------- | -------------- | ------
+| Win   | Chrome 65  | ✔   | ✔ | ✔ | ✔   |
+| Win   | Firefox 60 | ✔   | ✔ | ✔ | ✔   |
+| Linux   | Chrome 64  | ✔   | ✔ | ✔ | ✔   |
+| Linux   | Firefox 60 | ✔   | ✔ | ✔ | ✔   |
+| macOS   | Chrome 65  | ✔   | ✔ | ✔ | ✔   |
+| macOS   | Firefox 70 | ✔   | ✔ | ✔ | ✔   |
 
 
 Browsers/systems not listed in this table are not currently tested by us, so they might or might not work.
