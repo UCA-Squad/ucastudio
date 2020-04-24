@@ -21,4 +21,14 @@
   "mail_from" : "",
   "mail_to" : "",
 
+  "path_log_file_events" : ""
+  "path_folder_record" : ""
+
+  "client_config" : {
+    "doc_link_enable" : false,
+    "doc_link_path" : "",
+    "managed_my_media_enable": false,
+    "managed_my_media_path": "",
+    "path_check_speed_ntwk" : ""
+  }
 }

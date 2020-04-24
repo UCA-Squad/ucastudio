@@ -23,6 +23,36 @@ function Communications() {
     $('#moodle').val(url);
   });
 
+  this.socket.on('clientConfig',function(config){
+
+    $('.checkWifi').attr('src', config.path_check_speed_ntwk).ready(function () {
+      var actualprogress = 0;
+      var itv = 0;
+      function prog(){
+        if(actualprogress >= 100){
+          clearInterval(itv);
+          return;
+        }
+        actualprogress += 6.25;
+        document.getElementById("debitBar").className = 'c100 p'+Math.round(actualprogress)+' big center';
+        document.getElementById("debitPercent").innerHTML = Math.round(actualprogress) + "%";
+        if(actualprogress == 100) clearInterval(itv);
+      }
+      setInterval(prog, 1000);
+    });
+
+    if(config.doc_link_enable) {
+      $('.docLink').show();
+      $('.docLink').attr('href', config.doc_link_path);
+    }
+
+    if(config.managed_my_media_enable) {
+      $('.managedMyMediaLink').show();
+      $('.managedMyMediaLink').attr('href', config.managed_my_media_path);
+    }
+
+  });
+
   this.socket.on('fatal',function(e){
     alert("Un problème est survenu sur cette page web, elle va donc être rechargée");
     location.reload();

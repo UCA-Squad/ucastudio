@@ -17,23 +17,6 @@ $("#alertNoWebcam > .close").on('click', function () {
     $(this).parent().slideUp("slow");
 });
 
-
-var actualprogress = 0;
-var itv = 0;
-function prog()
-{
-   if(actualprogress >= 100)
-   {
-       clearInterval(itv);
-       return;
-   }
-   actualprogress += 6.25; 
-   document.getElementById("debitBar").className = 'c100 p'+Math.round(actualprogress)+' big center'; 
-   document.getElementById("debitPercent").innerHTML = Math.round(actualprogress) + "%";   
-   if(actualprogress == 100) clearInterval(itv);
-}
-setInterval(prog, 500);
-
 $( document ).ready(function() {
 
     $('#debitValue').val('');

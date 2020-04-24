@@ -8,7 +8,6 @@
     <link rel="stylesheet" type="text/css" href="css/cdn.uca.fr.css">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" media="screen and (max-width: 1300px)" href="css/screen.css">
-    <link rel="chrome-webstore-item" href="https://chrome.google.com/webstore/detail/oghkihildgnkedhlolgjomnbfmjpmddm">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
     <link rel="stylesheet" href="css/video-js.min.css" >
     <link rel="stylesheet" href="css/videojs-vjsdownload.css" >
@@ -28,8 +27,8 @@
             <img alt="Français" src="res/flags/fra.png" />
         </label>
         <ul></ul>
-        <a><iframe src="https://mediasmanager.dsi.uca.fr/checkSpeedNtwk" class="checkWifi"></iframe></a>
-        <a href="https://ippa.uca.fr/medias/fichier/ucamedia-enregistrement-et-generation-de-live_1575468327476-pdf" target="_blank" id="help" title="Accéder à la documentation UCAMedia">
+        <a><iframe src="" class="checkWifi"></iframe></a>
+        <a class="docLink" style="display: none" href="" target="_blank" id="help" title="Accéder à la documentation UCAMedia">
             <i class="fas fa-question-circle fa-2x"></i>
         </a>
         <a href="/logout" class="logout" title="Se déconnecter">
@@ -37,7 +36,6 @@
         </a>
     </div>
 </header>
-<input type="checkbox" class="toggleCover addDevice hiddenCheck" id="toggleExtensionModal" autocomplete="off" />
 <input type="checkbox" class="toggleCover hiddenCheck" id="toggleSaveCreationModal" autocomplete="off" />
 <div id="introCover">
     <div class="loader">
@@ -292,15 +290,6 @@
         </filter>
     </defs>
 </svg>
-<div id="extensionModal" class="modal">
-    <h4 data-translate="HEADING_EXTENSION">La capture d'écran nécessite une extension</h4>
-    <div class="modalBody">
-        <span data-translate="REQUIRE_EXTENSION">Vous devez installer une extension pour activer la capture d'écran..</span>
-        <p>
-            <a href="https://chrome.google.com/webstore/detail/oghkihildgnkedhlolgjomnbfmjpmddm" target="_blank" id="installExtension" type="button" data-translate="INSTALL_EXTENSION">Installez-le</a>
-        </p>
-    </div>
-</div>
 <div id="saveCreation" class="modal">
     <div class="modalBody">
         <h1 data-translate="PRODUCTION_MEDIA">Médias</h1>
@@ -335,7 +324,7 @@
         <input type="hidden" id="debitValue" value="" />
     </div>
     <div class="modalFooter">
-        <a href="https://ent.uca.fr/mediamanager/" target="_blank"><label class="button button-blue">Gérer mes vidéos</label></a>
+        <a class="managedMyMediaLink" style="display: none" href="" target="_blank"><label class="button button-blue">Gérer mes vidéos</label></a>
         <label for="toggleSaveCreationModal" class="button button-amber" data-translate="PRODUCTION_DISCARD">Nouvel enregistrement</label>
     </div>
 </div>
