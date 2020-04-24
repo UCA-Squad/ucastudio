@@ -38,7 +38,7 @@ function Communications() {
         document.getElementById("debitPercent").innerHTML = Math.round(actualprogress) + "%";
         if(actualprogress == 100) clearInterval(itv);
       }
-      setInterval(prog, 1000);
+      setInterval(prog, 500);
     });
 
     if(config.doc_link_enable) {
