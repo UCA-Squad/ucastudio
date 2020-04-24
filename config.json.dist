@@ -1,20 +1,20 @@
 {
-  "cas_url" : "",
-  "service_url" : "",
+  "cas_url" : "https://xxxxxxxx/cas",
+  "service_url" : "https://application_url.fr",
 
-  "path_cert_key" : "",
-  "path_cert" : "",
+  "path_cert_key" : "cert/xxx-key.pem",
+  "path_cert" : "cert/xxxx.pem",
 
-  "session_secret_key" : "",
+  "session_secret_key" : "xxxxxx",
 
-  "opencast_authentication" : "",
-  "opencast_events_url" : "",
-  "opencast_series_url" : "",
-  "opencast_cert" : "",
-  "opencast_workflow" : "",
-  "opencast_workflow_audio" : "",
+  "opencast_authentication" : "xxxxxx",
+  "opencast_events_url" : "/api/events",
+  "opencast_series_url" : "/api/series",
+  "opencast_cert" : "cert/xxxxxx.pem",
+  "opencast_workflow" : "schedule-and-upload",
+  "opencast_workflow_audio" : "audio",
 
-  "path_ldap_uca": ""
+  "path_ldap_uca": "ldaps://xxxxxx:636"
 
   "mail_host" : "",
   "mail_port" : 25,
