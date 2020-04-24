@@ -161,7 +161,6 @@ App.prototype = {
       rafLoop.resumeExecution(token);
     });
 
-    document.getElementById('installExtension').addEventListener('click', this.chromeInstall.bind(this), false);
     document.body.addEventListener('keyup', this.handleKeys.bind(this), false);
 
     this.recordButton.addEventListener('click', this.startRecord.bind(this), false);
@@ -194,10 +193,6 @@ App.prototype = {
 
     if (!e.target.checked) {
       return;
-    }
-
-    if (e.target.value === 'desktop' && this.needsExtension) {
-      document.getElementById('toggleExtensionModal').checked = true;
     }
 
    if(e.target.id == 'audiostream' && !$('.videoDevice').hasClass('active'))
@@ -1059,14 +1054,8 @@ compositor.on('stream.remove', () => {
 
 if (window.chrome && chrome.app) {
   if (!navigator.mediaDevices || !('getDisplayMedia' in navigator.mediaDevices)) {
-    let delay = setTimeout(() => {
-      app.needsExtension = true;
-    }, 1000);
-    window.addEventListener('message', e => {
-      if (e.data.type && e.data.type == 'SS_PING' && document.getElementById('appInstalled')) {
-        clearTimeout(delay);
-      }
-    });
+    //on active l'alert navigateur pas compatible
+    $("#alertBrowserVersion").show();
   }
 }
 
