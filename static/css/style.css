@@ -2198,10 +2198,7 @@ ul#listMicAvailable li:last-child {
 }
 
 .checkWifi{
-  border: none;
-  position: absolute;
-  right: 1em;
-  width: 15em;
+ display: none;
 }
 
 #listResoDesktop li, #listResoWebCam li{
