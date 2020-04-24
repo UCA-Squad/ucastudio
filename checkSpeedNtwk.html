@@ -1,0 +1,30 @@
+<script type="text/javascript" src="js/jquery-3.4.1.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.5.0.min.js" integrity="sha256-xNzN2a4ltkB44Mc/Jz3pT4iU1cmeR0FkXs4pru/JxaQ=" crossorigin="anonymous"></script><script>
+    $(function() {
+        var settings = {
+            endpoint: 'checkSpeedUpload', // Where is located the PHP file.
+            upload: {
+                // Where is located your `network.php` file.
+                // The delay while you want to take measures.
+                delay: 8000,
+                data: {
+                    // The amount of data to initially use.
+                    size: 2 * 1024 * 1024, // 2 MB
+
+                    // If the measure period can't reach the delay defined in the settings,
+                    // the data amount is multiplied by the following value.
+                    multiplier: 2
+                }
+            }
+        };
+
+        var net = new Network(settings);
+        net.upload
+            .on('end', function(averageSpeed, allInstantSpeeds) {
+                var finalValue = (averageSpeed/1024/1024)*8;
+                window.parent.postMessage(finalValue, '*');
+            })
+            .start();
+
+    });
+</script>

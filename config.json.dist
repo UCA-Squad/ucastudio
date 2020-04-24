@@ -14,6 +14,8 @@
   "opencast_workflow" : "schedule-and-upload",
   "opencast_workflow_audio" : "audio",
 
+  "moodle_url" : "xxxxxxxxxxxxx",
+
   "path_ldap_uca": "ldaps://xxxxxx:636"
 
   "mail_host" : "",
