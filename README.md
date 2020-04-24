@@ -26,6 +26,9 @@ To build Studio yourself, execute these commands:
 % node server.js
 ```
 
+To operate the speed test, push the file "checkSpeedNtwk" on server with apache or nginx
+(cf. https://www.npmjs.com/package/network-js/v/2.0.0)
+
 ## Supported Browsers
 
 The following table depicts the current state of browser support.
