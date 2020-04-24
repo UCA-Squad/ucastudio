@@ -20,7 +20,7 @@ You can configure all inside config.json
 To build Studio yourself, execute these commands:
 
 ```sh
-% git clone git@github.com:elan-ev/UCA-Squad/ucastudio.git
+% git clone https://github.com/UCA-Squad/ucastudio.git
 % cd ucastudio
 % npm install
 % node server.js
