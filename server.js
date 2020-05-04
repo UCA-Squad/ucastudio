@@ -50,7 +50,7 @@ io.on('connection', function(socket){
 	});
 
 	socket.emit('clientConfig', config.client_config);
-	socket.emit('moodle', config.moodle);
+	socket.emit('moodle', config.moodle_url);
 
 	var ffmpeg_process, feedStream=false;
 	var ffmpeg_process2, feedStream2=false;
