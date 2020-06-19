@@ -29,14 +29,19 @@ function Communications() {
       var actualprogress = 0;
       var itv = 0;
       function prog(){
-        if(actualprogress >= 100){
+        if(actualprogress >= 90){
+          actualprogress += 1;
+        } else {
+          actualprogress += 11.25;
+        }
+        if(actualprogress > 99) {
           clearInterval(itv);
           return;
         }
-        actualprogress += 6.25;
+        
         document.getElementById("debitBar").className = 'c100 p'+Math.round(actualprogress)+' big center';
         document.getElementById("debitPercent").innerHTML = Math.round(actualprogress) + "%";
-        if(actualprogress == 100) clearInterval(itv);
+        if(actualprogress == 90) clearInterval(itv);
       }
       setInterval(prog, 500);
     });
