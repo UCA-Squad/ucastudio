@@ -895,6 +895,11 @@ function createSerie(uid, socket, idSerieSelect, mustBeUpload)
 				'  {\n' +
 				'    "allow": true,\n' +
 				'    "action": "read"\n' +
+				'    "role": "ROLE_GROUP_MOODLE",\n' +
+				'  },\n' +
+				'  {\n' +
+				'    "allow": true,\n' +
+				'    "action": "read"\n' +
 				'    "role": "ROLE_USER_LDAP_' + uid.toUpperCase() + '",\n' +
 				'  },\n' +
 				'  {\n' +
