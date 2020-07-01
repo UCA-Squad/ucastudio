@@ -28,7 +28,8 @@
 
   "client_config" : {
     "doc_link_enable" : false,
-    "doc_link_path" : "",
+    "doc_link_path_ucastudio" : "",
+    "doc_link_path_ucamedia" : "",
     "managed_my_media_enable": false,
     "managed_my_media_path": "",
     "path_check_speed_ntwk" : ""

@@ -28,9 +28,13 @@
         </label>
         <ul></ul>
         <a><iframe src="" class="checkWifi"></iframe></a>
-        <a class="docLink" style="display: none" href="" target="_blank" id="help" title="Accéder à la documentation UCAMedia">
+        <div id="help" style="display: none" onclick="document.getElementById('helpList').style.visibility='visible';">
             <i class="fas fa-question-circle fa-2x"></i>
-        </a>
+            <ul id="helpList">
+                <li><a class="docLinkUcaStudio" style="display: none" href="" target="_blank" title="Accéder à la documentation UCAMedia">Accéder à la documentation UcaStudio</a></li>
+                <li><a class="docLinkUcaMedia" style="display: none" href="" target="_blank" title="Accéder à la documentation UCAMedia">Accéder à la documentation UcaMedia</a></li>
+            </ul>
+        </div>
         <a href="/logout" class="logout" title="Se déconnecter">
             <i class="fas fa-sign-out-alt fa-2x"></i>
         </a>

@@ -47,8 +47,10 @@ function Communications() {
     });
 
     if(config.doc_link_enable) {
-      $('.docLink').show();
-      $('.docLink').attr('href', config.doc_link_path);
+      $('#help').show();
+      $('#help a').show();
+      $('.docLinkUcaStudio').attr('href', config.doc_link_path_ucastudio);
+      $('.docLinkUcaMedia').attr('href', config.doc_link_path_ucamedia);
     }
 
     if(config.managed_my_media_enable) {

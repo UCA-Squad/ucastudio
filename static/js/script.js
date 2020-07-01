@@ -21,6 +21,11 @@ $( document ).ready(function() {
 
     $('#debitValue').val('');
 
+    $(window).click(function(event) {
+     if(event.target.className != 'fas fa-question-circle fa-2x' && $('#helpList').is(":visible"))
+         document.getElementById('helpList').style.visibility='hidden';
+    });
+
     /**
      * Réception debit depuis l'iframe checkSpeedNtwk
      * @param event
