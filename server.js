@@ -52,7 +52,7 @@ io.on('connection', function(socket){
 	socket.emit('clientConfig', config.client_config);
 	socket.emit('moodle', config.moodle_url);
 
-	if(config.enable_maintenance_mod)
+	if(config.enable_maintenance_mod == "true")
 		socket.emit('info_maintenance_mod', config.info_maintenance_mod);
 
 	var ffmpeg_process, feedStream=false;
