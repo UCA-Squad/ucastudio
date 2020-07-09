@@ -33,5 +33,9 @@
     "managed_my_media_enable": false,
     "managed_my_media_path": "",
     "path_check_speed_ntwk" : ""
-  }
+  },
+
+  "ENABLE_MAINTENANCE_MOD" : "false",
+  "INFO_MAINTENANCE_MOD" : "Attention ! UCAstudio sera en maintenance le jeudi 09 Juillet de 12h à 17h.'
+
 }

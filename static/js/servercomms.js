@@ -23,6 +23,11 @@ function Communications() {
     $('#moodle').val(url);
   });
 
+  this.socket.on('info_maintenance_mod',function(infoMaintenance){
+    $('#infoMaintenanceMod').html(infoMaintenance);
+    document.getElementById('infoMaintenanceMod').style.display = 'block';
+  });
+
   this.socket.on('clientConfig',function(config){
 
     $('.checkWifi').attr('src', config.path_check_speed_ntwk).ready(function () {

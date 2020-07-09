@@ -2203,3 +2203,8 @@ ul#listMicAvailable li:last-child {
 #listResoDesktop li:last-child, #listResoWebCam li.last-visible-li{
   border-bottom: none;
 }
+
+#infoMaintenanceMod{
+  display: none;
+  text-align: center;
+}
