@@ -23,8 +23,8 @@
   "mail_from" : "",
   "mail_to" : "",
 
-  "path_log_file_events" : ""
-  "path_folder_record" : ""
+  "path_log_file_events" : "./static/records/logFileEvents.csv"
+  "path_folder_record" : "./static/records/"
 
   "client_config" : {
     "doc_link_enable" : false,
