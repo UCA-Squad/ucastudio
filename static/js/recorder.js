@@ -96,7 +96,8 @@ class Recorder extends EventEmitter {
   }
 
   stop() {
-    this.recorder.stop();
+    if (this.recorder.state === 'recording')
+      this.recorder.stop();
     this.isRecording = false;
   }
 }
