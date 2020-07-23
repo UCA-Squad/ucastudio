@@ -13,7 +13,8 @@ $(".backToInfo").on('click', function () {
     $(".nextBtn").closest('section').css("transform", ``);
 });
 
-$("#alertNoWebcam > .close").on('click', function () {
+$("#alertBrowser > .close, #alertBrowserVersion > .close, #alertNoWebcam > .close, #alertWrongReso > .close, " +
+    "#alertLowDebit > .close, #alertMicNotEnable > .close").on('click', function () {
     $(this).parent().slideUp("slow");
 });
 
@@ -32,11 +33,9 @@ $( document ).ready(function() {
      */
     function receiveMessage(event){
 
+        document.getElementById("debitBar").className = 'c100 p100 big center';
+        document.getElementById("debitPercent").innerHTML = "100%";
 
-        
-        
-            document.getElementById("debitBar").className = 'c100 p100 big center';
-            document.getElementById("debitPercent").innerHTML = "100%";
         setTimeout(function () {
             $('body').removeClass('loading');
             $('.debitCircle').remove();

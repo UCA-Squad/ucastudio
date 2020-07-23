@@ -689,8 +689,10 @@ App.prototype = {
     if($(".desktopDevice").hasClass('active') && $(".audioDevice").hasClass('active') && !$(".videoDevice").hasClass('active'))
       comms.emit('start', 'audio-and-desktop', resDesktop);
 
-    if($(".desktopDevice").hasClass('active') && !$(".audioDevice").hasClass('active') && !$(".videoDevice").hasClass('active'))
+    if($(".desktopDevice").hasClass('active') && !$(".audioDevice").hasClass('active') && !$(".videoDevice").hasClass('active')) {
       comms.emit('start', 'onlydesktop', resDesktop);
+      document.getElementById("alertMicNotEnable").style.display = "block";
+    }
 
     if($(".audioDevice").hasClass('active') && $(".videoDevice").hasClass('active') && !$(".desktopDevice").hasClass('active'))
       comms.emit('start', 'onlyvideo', null, resDesktop);

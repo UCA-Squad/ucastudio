@@ -1894,13 +1894,12 @@ input:focus {
 }
 
 .close {
-  position: absolute;
-  right: 4em;
-  top: 5.8em;
+  position: relative;
   width: 20px;
   height: 20px;
   opacity: 0.3;
   z-index: 10;
+  float: right;
 }
 .close:hover {
   opacity: 1;
@@ -2118,10 +2117,10 @@ input:focus {
   width: 300px !important;
 }
 
-#alertNoWebcam, #alertBrowser, #alertBrowserVersion{
+#alertNoWebcam, #alertBrowser, #alertBrowserVersion, #alertMicNotEnable, #alertWrongReso, #alertLowDebit{
   text-align: center;
   display: none;
-  width: 95%;
+  width: 90%;
   margin-left: auto;
   margin-right: auto;
   margin-bottom: 20px;

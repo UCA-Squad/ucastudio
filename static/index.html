@@ -74,21 +74,17 @@
         <input type="radio" id="create" class="hiddenCheck" name="view" autocomplete="off" />
         <section id="mainSection">
             <label class="backBtn" for="main" title="Back to main navigation" data-translatetitle="BACK_TO_MAIN"></label>
-            <div id="alertBrowser" style="" class="alert alert-orange card-100 ">
+            <div id="alertBrowser" class="alert alert-orange">
                 <a href="#" class="close"></a>
-                <span style="padding: 10em">
-                        Le support de votre navigateur est actuellement en cours d'amélioration.
-                        <br>
-                        Veuillez utiliser le navigateur Firefox ou Google Chrome qui offrent actuellement les meilleurs résultats en matière d'enregistrement.
-                    </span>
+                Le support de votre navigateur est actuellement en cours d'amélioration.
+                <br>
+                Veuillez utiliser le navigateur Firefox ou Google Chrome qui offrent actuellement les meilleurs résultats en matière d'enregistrement.
             </div>
-            <div id="alertBrowserVersion" style="" class="alert alert-orange card-100 ">
+            <div id="alertBrowserVersion" class="alert alert-orange">
                 <a href="#" class="close"></a>
-                <span>
-                    Le support de votre navigateur n'est pas disponible dans cette version.
-                    <br>
-                    Veuillez mettre à jour votre navigateur.
-                </span>
+                Le support de votre navigateur n'est pas disponible dans cette version.
+                <br>
+                Veuillez mettre à jour votre navigateur.
             </div>
             <div class="production">
                 <h1 data-translate="PRODUCTION_HEADING" style="margin-top: 0;font-size: 1.8em">Détails de production</h1>
@@ -137,19 +133,25 @@
             <input type="checkbox" id="minimiseStreams" class="hiddenCheck" />
             <input name="userView" type="radio" value="simple" class="hiddenCheck" id="simpleUserView" autocomplete="off" />
             <input name="userView" type="radio" value="advanced" class="hiddenCheck" checked id="advancedUserView" autocomplete="off" />
-            <div id="alertLowDebit" class="alert alert-orange card-60 hiddenCheck" style="text-align: center;">
+            <div id="alertLowDebit" class="alert alert-orange">
+                <a href="#" class="close"></a>
                 Attention, nous vous recommandons de n'enregistrer qu'un flux vidéo (écran ou webcam) avec ou sans microphone, car votre débit n'est pas suffisant.
             </div>
-            <div id="alertWrongReso" class="alert alert-orange card-60 hiddenCheck" style="text-align: center;">
-                La résolution sélectionnée n'est pas recommandée car votre débit est insuffisant.
-            </div>
-	    <div id="alertNoWebcam" style="" class="alert alert-orange card-100 ">
+            <div id="alertWrongReso" class="alert alert-orange">
                 <a href="#" class="close"></a>
-                <span style="padding: 10em">
-                    Impossible de trouver un périphérique multimédia. Il est très probable que votre navigateur n'autorise pas l'accès à ce périphérique ou qu'il n'est pas connecté.
-                    <br>
-                    Essayez de recharger cette page ou ouvrez-la à l'aide d'un autre navigateur. N'oubliez pas que pour démarrer votre webcam, vous devez autoriser notre site Web à l'utiliser.
-                </span>
+                Attention, la résolution sélectionnée n'est pas recommandée car votre débit est insuffisant.
+            </div>
+	        <div id="alertNoWebcam" class="alert alert-orange">
+                <a href="#" class="close"></a>
+                Impossible de trouver un périphérique multimédia. Il est très probable que votre navigateur n'autorise pas l'accès à ce périphérique ou qu'il n'est pas connecté.
+                <br>
+                Essayez de recharger cette page ou ouvrez-la à l'aide d'un autre navigateur. N'oubliez pas que pour démarrer votre webcam, vous devez autoriser notre site Web à l'utiliser.
+            </div>
+            <div id="alertMicNotEnable" class="alert alert-orange">
+                <a href="#" class="close"></a>
+                Attention, vous avez lancé votre enregistrement sans avoir activé votre micro.
+                <br>
+                Si cela est un choix délibéré, veuillez ne pas tenir compte de ce message.
             </div>
             <div id="videoView">
                 <input type="radio" name="desktop" class="hiddenCheck streamToggle" id="desktopstream" autocomplete="off" />
