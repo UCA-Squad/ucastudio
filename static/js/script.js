@@ -33,8 +33,10 @@ $( document ).ready(function() {
      */
     function receiveMessage(event){
 
-        document.getElementById("debitBar").className = 'c100 p100 big center';
-        document.getElementById("debitPercent").innerHTML = "100%";
+        if(document.getElementById("debitBar") !== null) {
+            document.getElementById("debitBar").className = 'c100 p100 big center';
+            document.getElementById("debitPercent").innerHTML = "100%";
+        }
 
         setTimeout(function () {
             $('body').removeClass('loading');

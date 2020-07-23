@@ -675,6 +675,7 @@ App.prototype = {
     $('#startRecord').addClass('recording');
     $('#pauseRecord').show();
     $('#startStopTitle').html("Arrêter");
+    $('#startRecord').attr("title", "Arrêter l'enregistrement");
     $('#pauseTitle').show();
 
     var resDesktop = $('#resoDesktopChoose').val();

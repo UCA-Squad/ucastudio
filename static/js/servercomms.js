@@ -43,10 +43,12 @@ function Communications() {
           clearInterval(itv);
           return;
         }
-        
-        document.getElementById("debitBar").className = 'c100 p'+Math.round(actualprogress)+' big center';
-        document.getElementById("debitPercent").innerHTML = Math.round(actualprogress) + "%";
-        if(actualprogress == 90) clearInterval(itv);
+
+        if(document.getElementById("debitBar") !== null) {
+          document.getElementById("debitBar").className = 'c100 p' + Math.round(actualprogress) + ' big center';
+          document.getElementById("debitPercent").innerHTML = Math.round(actualprogress) + "%";
+          if (actualprogress == 90) clearInterval(itv);
+        }
       }
       setInterval(prog, 500);
     });
