@@ -197,7 +197,7 @@ App.prototype = {
 
    if(e.target.id == 'audiostream' && !$('.videoDevice').hasClass('active'))
    {
-     deviceMgr.connect(e.target.value)
+     deviceMgr.connect(e.target.value, 'audioSelect')
      .catch(function(err){
        console.log(err);
        if(e.target.value != 'desktop')
@@ -229,6 +229,15 @@ App.prototype = {
   },
   displayStream: function(stream, value, resSelect = null) {
     audAnalyser.resume();
+
+    if(value == '' ) {
+      if(typeof stream.getVideoTracks()[0] != 'undefined' && stream.getVideoTracks()[0] != null )
+        deviceMgr.initEnumerateDevices(stream.getVideoTracks()[0].getSettings().deviceId);
+
+      if(typeof stream.getAudioTracks()[0] != 'undefined' && stream.getAudioTracks()[0] != null )
+        deviceMgr.initEnumerateDevices(stream.getAudioTracks()[0].getSettings().deviceId);
+    }
+
     let mediaContainer = null;
     [...document.querySelectorAll(`video[data-id="${value}"],audio[data-id="${value}"]`)]
       .forEach(vid => {
@@ -589,7 +598,7 @@ App.prototype = {
     Object.keys(details)
         .filter(key => details[key].deviceType == 'audio')
         .forEach(key => {
-          if (!inputSourcesAudio[0].querySelector(`li[data-id="${key}"]`)) {
+          if (!inputSourcesAudio[0].querySelector(`li[data-id="${key}"]`) && key != "") {
             let item = utils.createElement('li', {
               data: {
                 id: key
@@ -618,7 +627,6 @@ App.prototype = {
     });
   },
   togglePeerStream: function(e) {
-    console.log(e.target.getAttribute('data-id'));
   },
   minimiseStreamView: function(e) {
     let title = e.target.checked ? 'Maximise' : 'Minimise';
@@ -1001,6 +1009,13 @@ ts.on('translations.languages', languages => {
 ts.on('translations.set', langObj => app.setLanguage(langObj));
 
 deviceMgr.once('enumerated', {
+    fn: devices => {
+      app.listDevices(devices);
+      app.listAsSource(devices);
+    }
+});
+
+deviceMgr.once('enumeratedChromeHack', {
     fn: devices => {
       app.listDevices(devices);
       app.listAsSource(devices);

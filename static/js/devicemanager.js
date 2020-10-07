@@ -52,46 +52,7 @@ class DeviceManager extends EventEmitter {
       }
     });
 
-    navigator.mediaDevices.enumerateDevices()
-      .then(devices => {
-        ['audio', 'video'].forEach(deviceType => {
-          this[deviceType] = devices.filter(device => device.kind === `${deviceType}input` && device.deviceId !== `communications`)
-                               .reduce((result, info) => {
-                                 result[info.deviceId] = new Device(info);
-                                 result[info.deviceId].on('stream', stream => {
-                                   this.emit('stream', {id: info.deviceId, stream: stream});
-                                   if (this.isRecording) {
-                                     result[info.deviceId].record();
-                                   }
-
-                                   if (stream.getAudioTracks().length > 0) {
-                                     this.desktop.attachAudioTrack(stream);
-                                   }
-                                 });
-                                 return result;
-                               }, {});
-        });
-
-        this.emit('enumerated', this.devices);
-
-        for (let dev in this.devices) {
-          this.devices[dev].on('record.prepare', label =>
-            this.emit('record.prepare', {
-               label: label,
-                  id: dev,
-              flavor: dev === 'desktop' ? 'Écran' : 'Orateur'
-            })
-          );
-          this.devices[dev].on('record.complete', obj =>
-            this.emit('record.complete', {
-               media: obj.media,
-                 url: obj.url,
-                  id: dev,
-            })
-          );
-          this.devices[dev].on('stream.mute', () => this.emit('stream.mute', dev));
-        }
-      });
+    this.initEnumerateDevices();
   }
 
   connect(id, opts, idAudio=null) {
@@ -152,6 +113,56 @@ class DeviceManager extends EventEmitter {
         reject("no such device");
       }
     });
+  }
+
+  initEnumerateDevices(idDeviceToConnect = '') {
+
+    navigator.mediaDevices.enumerateDevices()
+        .then(devices => {
+          ['audio', 'video'].forEach(deviceType => {
+            this[deviceType] = devices.filter(device => device.kind === `${deviceType}input` && device.deviceId !== `communications`)
+                .reduce((result, info) => {
+                  result[info.deviceId] = new Device(info);
+                  result[info.deviceId].on('stream', stream => {
+                    this.emit('stream', {id: info.deviceId, stream: stream});
+                    if (this.isRecording) {
+                      result[info.deviceId].record();
+                    }
+
+                    if (stream.getAudioTracks().length > 0) {
+                      this.desktop.attachAudioTrack(stream);
+                    }
+                  });
+                  return result;
+                }, {});
+          });
+
+          if(idDeviceToConnect != '')
+            this.emit('enumeratedChromeHack', this.devices);
+          else
+            this.emit('enumerated', this.devices);
+
+          for (let dev in this.devices) {
+            this.devices[dev].on('record.prepare', label =>
+                this.emit('record.prepare', {
+                  label: label,
+                  id: dev,
+                  flavor: dev === 'desktop' ? 'Écran' : 'Orateur'
+                })
+            );
+            this.devices[dev].on('record.complete', obj =>
+                this.emit('record.complete', {
+                  media: obj.media,
+                  url: obj.url,
+                  id: dev,
+                })
+            );
+            this.devices[dev].on('stream.mute', () => this.emit('stream.mute', dev));
+          }
+
+          if(idDeviceToConnect != '')
+            this.connect(idDeviceToConnect, 'mustListReso');
+        });
   }
 }
 
@@ -465,14 +476,44 @@ class Device extends EventEmitter {
         }
 
         let constraintMedia = this.constraints;
-        if(opts == "mustListReso")
-          constraintMedia = {audio: {deviceId: {exact: deviceAudioIdTmp}}, video: { deviceId: { exact: deviceVideoIdTmp }, width: {exact: 640}, height: {exact: 480}, facingMode: "user", frameRate: { ideal :25, max: 30 } } };
+        if(opts == "mustListReso") {
+          if(deviceVideoIdTmp != null && deviceAudioIdTmp != null) {
+            constraintMedia = {
+              audio: {deviceId: {exact: deviceAudioIdTmp}},
+              video: {
+                deviceId: {exact: deviceVideoIdTmp},
+                width: {exact: 640},
+                height: {exact: 480},
+                facingMode: "user",
+                frameRate: {ideal: 25, max: 30}
+              }
+            };
+          }
+          else{
+            constraintMedia = {
+              audio: true,
+              video: {
+                width: {exact: 640},
+                height: {exact: 480},
+                facingMode: "user",
+                frameRate: {ideal: 25, max: 30}
+              }
+            };
+          }
+        }
         else{
           //new add
-          if(this.deviceType == 'video')
-            this.constraints['video'] = { deviceId: { exact: deviceVideoIdTmp }, width: {exact: 640}, height: {exact: 480}, facingMode: "user" , frameRate: { ideal :25, max: 30 } } ;
+          if(this.deviceType == 'video' && deviceVideoIdTmp != null)
+            this.constraints['video'] = {
+              deviceId: { exact: deviceVideoIdTmp },
+              width: {exact: 640},
+              height: {exact: 480},
+              facingMode: "user" ,
+              frameRate: { ideal :25, max: 30 }
+            };
 
-          this.constraints['audio'] = {deviceId: {exact: deviceAudioIdTmp}};
+          if(deviceAudioIdTmp != null)
+            this.constraints['audio'] = {deviceId: {exact: deviceAudioIdTmp}};
 
           for (var key in opts) {
             if (this.deviceType === 'desktop') {
@@ -488,6 +529,9 @@ class Device extends EventEmitter {
 
         if(this.deviceType == 'desktop')
           this.constraints['audio'] = false;
+
+        if(opts == 'audioSelect')
+          constraintMedia = { audio: true };
 
         navigator.mediaDevices.getUserMedia(constraintMedia)
             .then(stream => {
