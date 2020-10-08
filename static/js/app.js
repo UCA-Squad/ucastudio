@@ -197,7 +197,7 @@ App.prototype = {
 
    if(e.target.id == 'audiostream' && !$('.videoDevice').hasClass('active'))
    {
-     deviceMgr.connect(e.target.value, 'audioSelect')
+     deviceMgr.connect(e.target.value)
      .catch(function(err){
        console.log(err);
        if(e.target.value != 'desktop')
@@ -229,15 +229,6 @@ App.prototype = {
   },
   displayStream: function(stream, value, resSelect = null) {
     audAnalyser.resume();
-
-    if(value == '' ) {
-      if(typeof stream.getVideoTracks()[0] != 'undefined' && stream.getVideoTracks()[0] != null )
-        deviceMgr.initEnumerateDevices(stream.getVideoTracks()[0].getSettings().deviceId);
-
-      if(typeof stream.getAudioTracks()[0] != 'undefined' && stream.getAudioTracks()[0] != null )
-        deviceMgr.initEnumerateDevices(stream.getAudioTracks()[0].getSettings().deviceId);
-    }
-
     let mediaContainer = null;
     [...document.querySelectorAll(`video[data-id="${value}"],audio[data-id="${value}"]`)]
       .forEach(vid => {
@@ -1015,10 +1006,10 @@ deviceMgr.once('enumerated', {
     }
 });
 
-deviceMgr.once('enumeratedChromeHack', {
+deviceMgr.once('hasNotAlreadyAllowShare', {
     fn: devices => {
-      app.listDevices(devices);
-      app.listAsSource(devices);
+      document.getElementById('infoNotAlreadyAllowShare').style.display = 'block';
+      $('.bigButton').hide();
     }
 });
 

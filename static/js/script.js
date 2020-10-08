@@ -316,3 +316,13 @@ function getVersionOfBrowser()
     // return M.join(' ');
 }
 
+/**
+ *
+ */
+function shareAndReload(){
+    navigator.mediaDevices.getUserMedia({audio: true, video: true}).
+    then(function (){
+        //on reload la page
+        location.reload();
+    }).catch();
+}
