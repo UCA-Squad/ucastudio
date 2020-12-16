@@ -227,6 +227,24 @@ App.prototype = {
          });
    }
   },
+  getTypeOfRec: function(mediaStream) {
+
+    const isFirefox = typeof InstallTrigger !== 'undefined';
+    const isChrome = !!window.chrome && (!!window.chrome.webstore || !!window.chrome.runtime);
+    const videoTrack = mediaStream.getVideoTracks()[0];
+
+    if (isFirefox) {
+      return (-1 !== videoTrack.label.indexOf('Screen'));
+    }
+    else if (isChrome) {
+      const videoSetting = videoTrack.getSettings();
+      if (videoSetting && videoSetting.displaySurface !== "monitor") {
+        return false;
+      } else {
+        return true;
+      }
+    }
+  },
   displayStream: function(stream, value, resSelect = null) {
     audAnalyser.resume();
     let mediaContainer = null;
@@ -257,6 +275,14 @@ App.prototype = {
       if(value == 'desktop')
       {
         //calcul resolutio
+
+        let typeRec = this.getTypeOfRec(stream);
+        if(!typeRec)
+          $("#alertTypeDesktopShare").show();
+        else
+          $("#alertTypeDesktopShare").hide();
+
+        comms.emit('isMonitor', typeRec);
 
         // let resolution = stream.getVideoTracks()[0].getSettings().height + 'p';
         let resolution = $("#resoDesktopChoose").val();

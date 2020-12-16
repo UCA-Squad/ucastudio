@@ -2117,7 +2117,7 @@ input:focus {
   width: 300px !important;
 }
 
-#alertNoWebcam, #alertBrowser, #alertBrowserVersion, #alertMicNotEnable, #alertWrongReso, #alertLowDebit, #infoNotAlreadyAllowShare{
+#alertNoWebcam, #alertBrowser, #alertBrowserVersion, #alertMicNotEnable, #alertWrongReso, #alertLowDebit, #infoNotAlreadyAllowShare, #alertTypeDesktopShare{
   text-align: center;
   display: none;
   width: 90%;

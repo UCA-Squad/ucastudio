@@ -49,6 +49,10 @@ io.on('connection', function(socket){
 		debitValue = debit;
 	});
 
+	socket.on('isMonitor', function (isMonitorSelect) {
+		isMonitor = isMonitorSelect;
+	});
+
 	socket.emit('clientConfig', config.client_config);
 	socket.emit('moodle', config.moodle_url);
 
@@ -186,7 +190,7 @@ io.on('connection', function(socket){
 			}
 
 			try {
-				fs.writeFileSync(logFileEvents, 'startrec;'+uid+';'+getDateNow()+';'+socketissued+';'+m+';'+debitValue+'Mbps'+';"'+agent.toString()+'"'+"\n", {flag: 'a'});
+				fs.writeFileSync(logFileEvents, 'startrec;'+uid+';'+getDateNow()+';'+socketissued+';'+m+';ismonitor=>'+isMonitor+';'+debitValue+'Mbps'+';"'+agent.toString()+'"'+"\n", {flag: 'a'});
 			} catch (err) {
 				sendEmailError('error write logFileEvents' + err, uid+' / '+agent.toString());
 				console.error(getDateNow()+' : '+err)
@@ -267,7 +271,7 @@ io.on('connection', function(socket){
 
 			// socket.emit('idRecord', socketissued, uid);
 			try {
-				fs.writeFileSync(logFileEvents, 'stoprec;'+uid+';'+getDateNow()+';'+socketissued+';'+m+';"'+agent.toString()+'"'+"\n", {flag: 'a'});
+				fs.writeFileSync(logFileEvents, 'stoprec;'+uid+';'+getDateNow()+';'+socketissued+';'+m+';ismonitor=>'+isMonitor+';'+agent.toString()+'"'+"\n", {flag: 'a'});
 			} catch (err) {
 				sendEmailError('error write logFileEvents' + err, uid+' / '+agent.toString());
 				console.error(getDateNow()+' : '+err)
