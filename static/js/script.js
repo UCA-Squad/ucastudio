@@ -14,7 +14,7 @@ $(".backToInfo").on('click', function () {
 });
 
 $("#alertBrowser > .close, #alertBrowserVersion > .close, #alertNoWebcam > .close, #alertWrongReso > .close, " +
-    "#alertLowDebit > .close, #alertMicNotEnable > .close").on('click', function () {
+    "#alertLowDebit > .close, #alertMicNotEnable > .close, #alertTypeDesktopShare > .close").on('click', function () {
     $(this).parent().slideUp("slow");
 });
 
