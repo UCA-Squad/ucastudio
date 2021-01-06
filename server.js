@@ -49,6 +49,7 @@ io.on('connection', function(socket){
 		debitValue = debit;
 	});
 
+	var isMonitor = 'noSelect';
 	socket.on('isMonitor', function (isMonitorSelect) {
 		isMonitor = isMonitorSelect;
 	});
