@@ -698,7 +698,11 @@ App.prototype = {
     }
 
     $('#startRecord').addClass('recording');
-    $('#pauseRecord').show();
+
+    setTimeout(function(){
+      $('#pauseRecord').show();
+    }, 4000);
+
     $('#startStopTitle').html("Arrêter");
     $('#startRecord').attr("title", "Arrêter l'enregistrement");
     $('#pauseTitle').show();
