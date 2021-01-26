@@ -126,9 +126,9 @@ class DeviceManager extends EventEmitter {
 
   pauseRecording() {
     for (var dev in this.devices) {
-      if (this.devices[dev].stream) {
-        this.devices[dev].pauseRecording();
-      }
+      if (this.devices[dev].stream)
+        if(this.devices[dev].stream.active)
+          this.devices[dev].pauseRecording();
     }
   }
 
