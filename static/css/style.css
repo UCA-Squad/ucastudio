@@ -1546,6 +1546,7 @@ label[for=mergestreams]::before {
   display: none;
   margin-left: -2.5em !important;
   position: absolute !important;
+  display: none;
 }
 
 #pauseTitle{
