@@ -29,7 +29,7 @@ var cas = new CASAuthentication({
 var session = require("express-session")({
 	secret: config.session_secret_key,
 	resave: false,
-	saveUninitialized: true
+	saveUninitialized: false
 });
 
 var sharedsession = require("express-socket.io-session");
