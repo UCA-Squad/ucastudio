@@ -27,7 +27,6 @@ function genLive() {
 			    }
 	});
 	var moodle = $('#moodle').val();
-	console.log(moodle);
 	xhr.open("POST", moodle+"insertLive.php?courseid="+courseid+"&serieid="+serieid);
 	xhr.setRequestHeader("User-Agent", "PostmanRuntime/7.13.0");
 	xhr.setRequestHeader("Accept", "*/*");
