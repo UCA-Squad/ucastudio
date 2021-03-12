@@ -30,28 +30,31 @@ function Communications() {
 
   this.socket.on('clientConfig',function(config){
 
-    $('.checkWifi').attr('src', config.path_check_speed_ntwk).ready(function () {
-      var actualprogress = 0;
-      var itv = 0;
-      function prog(){
-        if(actualprogress >= 90){
-          actualprogress += 1;
-        } else {
-          actualprogress += 11.25;
-        }
-        if(actualprogress > 99) {
-          clearInterval(itv);
-          return;
-        }
+    if(document.cookie.indexOf('debitValue=') == -1) {
+      $('.checkWifi').attr('src', config.path_check_speed_ntwk).ready(function () {
+        var actualprogress = 0;
+        var itv = 0;
 
-        if(document.getElementById("debitBar") !== null) {
-          document.getElementById("debitBar").className = 'c100 p' + Math.round(actualprogress) + ' big center';
-          document.getElementById("debitPercent").innerHTML = Math.round(actualprogress) + "%";
-          if (actualprogress == 90) clearInterval(itv);
+        function prog() {
+          if (actualprogress >= 90) {
+            actualprogress += 1;
+          } else {
+            actualprogress += 11.25;
+          }
+          if (actualprogress > 99) {
+            clearInterval(itv);
+            return;
+          }
+
+          if (document.getElementById("debitBar") !== null) {
+            document.getElementById("debitBar").className = 'c100 p' + Math.round(actualprogress) + ' big center';
+            document.getElementById("debitPercent").innerHTML = Math.round(actualprogress) + "%";
+            if (actualprogress == 90) clearInterval(itv);
+          }
         }
-      }
-      setInterval(prog, 500);
-    });
+        setInterval(prog, 500);
+      });
+    }
 
     if(config.doc_link_enable) {
       $('#help').show();

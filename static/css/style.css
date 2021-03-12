@@ -204,9 +204,6 @@ input:checked + section {
   border-radius: 0.25rem;
 }
 
-.bigButton:first-child {
-  margin-left: 20%;
-}
 
 .bigButton::before {
   margin-top: 100%;
@@ -1192,6 +1189,10 @@ svg {
   visibility: hidden;
   background: rgba(0,0,0,0.5);
   transition: visibility 0s 0.25s, opacity 0.25s;
+}
+
+#live{
+  display: none;
 }
 
 .loading #introCover {

@@ -20,7 +20,7 @@
             <span style="position:absolute;padding-left: 5px">Studio</span>
         </span>
     </a>
-    <div id="language">
+    <div id="language" style="display:none;">
         <input type="checkbox" class="hiddenCheck" id="chooseLanguage" />
         <label id="chosenLanguage" for="chooseLanguage">
             <span>FR</span>
@@ -40,9 +40,9 @@
         </a>
     </div>
 </header>
-<input type="checkbox" class="toggleCover hiddenCheck" id="toggleSaveCreationModal" autocomplete="off" />
+<input type="checkbox" class="toggleCover hiddenCheck" id="toggleSaveCreationModal" autocomplete="off" style="display: none"/>
 <div id="introCover">
-    <div class="loader">
+    <div class="loader" style="display: none">
         <div class="statutLoading" style="display: none">
             <svg width="240" height="240">
                 <circle r="82" cx="120" cy="120" fill="none" stroke="#00bdc4" stroke-width="8" stroke-dashoffset="0" stroke-dasharray="515"></circle>
@@ -50,7 +50,7 @@
             </svg>
             <span class="loaderText" data-translate="LOADING">Chargement...</span>
         </div>
-        <div class="debitCircle">
+        <div class="debitCircle" style="display: none">
             <div id="debitBar" class="c100 p0 big" style="margin-bottom: 20px;">
                 <span id="debitPercent">0%</span>
                 <div class="slice">
@@ -64,13 +64,13 @@
 </div>
 <div id="uploadProgress" style="display: none"></div>
 <div id="cover"></div>
-<main>
+<main style="visibility: hidden">
     <h2 id="infoMaintenanceMod" class="alert alert-danger-uca card"></h2>
     <div id="infoNotAlreadyAllowShare" class="alert alert-orange">
         <p>Afin d'assurer le bon fonctionnement de l'application, vous devez autoriser une première fois l'accès à vos périphériques.</p>
         <p>Merci de bien vouloir cliquer sur le bouton ci-dessous.</p>
         <p>Une fois le partage effectué, la page sera automatiquement rechargée.</p>
-        <button class="button button-uca-blue" onclick="shareAndReload()">Partager ma webcam</button>
+        <button class="button button-uca-blue" onclick="shareAndReload()">Partager ma webcam/mon micro</button>
     </div>
     <div class="content">
         <input type="radio" id="main" class="hiddenCheck" name="view" checked autocomplete="off" />
@@ -307,7 +307,7 @@
         </filter>
     </defs>
 </svg>
-<div id="saveCreation" class="modal">
+<div id="saveCreation" class="modal" style="display: none">
     <div class="modalBody">
         <h1 data-translate="PRODUCTION_MEDIA">Médias</h1>
         <div id="recordingList">
