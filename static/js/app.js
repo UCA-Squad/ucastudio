@@ -234,7 +234,7 @@ App.prototype = {
     const videoTrack = mediaStream.getVideoTracks()[0];
 
     if (isFirefox) {
-      return (-1 !== videoTrack.label.indexOf('Screen'));
+      return (-1 !== videoTrack.label.indexOf('Screen') || -1 !== videoTrack.label.indexOf('Monitor'));
     }
     else if (isChrome) {
       const videoSetting = videoTrack.getSettings();
