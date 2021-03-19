@@ -14,7 +14,9 @@ const server = require('https').createServer({
 	cert: fs.readFileSync(config.path_cert)
 
 },app);
-var io = require('socket.io')(server);
+var io = require('socket.io')(server, {
+	'maxHttpBufferSize': '1e8'
+});
 
 spawn('ffmpeg',['-h']).on('error',function(m){
 	console.error("FFMpeg not found in system cli; please install ffmpeg properly or make a softlink to ./!");
@@ -86,33 +88,56 @@ io.on('connection', function(socket){
 				return;
 			}
 			var ops = [
+				'-loglevel', 'quiet',
 				'-i', '-',
 				'-c:v', 'copy', '-preset', 'fast',
 				'-use_wallclock_as_timestamps', '1',
 				'-async', '1',
 				'-b:a', '96k', '-strict', '-2',
+				'-threads', '0',
+				'-f', 'webm',
 				config.path_folder_record + uid + '/' + socketissued + '/' + socketissued + '.webm'
 			];
 
 			if(m == 'video-and-desktop') {
 				var ops2 = [
+					'-loglevel', 'quiet',
 					'-i', '-',
 					'-c:v', 'copy', '-preset', 'fast',
 					'-an',
 					'-use_wallclock_as_timestamps', '1',
+					'-threads', '0',
+					'-f', 'webm',
 					config.path_folder_record + uid + '/' + socketissued + '/' + socketissued + 'screen.webm'
 				];
 			}
 			else
 			{
-				var ops2 = [
-					'-i', '-',
-					'-c:v', 'copy', '-preset', 'fast',
-					'-use_wallclock_as_timestamps', '1',
-					'-async', '1',
-					'-b:a', '96k', '-strict', '-2',
-					config.path_folder_record + uid + '/' + socketissued + '/' + socketissued + 'screen.webm'
-				];
+				if(m == "onlydesktop") {
+					var ops2 = [
+						'-loglevel', 'quiet',
+						'-i', '-',
+						'-c:v', 'copy', '-preset', 'fast',
+						'-use_wallclock_as_timestamps', '1',
+						'-async', '1',
+						'-threads', '0',
+						'-f', 'webm',
+						config.path_folder_record + uid + '/' + socketissued + '/' + socketissued + 'screen.webm'
+					];
+				}
+				else {
+					var ops2 = [
+						'-loglevel', 'quiet',
+						'-i', '-',
+						'-c:v', 'copy', '-preset', 'fast',
+						'-use_wallclock_as_timestamps', '1',
+						'-async', '1',
+						'-b:a', '96k', '-strict', '-2',
+						'-threads', '0',
+						'-f', 'webm',
+						config.path_folder_record + uid + '/' + socketissued + '/' + socketissued + 'screen.webm'
+					];
+				}
 			}
 
 			if(m != "onlyaudio") {
