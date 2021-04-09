@@ -14,7 +14,8 @@ $(".backToInfo").on('click', function () {
 });
 
 $("#alertBrowser > .close, #alertBrowserVersion > .close, #alertNoWebcam > .close, #alertWrongReso > .close, " +
-    "#alertLowDebit > .close, #alertMicNotEnable > .close, #alertTypeDesktopShare > .close").on('click', function () {
+    "#alertLowDebit > .close, #alertMicNotEnable > .close, #alertTypeDesktopShare > .close, " +
+    "#alertNoOnlyAudio  > .close").on('click', function () {
     $(this).parent().slideUp("slow");
 });
 
@@ -195,9 +196,21 @@ $( document ).ready(function() {
     else{
         let infoBrowser = getVersionOfBrowser();
         //on check la version
-        if(isFirefox)
-            if(infoBrowser[1] !== undefined && infoBrowser[1] < 60)
-                $("#alertBrowserVersion").show();
+        if(isFirefox) {
+            if (infoBrowser[1] !== undefined){
+                if(infoBrowser[1] < 60)
+                    $("#alertBrowserVersion").show();
+
+                if(infoBrowser[1] == 87) //bug audio seul FF87
+                {
+                    $("#alertNoOnlyAudio").show();
+                    $(".audioDevice").click(function (){
+                        if(!$(".desktopDevice").hasClass('active'))
+                            return false;
+                    })
+                }
+            }
+        }
 
         if(isChrome)
             if(infoBrowser[1] !== undefined && infoBrowser[1] < 65)
