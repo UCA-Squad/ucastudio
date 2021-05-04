@@ -107,9 +107,9 @@ function Communications() {
         }
       })
 
-      htmlTmp += '<optgroup label="Mes bibliothèques liées à un cours Moodle">';
+      htmlTmp += '<optgroup label="Mes bibliothèques">';
       $.each(listSeries, function (index, item) {
-          if(item.description == "Moodle" && item.subjects[0] == email && item.title != uid && item.title != 'etd_'+uid)
+          if(item.subjects[0] == email && item.title != uid && item.title != 'etd_'+uid)
             htmlTmp += "<option value='" + item.identifier + "'>" + item.title + "</option>";
       });
       htmlTmp += '</optgroup>';
