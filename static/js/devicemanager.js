@@ -260,7 +260,7 @@ class Device extends EventEmitter {
     this.deviceType = device.deviceType || (device.kind === 'audioinput' ? 'audio' : 'video');
 
     let _audConstraints = {audio: {exact: device.deviceId}};
-    let _vidConstraints = {audio: true, video: { exact: device.deviceId, width: {exact: 640}, height: {exact: 480}, facingMode: "user" , frameRate: { ideal :25, max: 30 } } };
+    let _vidConstraints = {audio: true, video: { exact: device.deviceId, width: {exact: 640}, height: {exact: 480}, facingMode: "user" , frameRate: { ideal :20, max: 25 } } };
 
     let desktopValue = { width: {ideal: 1280}, height: {ideal: 720} , frameRate: { ideal :25, max: 30 } };
     let _desktop = {
@@ -479,7 +479,7 @@ class Device extends EventEmitter {
                 width: {exact: 640},
                 height: {exact: 360},
                 facingMode: "user",
-                frameRate: {ideal: 25, max: 30}
+                frameRate: {ideal: 20, max: 25}
               }
             };
           }
@@ -491,7 +491,7 @@ class Device extends EventEmitter {
                 width: {exact: 640},
                 height: {exact: 480},
                 facingMode: "user",
-                frameRate: {ideal: 25, max: 30}
+                frameRate: {ideal: 20, max: 25}
               }
             };
           }
@@ -504,7 +504,7 @@ class Device extends EventEmitter {
               width: {exact: 640},
               height: {exact: 480},
               facingMode: "user" ,
-              frameRate: { ideal :25, max: 30 }
+              frameRate: { ideal :20, max: 25 }
             };
 
           if(deviceAudioIdTmp != null)
@@ -576,9 +576,9 @@ class Device extends EventEmitter {
       if(typeof opts != 'undefined')
         constraints = { audio: false, video: { width: opts.width, height: opts.height, frameRate: { ideal :25, max: 30 } } };
       else if($("#debitValue").val() < 3 && $("#debitValue").val() > 1 )
-        constraints = { audio: false, video: { width: {ideal: 960}, height: {ideal: 540} , frameRate: { ideal :25, max: 30 } } };
+        constraints = { audio: false, video: { width: {ideal: 960}, height: {ideal: 540} , frameRate: { ideal :20, max: 25 } } };
       else if($("#debitValue").val() <= 1  )
-        constraints = { audio: false, video: { width: {ideal: 640}, height: {ideal: 480} , frameRate: { ideal :25, max: 30 } } };
+        constraints = { audio: false, video: { width: {ideal: 640}, height: {ideal: 480} , frameRate: { ideal :15, max: 20 } } };
 
       return navigator.mediaDevices.getDisplayMedia(constraints)
                .then(stream => {
