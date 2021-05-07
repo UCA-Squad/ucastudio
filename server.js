@@ -1103,6 +1103,10 @@ function getRate(type, reso)
 
 	if(type == 'webcam') {
 		switch (reso) {
+			case 'nhd':
+			case 'vga':
+				rateValue = ['-maxrate', '1000k', '-bufsize', '1500k'];
+				break;
 			case 'qhd':
 			case 'svga':
 				rateValue = ['-maxrate', '1500k', '-bufsize', '3000k'];
@@ -1122,6 +1126,8 @@ function getRate(type, reso)
 	}
 	else {
 		switch (reso) {
+			case 'vga':
+				rateValue = ['-maxrate', '1000k', '-bufsize', '1500k'];
 			case 'qhd':
 			case 'svga':
 				rateValue = ['-maxrate', '1500k', '-bufsize', '3000k'];

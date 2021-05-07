@@ -734,7 +734,7 @@ App.prototype = {
     }
 
     if($(".audioDevice").hasClass('active') && $(".videoDevice").hasClass('active') && !$(".desktopDevice").hasClass('active'))
-      comms.emit('start', 'onlyvideo', null, resDesktop);
+      comms.emit('start', 'onlyvideo', null, resWebCam);
 
     [...document.querySelectorAll('#recordingList a')].forEach(anchor => anchor.parentNode.removeChild(anchor));
 

@@ -470,15 +470,31 @@ class Device extends EventEmitter {
 
         let constraintMedia = this.constraints;
         if(opts == "mustListReso") {
-          constraintMedia = {audio: {deviceId: {exact: deviceAudioIdTmp}},
-            video: {
-              deviceId: {exact: deviceVideoIdTmp},
-              width: {exact: 640},
-              height: {exact: 480},
-              facingMode: "user",
-              frameRate: {ideal: 25, max: 30}
-            }
-          };
+
+          if($("#debitValue").val() <= 1  && $('#resoWebCamChoose').val() == 'nhd')
+          {
+            constraintMedia = {audio: {deviceId: {exact: deviceAudioIdTmp}},
+              video: {
+                deviceId: {exact: deviceVideoIdTmp},
+                width: {exact: 640},
+                height: {exact: 360},
+                facingMode: "user",
+                frameRate: {ideal: 25, max: 30}
+              }
+            };
+          }
+          else  //c'est vga
+          {
+            constraintMedia = {audio: {deviceId: {exact: deviceAudioIdTmp}},
+              video: {
+                deviceId: {exact: deviceVideoIdTmp},
+                width: {exact: 640},
+                height: {exact: 480},
+                facingMode: "user",
+                frameRate: {ideal: 25, max: 30}
+              }
+            };
+          }
         }
         else{
           //new add
@@ -559,8 +575,10 @@ class Device extends EventEmitter {
       var constraints = this.constraints;
       if(typeof opts != 'undefined')
         constraints = { audio: false, video: { width: opts.width, height: opts.height, frameRate: { ideal :25, max: 30 } } };
-      else if($("#debitValue").val() < 3)
+      else if($("#debitValue").val() < 3 && $("#debitValue").val() > 1 )
         constraints = { audio: false, video: { width: {ideal: 960}, height: {ideal: 540} , frameRate: { ideal :25, max: 30 } } };
+      else if($("#debitValue").val() <= 1  )
+        constraints = { audio: false, video: { width: {ideal: 640}, height: {ideal: 480} , frameRate: { ideal :25, max: 30 } } };
 
       return navigator.mediaDevices.getDisplayMedia(constraints)
                .then(stream => {

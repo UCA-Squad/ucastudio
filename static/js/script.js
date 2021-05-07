@@ -74,7 +74,14 @@ $( document ).ready(function() {
         else
             comms.emit('debitValue', debit);
 
-        if(debit < 3)
+        if(debit <= 1) {
+            if(debit <= 0.5) {
+                $('#resoWebCamChoose').val('nhd');
+                $('.videoDevice').removeClass('quartretiers').addClass('seizeneuvieme');
+            }
+            $('#resoDesktopChoose').val('vga');
+        }
+        else if(debit < 3)
         {
             $('#listResoDesktop li.hd').attr("title", "Résolution non conseillée pour votre débit");
             $('#listResoDesktop li.hd').css("background-color", "rgb(127, 26, 26)");
