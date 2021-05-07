@@ -680,6 +680,15 @@ App.prototype = {
   },
   startRecord: function(e) {
 
+    if($(".desktopDevice").hasClass('active'))
+    {
+      if(!this.getTypeOfRec(deviceMgr.devices['desktop'].stream))
+      {
+        alert('Attention, l\'enregistrement d\'une fenêtre n\'est pas autorisé, merci de selectionner l\'intégralité de votre écran (cliquez sur "Écran" pour changer)');
+        return false;
+      }
+    }
+
     let numStreams = Object.keys(deviceMgr.devices)
                        .map(key => deviceMgr.devices[key].stream)
                        .filter(stream => stream).length;
