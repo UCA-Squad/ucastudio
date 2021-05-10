@@ -81,7 +81,8 @@ $( document ).ready(function() {
             }
             $('#resoDesktopChoose').val('vga');
         }
-        else if(debit < 3)
+
+        if(debit < 3)
         {
             $('#listResoDesktop li.hd').attr("title", "Résolution non conseillée pour votre débit");
             $('#listResoDesktop li.hd').css("background-color", "rgb(127, 26, 26)");

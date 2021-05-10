@@ -580,8 +580,6 @@ class Device extends EventEmitter {
       else if($("#debitValue").val() <= 1  )
         constraints = { audio: false, video: { width: {ideal: 640}, height: {ideal: 480} , frameRate: { ideal :20, max: 30 } } };
 
-      console.log(constraints);
-
       return navigator.mediaDevices.getDisplayMedia(constraints)
                .then(stream => {
                  this.stream = stream;
