@@ -113,6 +113,10 @@ function getRate(type)
   if(type == 'webcam') {
     var reso = $("#resoWebCamChoose").val();
     switch (reso) {
+      case 'nhd':
+      case 'vga':
+        rateValue = '1000000';
+        break;
       case 'qhd':
       case 'svga':
         rateValue = '1500000';
@@ -135,6 +139,9 @@ function getRate(type)
   else {
     var reso = $("#resoDesktopChoose").val();
     switch (reso) {
+      case 'vga':
+        rateValue = '1000000';
+        break;
       case 'qhd':
       case 'svga':
         rateValue = '1500000';
