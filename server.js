@@ -451,13 +451,13 @@ function encodeAudioToMp4(socket)
 	var uid = socket.handshake.session.cas_user;
 	var socketissued = socket.handshake.issued;
     var ops = [
-        '-y', '-loop', '1', '-t', '1',
-        '-i', './static/img/onlyaudio_ffmpeg.jpg',
-        '-i', config.path_folder_record + uid + '/' + socketissued + '/' + socketissued + 'screen.webm',
-		config.path_folder_record + uid + '/' + socketissued + '/' + socketissued + 'screen.mp4'
+        '-y', '-i '+ config.path_folder_record + uid + '/' + socketissued + '/' + socketissued + 'screen.webm',
+		'-loop 1 -t 1 -i ./static/img/onlyaudio_ffmpeg.jpg',
+		'-filter_complex "[0:a]showwaves=s=1520x200:mode=cline:rate=30:scale=lin:colors=#178F96:draw=full[v];[1:v][v]overlay=200:850,format=yuv420p[outv]"',
+		'-map "[outv]" -map 0:a '+ config.path_folder_record + uid + '/' + socketissued + '/' + socketissued + 'screen.mp4'
     ];
 
-    ffmpeg_process = spawn('ffmpeg', ops);
+	ffmpeg_process = spawn('ffmpeg', ops, {shell: true});
     ffmpeg_process.on('exit', function (e) {
         uploadFile(socket, false, true, true);
     });
