@@ -178,8 +178,8 @@ io.on('connection', function(socket){
 					console.log('child process desktop exit - '+ uid +' - '+ socketissued +' - status '+e);
 					if(m == 'onlyaudio' || m == 'onlydesktop' || m == 'audio-and-desktop') {
                         if(m == 'onlyaudio')
-                            encodeAudioToMp4(socket)
-					    else
+							uploadFile(socket, false, true, true);
+						else
                             uploadFile(socket, false, true, false, true);
                     }
 				});
@@ -442,26 +442,6 @@ process.on('uncaughtException', function(err) {
     // Note: after client disconnect, the subprocess will cause an Error EPIPE, which can only be caught this way.
 });
 
-/**
- * Réencode les fichiers audio en mp4 pour ingest opencast
- * @param socket
- */
-function encodeAudioToMp4(socket)
-{
-	var uid = socket.handshake.session.cas_user;
-	var socketissued = socket.handshake.issued;
-    var ops = [
-        '-y', '-i '+ config.path_folder_record + uid + '/' + socketissued + '/' + socketissued + 'screen.webm',
-		'-loop 1 -t 1 -i ./static/img/onlyaudio_ffmpeg.jpg',
-		'-filter_complex "[0:a]showwaves=s=1520x200:mode=cline:rate=30:scale=lin:colors=#178F96:draw=full[v];[1:v][v]overlay=200:850,format=yuv420p[outv]"',
-		'-map "[outv]" -map 0:a '+ config.path_folder_record + uid + '/' + socketissued + '/' + socketissued + 'screen.mp4'
-    ];
-
-	ffmpeg_process = spawn('ffmpeg', ops, {shell: true});
-    ffmpeg_process.on('exit', function (e) {
-        uploadFile(socket, false, true, true);
-    });
-}
 
 /**
  * Permet d'uploader un média

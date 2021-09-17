@@ -12,7 +12,7 @@
   "opencast_series_url" : "/api/series",
   "opencast_cert" : "cert/xxxxxx.pem",
   "opencast_workflow" : "schedule-and-upload",
-  "opencast_workflow_audio" : "audio",
+  "opencast_workflow_audio" : "schedule-and-upload-mp3",
 
   "moodle_url" : "xxxxxxxxxxxxx",
 
