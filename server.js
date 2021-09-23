@@ -18,7 +18,7 @@ var io = require('socket.io')(server, {
 	'maxHttpBufferSize': '1e8'
 });
 
-spawn('ffmpeg',['-h']).on('error',function(m){
+spawn('ffmpeg',['-h']).on('error',function(){
 	console.error("FFMpeg not found in system cli; please install ffmpeg properly or make a softlink to ./!");
 	process.exit(-1);
 });
@@ -59,7 +59,7 @@ io.on('connection', function(socket){
 	socket.emit('clientConfig', config.client_config);
 	socket.emit('moodle', config.moodle_url);
 
-	if(config.enable_maintenance_mod == "true")
+	if(config.enable_maintenance_mod === "true")
 		socket.emit('info_maintenance_mod', config.info_maintenance_mod);
 
 	var ffmpeg_process, feedStream=false;
@@ -99,8 +99,9 @@ io.on('connection', function(socket){
 				config.path_folder_record + uid + '/' + socketissued + '/' + socketissued + '.webm'
 			];
 
-			if(m == 'video-and-desktop') {
-				var ops2 = [
+			var ops2;
+			if(m === 'video-and-desktop') {
+				ops2 = [
 					'-loglevel', 'quiet',
 					'-i', '-',
 					'-c:v', 'copy', '-preset', 'fast',
@@ -113,8 +114,8 @@ io.on('connection', function(socket){
 			}
 			else
 			{
-				if(m == "onlydesktop") {
-					var ops2 = [
+				if(m === "onlydesktop") {
+					ops2 = [
 						'-loglevel', 'quiet',
 						'-i', '-',
 						'-c:v', 'copy', '-preset', 'fast',
@@ -126,7 +127,7 @@ io.on('connection', function(socket){
 					];
 				}
 				else {
-					var ops2 = [
+					ops2 = [
 						'-loglevel', 'quiet',
 						'-i', '-',
 						'-c:v', 'copy', '-preset', 'fast',
@@ -140,20 +141,20 @@ io.on('connection', function(socket){
 				}
 			}
 
-			if(m != "onlyaudio") {
-				var i = 6;
+			if(m !== "onlyaudio") {
+				var iWebCam = 6;
 				getRate('webcam', resWebCam).forEach(function (element) {
-					ops.splice(i, 0, element);
-					i++;
+					ops.splice(iWebCam, 0, element);
+					iWebCam++;
 				});
-				var i = 6;
+				var iDesktop = 6;
 				getRate('desktop', resDesktop).forEach(function (element) {
-					ops2.splice(i, 0, element);
-					i++;
+					ops2.splice(iDesktop, 0, element);
+					iDesktop++;
 				});
 			}
 
-			if(m == 'video-and-desktop' || m == 'audio-and-desktop' || m == 'onlyaudio' || m == 'onlydesktop') {
+			if(m === 'video-and-desktop' || m === 'audio-and-desktop' || m === 'onlyaudio' || m === 'onlydesktop') {
 				ffmpeg_process2 = spawn('ffmpeg', ops2);
 				feedStream2 = function (data) {
 					ffmpeg_process2.stdin.write(data);
@@ -176,8 +177,8 @@ io.on('connection', function(socket){
 				});
 				ffmpeg_process2.on('exit', function (e) {
 					console.log('child process desktop exit - '+ uid +' - '+ socketissued +' - status '+e);
-					if(m == 'onlyaudio' || m == 'onlydesktop' || m == 'audio-and-desktop') {
-                        if(m == 'onlyaudio')
+					if(m === 'onlyaudio' || m === 'onlydesktop' || m === 'audio-and-desktop') {
+                        if(m === 'onlyaudio')
 							uploadFile(socket, false, true, true);
 						else
                             uploadFile(socket, false, true, false, true);
@@ -185,7 +186,7 @@ io.on('connection', function(socket){
 				});
 			}
 
-			if(m == 'video-and-desktop' || m == 'onlyvideo') {
+			if(m === 'video-and-desktop' || m === 'onlyvideo') {
 				ffmpeg_process = spawn('ffmpeg', ops);
 				feedStream = function (data) {
 					ffmpeg_process.stdin.write(data);
@@ -208,7 +209,7 @@ io.on('connection', function(socket){
 				});
 				ffmpeg_process.on('exit', function (e) {
 					console.log('child process video exit - '+ uid +' - '+ socketissued +' - status '+e);
-					if(m == 'video-and-desktop')
+					if(m === 'video-and-desktop')
 						uploadFile(socket, true);
 					else
 						uploadFile(socket, false);
@@ -273,7 +274,7 @@ io.on('connection', function(socket){
 			socket.handshake.session.usermediadatas = m;
 		});
 		socket.on('stop', function (m) {
-			if(m == 'video-and-desktop' || m == 'onlyvideo') {
+			if(m === 'video-and-desktop' || m === 'onlyvideo') {
 				feedStream = false;
 				if (ffmpeg_process) {
 					try {
@@ -284,7 +285,7 @@ io.on('connection', function(socket){
 					}
 				}
 			}
-			if(m == 'video-and-desktop' || m == 'audio-and-desktop' || m == 'onlyaudio' || m == 'onlydesktop') {
+			if(m === 'video-and-desktop' || m === 'audio-and-desktop' || m === 'onlyaudio' || m === 'onlydesktop') {
 				feedStream2 = false;
 				if (ffmpeg_process2) {
 					try {
@@ -408,10 +409,7 @@ io.on('connection', function(socket){
 		getLdapInfos(socket.handshake.session.cas_user, function (displayName, mail, clfdstatus) {
 			socket.handshake.session.cn = displayName;
 			socket.handshake.session.mail = mail;
-			if(clfdstatus == 0 || clfdstatus == 1 )
-				socket.handshake.session.isEtudiant = true;
-			else
-				socket.handshake.session.isEtudiant = false;
+			socket.handshake.session.isEtudiant = clfdstatus === 0 || clfdstatus === 1;
 			socket.emit('displayName', displayName);
 			socket.emit('isEtudiant', socket.handshake.session.isEtudiant);
 		});
@@ -446,6 +444,10 @@ process.on('uncaughtException', function(err) {
 /**
  * Permet d'uploader un média
  * @param socket
+ * @param hasSecondStream
+ * @param onlySecondStream
+ * @param isAudioFile
+ * @param onlydesktop
  */
 function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFile = false, onlydesktop = false)
 {
@@ -463,19 +465,16 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 		var mustBeUpload = usermediainfosToUpload.mustBeUpload;
 		var desc = 'N/R';
 		var typeOfFlavor = "presenter";
-		if(usermediainfosToUpload.descUpload != '')
+		if(usermediainfosToUpload.descUpload !== '')
 			desc = usermediainfosToUpload.descUpload;
 		var location = 'N/R';
-		if(usermediainfosToUpload.locationUpload != '')
+		if(usermediainfosToUpload.locationUpload !== '')
 			location = usermediainfosToUpload.locationUpload;
 
 		var nameFile = uid + '/' + idFileUpload + '/' + idFileUpload + ".webm";
 
 		if(onlySecondStream)
 			nameFile = uid + '/' + idFileUpload + '/' + idFileUpload + "screen.webm";
-
-		if(isAudioFile)
-			nameFile = uid + '/' + idFileUpload + '/' + idFileUpload + "screen.mp4";
 
 		//on check si l'user à select une serie ou son dossier, si son dossier et exist pas alors on le créer
 		createSerie(uid, socket, usermediainfosToUpload.idSerie, mustBeUpload).then( function (idSerie) {
@@ -493,6 +492,15 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 			fluentFFMPEG.ffprobe(pathMediaToFFprobe, function(err, metadataFFprobe) {
 
 				try {
+
+					var typeEncode = '';
+
+					metadataFFprobe.streams.forEach(function(obj) {
+						if(obj.codec_type === 'video')
+							typeEncode = obj.codec_name;
+
+					});
+
 					duration = new Date(metadataFFprobe.format.duration * 1000).toISOString().substr(11, 8);
 
 					var metadata = '[\n' +
@@ -603,10 +611,10 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 						if((!isAudioFile) && metadataFFprobe.streams[0].height < 1000 ) {
 							canEncode1080p = false;
 						}
-
+						var processing;
 						if (isAudioFile)
 						{
-							var processing = '{\n' +
+							processing = '{\n' +
 								'  "workflow": "' + config.opencast_workflow_audio + '"\n' +
 								'}';
 						}
@@ -614,47 +622,51 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 						{
 							if (canEncode1080p)
 							{
-								var processing = '{\n' +
+								processing = '{\n' +
 									'  "workflow": "' + config.opencast_workflow + '"\n' +
 									'  "configuration": {\n' +
 									'    "flagQuality480p": "true",\n' +
 									'    "flagQuality720p": "true",\n' +
 									'    "flagQuality1080p": "true"\n' +
+									'    "typeEncode": "'+ typeEncode + '"\n' +
 									'  }\n' +
 									'}';
 							}
 							else if (canEncode720p)
 							{
-								var processing = '{\n' +
+								processing = '{\n' +
 									'  "workflow": "' + config.opencast_workflow + '"\n' +
 									'  "configuration": {\n' +
 									'    "flagQuality480p": "true",\n' +
 									'    "flagQuality720p": "true",\n' +
 									'    "flagQuality1080p": "false"\n' +
+									'    "typeEncode": "'+ typeEncode + '"\n' +
 									'  }\n' +
 									'}';
 							}
 							else if (canEncode540p)
 							{
-								var processing = '{\n' +
+								processing = '{\n' +
 									'  "workflow": "' + config.opencast_workflow + '"\n' +
 									'  "configuration": {\n' +
 									'    "flagQuality480p": "true",\n' +
 									'    "flagQuality540p": "true",\n' +
 									'    "flagQuality720p": "false",\n' +
 									'    "flagQuality1080p": "false"\n' +
+									'    "typeEncode": "'+ typeEncode + '"\n' +
 									'  }\n' +
 									'}';
 							}
 							else
 							{
-								var processing = '{\n' +
+								processing = '{\n' +
 									'  "workflow": "' + config.opencast_workflow + '",\n' +
 									'  "configuration": {\n' +
 									'    "flagQuality480p": "true",\n' +
 									'    "flagQuality540p": "false",\n' +
 									'    "flagQuality720p": "false",\n' +
 									'    "flagQuality1080p": "false"\n' +
+									'    "typeEncode": "'+ typeEncode + '"\n' +
 									'  }\n' +
 									'}'
 							}
@@ -664,8 +676,9 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 							typeOfFlavor = "presentation";
 						}
 
+						var options;
 						if (hasSecondStream) {
-							var options = {
+							options = {
 								method: "POST",
 								url: config.opencast_events_url,
 								ca: fs.readFileSync(config.opencast_cert),
@@ -698,8 +711,8 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 										acl
 									}
 							};
-						} else if(!hasSecondStream && typeOfFlavor == "presenter") {
-							var options = {
+						} else if(!hasSecondStream && typeOfFlavor === "presenter") {
+							options = {
 								method: "POST",
 								url: config.opencast_events_url,
 								ca: fs.readFileSync(config.opencast_cert),
@@ -725,7 +738,7 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 									}
 							};
 						} else {
-							var options = {
+							options = {
 								method: "POST",
 								url: config.opencast_events_url,
 								ca: fs.readFileSync(config.opencast_cert),
@@ -752,7 +765,7 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 							};
 						}
 
-						request(options, function (error, response, body) {
+						request(options, function (error) {
 							if (error)
 								throw new Error(error);
 							else
@@ -774,6 +787,7 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 /**
  * Permet de récupérer des infos ldap en fonction d'un uid
  * @param uid
+ * @param callback
  */
 function getLdapInfos(uid, callback)
 {
@@ -802,7 +816,7 @@ function getLdapInfos(uid, callback)
 		res.on('error', function(err) {
 			console.error('error: ' + err.message);
 		});
-		res.on('end', function(result) {
+		res.on('end', function() {
 			callback(displayName, mail, clfdstatus);
 		});
 	});
@@ -861,7 +875,7 @@ async function getListSeriresWritable (uid, listSeries)
  */
 function checkSerieAcl(uid, serieinfo)
 {
-	return new Promise(function (resolve, reject) {
+	return new Promise(function (resolve) {
 		var options = {
 			method: 'GET',
 			url: config.opencast_series_url + '/' + serieinfo.identifier + '/acl',
@@ -875,7 +889,7 @@ function checkSerieAcl(uid, serieinfo)
 		request(options, function (error, response, listSeries2) {
 			serieInfo = JSON.parse(listSeries2);
 			for (var j = 0, len = serieInfo.length; j < len; j++)
-				if (serieInfo[j].action == 'write' && serieInfo[j].allow == true && serieInfo[j].role.indexOf(uid) > -1)
+				if (serieInfo[j].action === 'write' && serieInfo[j].allow === true && serieInfo[j].role.indexOf(uid) > -1)
 					resolve(serieinfo);
 			resolve();
 		});
@@ -885,14 +899,16 @@ function checkSerieAcl(uid, serieinfo)
 /**
  * Créer une série si existe pas
  * @param uid
+ * @param socket
  * @param idSerieSelect
+ * @param mustBeUpload
  * @returns {Promise<any>}
  */
 function createSerie(uid, socket, idSerieSelect, mustBeUpload)
 {
-	return new Promise(function (resolve, reject) {
+	return new Promise(function (resolve) {
 
-		if(idSerieSelect == 'myfolder' && mustBeUpload) {
+		if(idSerieSelect === 'myfolder' && mustBeUpload) {
 
 			var acl = '[\n' +
 				'  {\n' +
@@ -928,7 +944,7 @@ function createSerie(uid, socket, idSerieSelect, mustBeUpload)
 			var idSerieMyFolder = null;
 			getListSeries(socket, function (listSeries) {
 				listSeries.forEach(function (serie) {
-					if(serie.title == uid)
+					if(serie.title === uid)
 						idSerieMyFolder = serie.identifier;
 				});
 
@@ -1011,7 +1027,7 @@ function checkIsFileIsWrite(socket, path, typeOfRec, agent)
 				}
 				socket.emit('errorffmpeg');
 				socket.disconnect();
-			} else if (typeOfRec == 'video-and-desktop') {
+			} else if (typeOfRec === 'video-and-desktop') {
 				if (!fs.existsSync(config.path_folder_record + uid + '/' + socketissued + '/' + socketissued + 'screen.webm') || !fs.existsSync(config.path_folder_record + uid + '/' + socketissued + '/' + socketissued + '.webm')) {
 					try {
 						fs.writeFileSync(logFileEvents, 'errorrec;' + uid + ';' + getDateNow() + ';' + socketissued + ';' + typeOfRec + ';"' + agent.toString() + '"' + "\n", {flag: 'a'});
@@ -1036,14 +1052,12 @@ function checkIsFileIsWrite(socket, path, typeOfRec, agent)
  */
 function getDateNow() {
 	var dateNowTmp = new Date();
-	var dateNow = dateNowTmp.getDate()+'-'+(dateNowTmp.getMonth()+1)+'-'+dateNowTmp.getFullYear()+';'+dateNowTmp.getHours()+':'+dateNowTmp.getMinutes()+':'+dateNowTmp.getSeconds();
-	return dateNow;
+	return dateNowTmp.getDate() + '-' + (dateNowTmp.getMonth() + 1) + '-' + dateNowTmp.getFullYear() + ';' + dateNowTmp.getHours() + ':' + dateNowTmp.getMinutes() + ':' + dateNowTmp.getSeconds();
 }
 
 /**
  * @param err
  * @param user
- * @param subject
  */
 function sendEmailError(err, user) {
 	if(!hasSendMailError) {
@@ -1062,7 +1076,7 @@ function sendEmailError(err, user) {
 			text: 'Une erreur a été détectée \nDate : ' + getDateNow() + '\nUser : ' + user + '\nErreur : \n' + err
 		};
 
-		transporter.sendMail(mailOptions, function (error, info) {
+		transporter.sendMail(mailOptions, function (error) {
 			if (error)
 				console.log(error);
 		});
@@ -1081,7 +1095,7 @@ function getRate(type, reso)
 {
 	var rateValue;
 
-	if(type == 'webcam') {
+	if(type === 'webcam') {
 		switch (reso) {
 			case 'nhd':
 			case 'vga':
@@ -1108,6 +1122,7 @@ function getRate(type, reso)
 		switch (reso) {
 			case 'vga':
 				rateValue = ['-maxrate', '1000k', '-bufsize', '1500k'];
+				break;
 			case 'qhd':
 			case 'svga':
 				rateValue = ['-maxrate', '1500k', '-bufsize', '3000k'];

@@ -29,10 +29,10 @@ class Recorder extends EventEmitter {
           if($(".desktopDevice").hasClass('active') && $(".audioDevice").hasClass('active') && !$(".videoDevice").hasClass('active'))
             isAudioDesktopRec = true;
 
-          if(isAudioDesktopRec && typeDevice != 'audio')
+          if(isAudioDesktopRec && typeDevice !== 'audio')
             comms.emit("binarystream"+typeDevice,e.data);
           else if(!isAudioDesktopRec){
-            if(typeDevice == 'audio')
+            if(typeDevice === 'audio')
               typeDevice = 'desktop';
 
             comms.emit("binarystream"+typeDevice,e.data);
@@ -110,8 +110,9 @@ function getRate(type)
 {
   var rateValue;
 
-  if(type == 'webcam') {
-    var reso = $("#resoWebCamChoose").val();
+  var reso;
+  if(type === 'webcam') {
+    reso = $("#resoWebCamChoose").val();
     switch (reso) {
       case 'nhd':
       case 'vga':
@@ -137,7 +138,7 @@ function getRate(type)
     }
   }
   else {
-    var reso = $("#resoDesktopChoose").val();
+    reso = $("#resoDesktopChoose").val();
     switch (reso) {
       case 'vga':
         rateValue = '1000000';
