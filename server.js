@@ -498,7 +498,6 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 					metadataFFprobe.streams.forEach(function(obj) {
 						if(obj.codec_type === 'video')
 							typeEncode = obj.codec_name;
-
 					});
 
 					duration = new Date(metadataFFprobe.format.duration * 1000).toISOString().substr(11, 8);
@@ -597,20 +596,7 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 							'  }\n' +
 							']';
 
-						var canEncode540p = false;
-						if((!isAudioFile) && metadataFFprobe.streams[0].height >= 520 && metadataFFprobe.streams[0].height <= 700) {
-							canEncode540p = true;
-						}
 
-						var canEncode720p = true;
-						if((!isAudioFile) && metadataFFprobe.streams[0].height < 700 ) {
-							canEncode720p = false;
-						}
-
-						var canEncode1080p = true;
-						if((!isAudioFile) && metadataFFprobe.streams[0].height < 1000 ) {
-							canEncode1080p = false;
-						}
 						var processing;
 						if (isAudioFile)
 						{
@@ -620,76 +606,32 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 						}
 						else
 						{
-							if (canEncode1080p)
-							{
-								processing = '{\n' +
-									'  "workflow": "' + config.opencast_workflow + '"\n' +
-									'  "configuration": {\n' +
-									'    "flagQuality480p": "true",\n' +
-									'    "flagQuality720p": "true",\n' +
-									'    "flagQuality1080p": "true"\n' +
-									'    "typeEncode": "'+ typeEncode + '"\n' +
-									'  }\n' +
-									'}';
-							}
-							else if (canEncode720p)
-							{
-								processing = '{\n' +
-									'  "workflow": "' + config.opencast_workflow + '"\n' +
-									'  "configuration": {\n' +
-									'    "flagQuality480p": "true",\n' +
-									'    "flagQuality720p": "true",\n' +
-									'    "flagQuality1080p": "false"\n' +
-									'    "typeEncode": "'+ typeEncode + '"\n' +
-									'  }\n' +
-									'}';
-							}
-							else if (canEncode540p)
-							{
-								processing = '{\n' +
-									'  "workflow": "' + config.opencast_workflow + '"\n' +
-									'  "configuration": {\n' +
-									'    "flagQuality480p": "true",\n' +
-									'    "flagQuality540p": "true",\n' +
-									'    "flagQuality720p": "false",\n' +
-									'    "flagQuality1080p": "false"\n' +
-									'    "typeEncode": "'+ typeEncode + '"\n' +
-									'  }\n' +
-									'}';
-							}
-							else
-							{
-								processing = '{\n' +
-									'  "workflow": "' + config.opencast_workflow + '",\n' +
-									'  "configuration": {\n' +
-									'    "flagQuality480p": "true",\n' +
-									'    "flagQuality540p": "false",\n' +
-									'    "flagQuality720p": "false",\n' +
-									'    "flagQuality1080p": "false"\n' +
-									'    "typeEncode": "'+ typeEncode + '"\n' +
-									'  }\n' +
-									'}'
-							}
+							processing = '{\n' +
+								'  "workflow": "' + config.opencast_workflow + '",\n' +
+								'  "configuration": {\n' +
+								'    "typeEncode": "'+ typeEncode + '"\n' +
+								'  }\n' +
+								'}'
 						}
 
 						if(onlydesktop) {
 							typeOfFlavor = "presentation";
 						}
 
-						var options;
+						var options = {
+							method: "POST",
+							url: config.opencast_events_url,
+							ca: fs.readFileSync(config.opencast_cert),
+							headers:
+								{
+									'cache-control': 'no-cache',
+									'Authorization': 'Basic ' + config.opencast_authentication,
+									'content-type': 'multipart/form-data;'
+								}
+						};
+
 						if (hasSecondStream) {
-							options = {
-								method: "POST",
-								url: config.opencast_events_url,
-								ca: fs.readFileSync(config.opencast_cert),
-								headers:
-									{
-										'cache-control': 'no-cache',
-										'Authorization': 'Basic ' + config.opencast_authentication,
-										'content-type': 'multipart/form-data;'
-									},
-								formData:
-									{
+							options.formData = {
 										presenter:
 											{
 												value: fs.createReadStream(config.path_folder_record + uid + '/' + idFileUpload + '/' + idFileUpload + ".webm"),
@@ -705,25 +647,10 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 													{
 														filename: 'metadata/' + idFileUpload + 'screen.webm'
 													}
-											},
-										processing,
-										metadata,
-										acl
-									}
-							};
+											}
+									};
 						} else if(!hasSecondStream && typeOfFlavor === "presenter") {
-							options = {
-								method: "POST",
-								url: config.opencast_events_url,
-								ca: fs.readFileSync(config.opencast_cert),
-								headers:
-									{
-										'cache-control': 'no-cache',
-										'Authorization': 'Basic ' + config.opencast_authentication,
-										'content-type': 'multipart/form-data;'
-									},
-								formData:
-									{
+							options.formData = {
 										presenter:
 											{
 												value: fs.createReadStream(config.path_folder_record + nameFile),
@@ -731,25 +658,10 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 													{
 														filename: 'metadata/' + nameFile
 													}
-											},
-										processing,
-										metadata,
-										acl
-									}
-							};
+											}
+									};
 						} else {
-							options = {
-								method: "POST",
-								url: config.opencast_events_url,
-								ca: fs.readFileSync(config.opencast_cert),
-								headers:
-									{
-										'cache-control': 'no-cache',
-										'Authorization': 'Basic ' + config.opencast_authentication,
-										'content-type': 'multipart/form-data;'
-									},
-								formData:
-									{
+							options.formData = {
 										presentation:
 											{
 												value: fs.createReadStream(config.path_folder_record + nameFile),
@@ -757,13 +669,13 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 													{
 														filename: 'metadata/' + nameFile
 													}
-											},
-										processing,
-										metadata,
-										acl
-									}
-							};
+											}
+									};
 						}
+
+						options.formData.processing = processing;
+						options.formData.metadata = metadata;
+						options.formData.acl = acl;
 
 						request(options, function (error) {
 							if (error)
@@ -1103,16 +1015,16 @@ function getRate(type, reso)
 				break;
 			case 'qhd':
 			case 'svga':
-				rateValue = ['-maxrate', '1500k', '-bufsize', '3000k'];
+				rateValue = ['-maxrate', '1500k', '-bufsize', '2000k'];
 				break;
 			case 'hd':
-				rateValue = ['-maxrate', '2400k', '-bufsize', '4800k'];
+				rateValue = ['-maxrate', '2500k', '-bufsize', '3000k'];
 				break;
 			case 'xga':  //à tester
-				rateValue = ['-maxrate', '2060k', '-bufsize', '4120k'];
+				rateValue = ['-maxrate', '2060k', '-bufsize', '2560k'];
 				break;
 			case 'hdplus': //à tester
-				rateValue = ['-maxrate', '3500k', '-bufsize', '7000k'];
+				rateValue = ['-maxrate', '3500k', '-bufsize', '4000k'];
 				break;
 			default:
 				rateValue = [];
@@ -1125,13 +1037,13 @@ function getRate(type, reso)
 				break;
 			case 'qhd':
 			case 'svga':
-				rateValue = ['-maxrate', '1500k', '-bufsize', '3000k'];
+				rateValue = ['-maxrate', '1500k', '-bufsize', '2000k'];
 				break;
 			case 'hd':
-				rateValue = ['-maxrate', '2400k', '-bufsize', '4800k']; 
+				rateValue = ['-maxrate', '2500k', '-bufsize', '3000k'];
 				break;
 			case 'hdplus':
-				rateValue = ['-maxrate', '3500k', '-bufsize', '7000k'];
+				rateValue = ['-maxrate', '3500k', '-bufsize', '4000k'];
 				break;
 			default:
 				rateValue = [];
