@@ -1,5 +1,4 @@
-<script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
-<script type="text/javascript" src="link_to_network.min.js"></script> <!-- https://github.com/nesk/network.js -->
+<script type="text/javascript"  src="static/js/jquery.min.js" ></script>
 <script>
     $(function() {
         var settings = {
@@ -11,7 +10,6 @@
                 data: {
                     // The amount of data to initially use.
                     size: 2 * 1024 * 1024, // 2 MB
-
                     // If the measure period can't reach the delay defined in the settings,
                     // the data amount is multiplied by the following value.
                     multiplier: 2
@@ -21,7 +19,7 @@
 
         var net = new Network(settings);
         net.upload
-            .on('end', function(averageSpeed, allInstantSpeeds) {
+            .on('end', function(averageSpeed) {
                 var finalValue = (averageSpeed/1024/1024)*8;
                 window.parent.postMessage(finalValue, '*');
             })
