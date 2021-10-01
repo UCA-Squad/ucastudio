@@ -99,7 +99,7 @@ class DeviceManager extends EventEmitter {
   }
 
   connect(id, opts, idAudio=null) {
-    if (id == 'desktop') {
+    if (id === 'desktop') {
       return this.desktop.connect();
     }
 
@@ -305,7 +305,7 @@ class Device extends EventEmitter {
     //PAS DE ON DERRIERE SERT A QUELQUE CHOSE ????
     if (this.deviceType === 'desktop' && _browser === 'chrome') {
       window.addEventListener('message', e => {
-        if (e.data.type && e.data.type == 'SS_DIALOG_SUCCESS') {
+        if (e.data.type && e.data.type === 'SS_DIALOG_SUCCESS') {
           this.emit('streamId', e.data.streamId);
         }
       });
@@ -342,7 +342,7 @@ class Device extends EventEmitter {
       var audioTmp = document.getElementById("audio");
       var deviceAudioIdTmp = audioTmp.getAttribute('data-id');
 
-      if(opts == 'isSwitch' || opts == 'isOnlyChangeMic')
+      if(opts === 'isSwitch' || opts === 'isOnlyChangeMic')
       {
         var audio = document.querySelector('#audio');
         var video = document.querySelector('#video');
@@ -358,22 +358,22 @@ class Device extends EventEmitter {
           //new add
           var constraintMedia = {audio: constraintAudio, video: { deviceId: { exact: this.constraints.video.exact, facingMode: "user"} } };
 
-          if(opts == 'isOnlyChangeMic' && deviceVideoIdTmp != null) {
+          if(opts === 'isOnlyChangeMic' && deviceVideoIdTmp != null) {
             constraintMedia = {audio: constraintAudio, video: {deviceId: {exact: deviceVideoIdTmp, facingMode: "user"}}};
           }
 
           navigator.mediaDevices.getUserMedia(constraintMedia)
               .then(stream => {
 
-                if(opts != 'isOnlyChangeMic')
+                if(opts !== 'isOnlyChangeMic')
                   $('.labelWebcam').trigger('click');
 
-                if(opts == 'isOnlyChangeMic') {
+                if(opts === 'isOnlyChangeMic') {
                   $('.labelAudio').trigger('click');
 
                   var tracks = stream.getTracks();
                   for(var i = 0; i < tracks.length; i++){
-                    if(tracks[i].kind == 'audio')
+                    if(tracks[i].kind === 'audio')
                       this.getDevice(tracks[i].getSettings().deviceId)
                   }
                 }
@@ -391,7 +391,7 @@ class Device extends EventEmitter {
                 //manque foreac
                 navigator.mediaDevices.enumerateDevices().then(devices => {
                   for (var key in devices) {
-                    if (this.deviceType == 'video' && devices[key].kind == 'videoinput' && this.constraints.video.exact == devices[key].deviceId) {
+                    if (this.deviceType === 'video' && devices[key].kind === 'videoinput' && this.constraints.video.exact == devices[key].deviceId) {
                       // var labelWebcam = (devices[key].label.includes(worToExclude) ? devices[key].label.replace(worToExclude, '') : devices[key].label);
                       let camera = {};
                       camera.id = devices[key].deviceId;
@@ -409,7 +409,7 @@ class Device extends EventEmitter {
                 }
 
                 //new add
-                if(opts == 'isOnlyChangeMic' && deviceVideoIdTmp != null) {
+                if(opts === 'isOnlyChangeMic' && deviceVideoIdTmp != null) {
                   $('#video').attr('data-id', deviceVideoIdTmp);
                   $('#webcamstream').val(deviceVideoIdTmp);
                 }
@@ -463,15 +463,15 @@ class Device extends EventEmitter {
           if (this.deviceType === 'desktop') {
             this.constraints.video[key] = opts[key];
           }
-          else if(opts != 'mustListReso') {
+          else if(opts !== 'mustListReso') {
             this.constraints[this.deviceType][key] = opts[key];
           }
         }
 
         let constraintMedia = this.constraints;
-        if(opts == "mustListReso") {
+        if(opts === "mustListReso") {
 
-          if($("#debitValue").val() <= 1  && $('#resoWebCamChoose').val() == 'nhd')
+          if($("#debitValue").val() <= 1  && $('#resoWebCamChoose').val() === 'nhd')
           {
             constraintMedia = {audio: {deviceId: {exact: deviceAudioIdTmp}},
               video: {
@@ -498,7 +498,7 @@ class Device extends EventEmitter {
         }
         else{
           //new add
-          if(this.deviceType == 'video' && deviceVideoIdTmp != null)
+          if(this.deviceType === 'video' && deviceVideoIdTmp != null)
             this.constraints['video'] = {
               deviceId: { exact: deviceVideoIdTmp },
               width: {exact: 640},
@@ -514,7 +514,7 @@ class Device extends EventEmitter {
             if (this.deviceType === 'desktop') {
               this.constraints.video[key] = opts[key];
             }
-            else if(opts != 'mustListReso') {
+            else if(opts !== 'mustListReso') {
               //uniquement switch reso ???,
               this.constraints[this.deviceType][key] = opts[key];
             }
@@ -522,7 +522,7 @@ class Device extends EventEmitter {
           constraintMedia = this.constraints;
         }
 
-        if(this.deviceType == 'desktop')
+        if(this.deviceType === 'desktop')
           this.constraints['audio'] = false;
 
         navigator.mediaDevices.getUserMedia(constraintMedia)
@@ -555,7 +555,7 @@ class Device extends EventEmitter {
                     $('.labelAudio').find('li[data-id="' + devices[key].deviceId + '"]').find('button').html(devices[key].label.replace(/\s*\(.{4}:.{4}\)\s*/g, ''));
                   }
 
-                  if(opts == "mustListReso" && this.deviceType == 'video' && devices[key].kind == 'videoinput' && this.constraints.video.exact ==  devices[key].deviceId) {
+                  if(opts === "mustListReso" && this.deviceType === 'video' && devices[key].kind === 'videoinput' && this.constraints.video.exact ==  devices[key].deviceId) {
                     let camera = {};
                     camera.id = devices[key].deviceId;
                     camera.label = devices[key].label;
@@ -575,9 +575,9 @@ class Device extends EventEmitter {
       var constraints = this.constraints;
       if(typeof opts != 'undefined')
         constraints = { audio: false, video: { width: opts.width, height: opts.height, frameRate: { ideal :25, max: 30 } } };
-      else if($("#debitValue").val() < 3 && $("#debitValue").val() > 1 )
+      else if($("#debitValue").val() < 2.5 && $("#debitValue").val() > 0.6 )
         constraints = { audio: false, video: { width: {ideal: 960}, height: {ideal: 540} , frameRate: { ideal :20, max: 30 } } };
-      else if($("#debitValue").val() <= 1  )
+      else if($("#debitValue").val() <= 0.6  )
         constraints = { audio: false, video: { width: {ideal: 640}, height: {ideal: 480} , frameRate: { ideal :20, max: 30 } } };
 
       return navigator.mediaDevices.getDisplayMedia(constraints)
@@ -686,7 +686,7 @@ class Device extends EventEmitter {
             if (cmpt < this.candidates.length)
               this.gum(this.candidates[cmpt++], device, cmpt);
           })
-          .catch((error) => {
+          .catch(() => {
             if(candidate.id)
               $('#listResoWebCam .' + candidate.id).hide();
             if (cmpt < this.candidates.length)
@@ -698,7 +698,7 @@ class Device extends EventEmitter {
 
   changeResolution(res) {
     var objectOpts;
-    if (typeof res === 'string' && this.deviceType == 'desktop') {
+    if (typeof res === 'string' && this.deviceType === 'desktop') {
       // res = {width: parseInt(res) * 4 / 3, height: parseInt(res)};
       for(var i = 0; i < this.candidates.length; i++) {
         if(this.candidates[i].id == res) {
@@ -712,7 +712,7 @@ class Device extends EventEmitter {
       for(var i = 0; i < this.candidates.length; i++) {
         if(this.candidates[i].id == res) {
 
-          if (res == 'nhd' ||res == 'hd' || res == 'fullhd')
+          if (res === 'nhd' ||res === 'hd' || res === 'fullhd')
             $('.videoDevice').removeClass('quartretiers').addClass('seizeneuvieme');
           else
             $('.videoDevice').removeClass('seizeneuvieme').addClass('quartretiers');
@@ -766,10 +766,10 @@ class Device extends EventEmitter {
     navigator.mediaDevices.enumerateDevices()
         .then(function(devices) {
           devices.forEach(function(device) {
-              if (device.deviceId == id) {
-                if (device.kind == 'audioinput')
+              if (device.deviceId === id) {
+                if (device.kind === 'audioinput')
                   $('.labelMicSelect').html(trimLabelDevice(device.label), 'audio');
-                if (device.kind == 'videoinput')
+                if (device.kind === 'videoinput')
                   $('.labelCamSelect').html(trimLabelDevice(device.label), 'video');
               }
           });

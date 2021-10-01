@@ -16,7 +16,7 @@
 <header>
     <a href="index.html" id="UCAStudio">
         <span>
-            <img src="img/logo_uca_mini_light.png" height="30px"  style="margin-top: 0.25em">
+            <img src="img/logo_uca_mini_light.png" alt="UCA" height="30px"  style="margin-top: 0.25em">
             <span style="position:absolute;padding-left: 5px">Studio</span>
         </span>
     </a>
@@ -99,23 +99,23 @@
                 </div>
                 <div class="card card-60">
                     <div class="form-input card-80" id="dropdownlistserie">
-                        <label class="required-field">Bibliothèque</label>
+                        <label for="listseries" class="required-field">Bibliothèque</label>
                         <select id="listseries"></select>
                     </div>
                     <div class="form-input card-80">
-                        <label class="required-field">Titre</label>
+                        <label for="titleUpload" class="required-field">Titre</label>
                         <input type="text" id="titleUpload" name="title" placeholder="Titre de votre média">
                     </div>
                     <div class="form-input card-80">
-                        <label class="required-field">Auteur</label>
+                        <label for="presenterUpload" class="required-field">Auteur</label>
                         <input type="text" id="presenterUpload" name="presenter" placeholder="Nom/Prénom">
                     </div>
                     <div class="form-input card-80">
-                        <label>Description</label>
+                        <label for="descUpload">Description</label>
                         <textarea id="descUpload" name="desc"></textarea>
                     </div>
                     <div class="form-input card-80">
-                        <label>Localisation</label>
+                        <label for="locationUpload">Localisation</label>
                         <input type="text" id="locationUpload" name="location" placeholder="lieux de l'enregistrement">
                     </div>
                     <div id="uploadAtEnd" class="form-input card-80">
@@ -324,8 +324,8 @@
                         preload
                          >
                     <p class='vjs-no-js'>
-                    To view this video please enable JavaScript, and consider upgrading to a web browser that
-                    <a href='https://videojs.com/html5-video-support/' target='_blank'>supports HTML5 video</a>
+                        Pour voir cette vidéo, veuillez activer JavaScript et envisagez de passer à un navigateur Web
+                        <a href='https://videojs.com/html5-video-support/' target='_blank'>prenant en charge les vidéos HTML5</a>
                     </p>
                 </video>
                 <video
@@ -335,8 +335,8 @@
                         preload
                         >
                     <p class='vjs-no-js'>
-                    To view this video please enable JavaScript, and consider upgrading to a web browser that
-                    <a href='https://videojs.com/html5-video-support/' target='_blank'>supports HTML5 video</a>
+                        Pour voir cette vidéo, veuillez activer JavaScript et envisagez de passer à un navigateur Web
+                        <a href='https://videojs.com/html5-video-support/' target='_blank'> prenant en charge la vidéo HTML5.</a>
                     </p>
                 </video>
         </div>
@@ -370,7 +370,6 @@
 <script src="js/servercomms.js"></script>
 <script src="js/app.js"></script>
 <link href="css/googlefont.css" rel="stylesheet">
-<script src="js/RecordRTC.min.js"></script>
 <script src="js/EBML.js"></script>
 <script src="js/videojs-vjsdownload.js"></script>
 <script>window.HELP_IMPROVE_VIDEOJS = false;</script>

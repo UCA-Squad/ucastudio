@@ -44,14 +44,14 @@ class Recorder extends EventEmitter {
       this.emit('record.error', e);
     };
 
-    this.recorder.onstart = e => {
+    this.recorder.onstart = () => {
       //A GERER !!! Pas de on derrière
       this.emit('record.start', true);
     };
 
     this.result = null;
 
-    this.recorder.onstop = e => {
+    this.recorder.onstop = () => {
       self.recorder = null;
     };
 

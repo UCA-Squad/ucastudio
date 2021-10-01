@@ -116,7 +116,7 @@ $( document ).ready(function() {
             $('#listResoWebCam li.fullhd').css("background-color", "rgb(127, 26, 26)");
             $('#listResoWebCam li.fullhd').attr("title", "Résolution non conseillée pour votre débit");
 
-            $(document).on('click', '#listResoDesktop li.hdplus, #listResoWebCam li.fullhd', function(event) {
+            $(document).on('click', '#listResoDesktop li.hdplus, #listResoWebCam li.fullhd', function() {
                 document.getElementById("alertWrongReso").style.display = "block";
             });
             $(document).on('click', '#listResoDesktop li.hd, #listResoDesktop li.qhd, #listResoDesktop li.vga, #listResoDesktop li.svga', function() {
@@ -132,7 +132,7 @@ $( document ).ready(function() {
             $('#listResoWebCam li.fullhd').css("background-color", "rgb(127, 26, 26)");
             $('#listResoWebCam li.fullhd').attr("title", "Résolution non conseillée pour votre débit");
 
-            $(document).on('click', '#listResoWebCam li.fullhd', function(event) {
+            $(document).on('click', '#listResoWebCam li.fullhd', function() {
                 document.getElementById("alertWrongReso").style.display = "block";
             });
             $(document).on('click', '#listResoDesktop li.hdplus, #listResoDesktop li.hd, #listResoDesktop li.qhd, #listResoDesktop li.vga, #listResoDesktop li.svga', function() {
@@ -146,12 +146,12 @@ $( document ).ready(function() {
     }
 
     $(document).on('click','label.mediadevice.action.audioDevice.active',function(event){
-        if($(event.target).attr('class') == 'streamControls' || $(event.target).attr('class') == 'mediadevice action audioDevice active')
+        if($(event.target).attr('class') === 'streamControls' || $(event.target).attr('class') == 'mediadevice action audioDevice active')
             event.preventDefault();
     });
 
     //Add by lylblaud
-    $(document).on('click', '#pauseRecord', function(event){
+    $(document).on('click', '#pauseRecord', function(){
 
         if (document.getElementById('recordingTime').textContent < '00:00:04.000')
             return;
@@ -228,7 +228,7 @@ $( document ).ready(function() {
     if(!$('#uploadMedia').prop("checked"))
         $("#listseries").prop('disabled', 'disabled');
 
-    $('#uploadMedia').on('change',  function (e) {
+    $('#uploadMedia').on('change',  function () {
        if(!$(this).prop("checked"))
            $("#listseries").prop('disabled', 'disabled');
        else
@@ -321,7 +321,7 @@ $( document ).ready(function() {
         });
     });
 
-    $('.streamControls ul li button').on('click',  function (e) {
+    $('.streamControls ul li button').on('click',  function () {
         if($(this).hasClass('non-clickable'))
             return false;
         else {
@@ -378,12 +378,12 @@ function shareAndReload(){
     then(function (){
         //on reload la page
         location.reload();
-    }).catch(function(err) {
+    }).catch(function() {
         navigator.mediaDevices.getUserMedia({audio: true}).
         then(function (){
             //on reload la page
             location.reload();
-        }).catch(function(err) {
+        }).catch(function() {
             location.reload();
         });
     });

@@ -24,9 +24,6 @@ function App() {
 
   this.audioCanvas = document.querySelector('#audio ~ canvas');
 
-  this.simpleUserView = document.getElementById('simpleUserView');
-  this.advancedUserView = document.getElementById('advancedUserView');
-
   this.recordButton = document.getElementById('startRecord');
   this.pauseButton = document.getElementById('pauseRecord');
   this.stopButton = document.getElementById('startRecord');
@@ -117,12 +114,8 @@ function App() {
   this.saveRecordingsFusion = document.getElementById('saveRecordingsFusion');
   this.nextBtn = document.getElementById('nextBtn');
 
-  this.listingPeer = [];
-
   this.attachEvents();
-  // setTimeout(() => {
-  //   document.body.classList.remove('loading');
-  // }, 500);
+
 }
 
 App.prototype = {
@@ -130,12 +123,10 @@ App.prototype = {
   attachEvents: function() {
     deviceMgr.on('enumerated', () => {
       for (let deviceType in deviceMgr) {
-        let deviceId = (deviceMgr[deviceType].info || {}).deviceId || 
-                         Object.keys(deviceMgr[deviceType])
-                           .filter(device => device !== 'default')
-                           .reduce((id, current) => id = id || current, null);
-
-        this.mediaToggles[deviceType].value = deviceId;
+        this.mediaToggles[deviceType].value = (deviceMgr[deviceType].info || {}).deviceId ||
+            Object.keys(deviceMgr[deviceType])
+                .filter(device => device !== 'default')
+                .reduce((id, current) => id = id || current, null);
       }
     });
 
@@ -195,12 +186,12 @@ App.prototype = {
       return;
     }
 
-   if(e.target.id == 'audiostream' && !$('.videoDevice').hasClass('active'))
+   if(e.target.id === 'audiostream' && !$('.videoDevice').hasClass('active'))
    {
      deviceMgr.connect(e.target.value)
      .catch(function(err){
        console.log(err);
-       if(e.target.value != 'desktop')
+       if(e.target.value !== 'desktop')
          $('#alertNoWebcam').show();
      }).then(function () {
        if(!$('#alertNoWebcam').is(':visible'))
@@ -211,13 +202,13 @@ App.prototype = {
    }
    else {
 
-     if(e.target.id != 'desktopstream' && typeof deviceMgr.audio[audio.getAttribute('data-id')] !== 'undefined' && deviceMgr.audio[audio.getAttribute('data-id')].stream)
+     if(e.target.id !== 'desktopstream' && typeof deviceMgr.audio[audio.getAttribute('data-id')] !== 'undefined' && deviceMgr.audio[audio.getAttribute('data-id')].stream)
        deviceMgr.audio[audio.getAttribute('data-id')].stream.getTracks().forEach(track => track.stop());
 
      deviceMgr.connect(e.target.value, 'mustListReso')
          .catch(function (err) {
            console.log(err);
-           if (e.target.value != 'desktop')
+           if (e.target.value !== 'desktop')
              $('#alertNoWebcam').show();
          }).then(function () {
            if(!$('#alertNoWebcam').is(':visible'))
@@ -238,11 +229,7 @@ App.prototype = {
     }
     else if (isChrome) {
       const videoSetting = videoTrack.getSettings();
-      if (videoSetting && videoSetting.displaySurface !== "monitor") {
-        return false;
-      } else {
-        return true;
-      }
+      return !(videoSetting && videoSetting.displaySurface !== "monitor");
     }
   },
   displayStream: function(stream, value, resSelect = null) {
@@ -272,7 +259,7 @@ App.prototype = {
 
       let videoControls = mediaContainer.querySelector('.streamControls');
 
-      if(value == 'desktop')
+      if(value === 'desktop')
       {
         //calcul resolutio
 
@@ -431,17 +418,6 @@ App.prototype = {
         deviceMgr.connect( $('#webcamstream').val(), 'isOnlyChangeMic', id);
     }
   },
-  getStreamSource: function(id, isPeer) {
-    if (isPeer) {
-      if (peers[id] && peers[id].stream) {
-        return peers[id].stream;
-      }
-    }
-    else if (deviceMgr.video[id]) {
-      return deviceMgr.video[id].stream;
-    }
-    return;
-  },
   chooseResolution: function(e) {
     let res = e.target.value;
     let parent = e.target.parentNode;
@@ -460,8 +436,8 @@ App.prototype = {
     let change = this.changeResolution(streamId, res);
     change.then(streamObj => this.displayStream(streamObj.stream, streamId === 'desktop' ? 'desktop' : 'video', res));
 
-    if(e.target.className == 'desktopReso' && !$(".videoDevice").hasClass('active') && $(".audioDevice ").hasClass('active')
-        && deviceMgr.desktop.cachedAudioTracks && deviceMgr.desktop.cachedAudioTracks.length == 0)
+    if(e.target.className === 'desktopReso' && !$(".videoDevice").hasClass('active') && $(".audioDevice ").hasClass('active')
+        && deviceMgr.desktop.cachedAudioTracks && deviceMgr.desktop.cachedAudioTracks.length === 0)
     {
       deviceMgr.connect(audio.getAttribute('data-id'))
           .catch(function(err){
@@ -478,7 +454,6 @@ App.prototype = {
       case 'composite':
         return compositor.changeResolution(res);
         break;
-
       default:
         compositor.removeStream(id);
         return deviceMgr.changeResolution(id, res);
@@ -574,7 +549,7 @@ App.prototype = {
     let inputSources = document.querySelectorAll('.inputSource.labelWebcam ul');
 
     Object.keys(details)
-      .filter(key => details[key].deviceType == 'video')
+      .filter(key => details[key].deviceType === 'video')
       .forEach(key => {
         if (!inputSources[0].querySelector(`li[data-id="${key}"]`)) {
           let item = utils.createElement('li', {
@@ -590,7 +565,7 @@ App.prototype = {
                             }
                           });
 
-          if (details[key].source == 'peer') {
+          if (details[key].source === 'peer') {
             let streamType = details[key].info.type;
             deviceBtn.setAttribute('data-peer', streamType);
           }
@@ -613,7 +588,7 @@ App.prototype = {
     //on ajoute un event click sur le switch de l'audio et on créer la liste
     let inputSourcesAudio = document.querySelectorAll('.inputSourceAudio ul');
     Object.keys(details)
-        .filter(key => details[key].deviceType == 'audio')
+        .filter(key => details[key].deviceType === 'audio')
         .forEach(key => {
           if (!inputSourcesAudio[0].querySelector(`li[data-id="${key}"]`) && key != "") {
             let item = utils.createElement('li', {
@@ -643,8 +618,7 @@ App.prototype = {
       input.style.maxHeight = (([...input.querySelectorAll('li')].length + 1) * 2) + 'rem';
     });
   },
-  togglePeerStream: function(e) {
-  },
+
   minimiseStreamView: function(e) {
     let title = e.target.checked ? 'Maximise' : 'Minimise';
     document.querySelector('label[for=minimiseStreams]').setAttribute('title', title);
@@ -678,7 +652,7 @@ App.prototype = {
       );
     }
   },
-  startRecord: function(e) {
+  startRecord: function() {
 
     if($(".desktopDevice").hasClass('active'))
     {
@@ -692,7 +666,7 @@ App.prototype = {
     let numStreams = Object.keys(deviceMgr.devices)
                        .map(key => deviceMgr.devices[key].stream)
                        .filter(stream => stream).length;
-    if (numStreams === 0 || this.isRecording == true) {
+    if (numStreams == 0 || this.isRecording == true) {
       return;
     }
 
@@ -741,7 +715,7 @@ App.prototype = {
     document.querySelector('#listWebCamAvailable').style.display = 'none';
 
   },
-  pauseRecord: function(e) {
+  pauseRecord: function() {
     if (!this.isRecording || this.timeEl.textContent < '00:00:04.000') {
       return;
     }
@@ -753,7 +727,7 @@ App.prototype = {
     }
     this.isPaused = !this.isPaused;
   },
-  stopRecord: function(e) {
+  stopRecord: function() {
     if (!this.isRecording || this.timeEl.textContent < '00:00:03.000') {
       return;
     }
@@ -823,7 +797,7 @@ App.prototype = {
                     .map((unit, i) => (unit < 10 ? '0' : '') + unit);
     this.timeEl.textContent = timeArr.join(':');
   },
-  listRecording: function(details) {
+  listRecording: function() {
       if ($(".videoDevice").hasClass('active') && !$(".desktopDevice").hasClass('active'))
           $('#screenPreview').hide();
       else if ((!$(".videoDevice").hasClass('active') && $(".desktopDevice").hasClass('active')) ||
@@ -861,18 +835,6 @@ App.prototype = {
       }
     }
   },
-  requestRawFootage: function(e) {
-    e.preventDefault();
-    e.stopImmediatePropagation();
-    let peerId = e.target.value;
-    if (!peers.hasOwnProperty(peerId)) {
-      return;
-    }
-
-    peers[peerId].progress = e.target.parentNode.querySelector('.loader circle');
-    peers[peerId].dataChannel.send('request.filetransfer');
-    e.target.parentNode.classList.add('transfer');
-  },
   setTitle: function(e) {
     this.title = e.target.value || 'Enregistrement';
     [...document.querySelectorAll('#recordingList a')].forEach(anchor => {
@@ -885,25 +847,25 @@ App.prototype = {
   setLocation: function(e) {
     this.location = e.target.value;
   },
-  saveMedia: function(e) {
+  saveMedia: function() {
     $('#uploadProgress').html('');
     $('#uploadProgress').show();
     this.addLoader(document.getElementById('uploadProgress'), 'Création en cours...', {fontSize: '1.5rem'});
     comms.emit('zipfiles', false);
   },
-  saveMediaFusion: function(e) {
+  saveMediaFusion: function() {
     $('#uploadProgress').html('');
     $('#uploadProgress').show();
     this.addLoader(document.getElementById('uploadProgress'), 'Création en cours...', {fontSize: '1.5rem'});
     comms.emit('zipfiles', true);
   },
-  setDetails: function(e) {
+  setDetails: function() {
     let keyupEvent = new Event('keyup');
     this.titleEl.dispatchEvent(keyupEvent)
     this.presenterEl.dispatchEvent(keyupEvent)
     this.locationEl.dispatchEvent(keyupEvent)
   },
-  uploadMedia: function(e) {
+  uploadMedia: function() {
       var infos = {};
       infos['titleUpload'] = document.getElementById('titleUpload').value;
       infos['presenterUpload'] = document.getElementById('presenterUpload').value;
@@ -973,32 +935,6 @@ App.prototype = {
 
     document.body.classList.remove('translating');
   },
-  addPeerStreamToComposite: function(e) {
-    let parent = e.target;
-    while (parent && !parent.getAttribute('data-id')) {
-      parent = parent.parentNode;
-    }
-
-    if (!parent) {
-      return console.log('no such item');
-    }
-
-    let peerId = parent.getAttribute('data-id');
-    if (!peers[peerId]) {
-      return console.log('no such peer');
-    }
-    if (!peers[peerId].stream) {
-      return console.log('requested peer has no stream');
-    }
-
-    compositor.addStream({id: peerId, stream: peers[peerId].stream});
-  },
-  removePeer: function(peer) {
-    [...document.querySelectorAll(`.streamControls [data-id="${peer}"]`)]
-      .forEach(el => el.parentNode.removeChild(el));
-    [...document.querySelectorAll(`video[data-id="${peer}"], audio[data-id="${peer}"]`)]
-      .forEach(mediaEl => mediaEl.srcObject = null);
-  },
   cacheApp: function() {
     navigator.serviceWorker.register('/sw.js')
       .catch(err => console.log('failed to register sw', err));
@@ -1046,15 +982,15 @@ deviceMgr.once('enumerated', {
 });
 
 deviceMgr.once('hasNotAlreadyAllowShare', {
-    fn: devices => {
+    fn: () => {
       document.getElementById('infoNotAlreadyAllowShare').style.display = 'block';
       $('.bigButton').hide();
     }
 });
 
 [deviceMgr, compositor].forEach(recorder => {
-  recorder.on('record.prepare', details => {
-    app.listRecording(details);
+  recorder.on('record.prepare', () => {
+    app.listRecording();
   });
   recorder.on('record.complete', details => {
     app.setMediaLink(details);

@@ -9,7 +9,7 @@ function Communications() {
     this.socket = io();
   }
 
-  this.socket.on('errorffmpeg',function(e){
+  this.socket.on('errorffmpeg',function(){
     alert("Un problème est survenu sur cette page web, elle va donc être rechargée");
     location.reload();
   });
@@ -70,7 +70,7 @@ function Communications() {
 
   });
 
-  this.socket.on('fatal',function(e){
+  this.socket.on('fatal',function(){
     alert("Un problème est survenu sur cette page web, elle va donc être rechargée");
     location.reload();
   });

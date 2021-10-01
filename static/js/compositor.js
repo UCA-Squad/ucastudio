@@ -17,7 +17,6 @@ class Compositor extends EventEmitter {
                    [];
 
     this.recorder = null;
-    this.recData = [];
     this.canvas = document.createElement('canvas');
     this.width = 1280;
     this.height = 720;
@@ -108,7 +107,7 @@ class Compositor extends EventEmitter {
         width: position.width,
         height: position.height
       };
-      if (streamObj.id == 'desktop') {
+      if (streamObj.id === 'desktop') {
         this.streamOrder.unshift(streamObj.id);
       }
       else {
@@ -257,7 +256,7 @@ class Compositor extends EventEmitter {
   changeResolution(res) {
     let height = parseInt(res);
     let width = Math.ceil(height / 9 * 16);
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       this.setDimensions({width: width, height: height});
       resolve({stream: this.stream});
     });

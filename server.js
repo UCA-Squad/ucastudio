@@ -1,13 +1,14 @@
 const config = require('./config.json');
-var express = require('express');
-var app = express();
-var spawn = require('child_process').spawn;
-var fluentFFMPEG = require('fluent-ffmpeg');
-var CASAuthentication = require('connect-cas-uca');
-var useragent = require('useragent');
-var logFileEvents = config.path_log_file_events;
-var debitValue = null;
-var fs = require('fs');
+const express = require('express');
+const app = express();
+const spawn = require('child_process').spawn;
+const fluentFFMPEG = require('fluent-ffmpeg');
+const CASAuthentication = require('connect-cas-uca');
+const useragent = require('useragent');
+const logFileEvents = config.path_log_file_events;
+const axios = require('axios');
+const fs = require('fs');
+let debitValue = null;
 global.hasSendMailError = false;
 const server = require('https').createServer({
 	key: fs.readFileSync(config.path_cert_key),
@@ -455,7 +456,7 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 		//on test si c'est pas undefined  ?
 		var usermediainfosToUpload = JSON.parse(socket.handshake.session.usermediadatas);
 		const agent = useragent.parse(socket.request.headers['user-agent']);
-		var request = require("request");
+
 		var d = new Date();
 		var startDate = d.getFullYear() + '-' + ("0" + (d.getMonth() + 1)).slice(-2) + '-' + ("0" + d.getDate()).slice(-2);
 		var startTime = d.getUTCHours() + ':' + (d.getMinutes()<10?'0':'') + d.getMinutes();
@@ -502,50 +503,7 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 
 					duration = new Date(metadataFFprobe.format.duration * 1000).toISOString().substr(11, 8);
 
-					var metadata = '[\n' +
-						'  {\n' +
-						'    "flavor": "dublincore/episode",\n' +
-						'    "fields": [\n' +
-						'      {\n' +
-						'        "id": "title",\n' +
-						'        "value": "' + usermediainfosToUpload.titleUpload.replace(/"/g, '\\"') + '"\n' +
-						'      },\n' +
-						'      {\n' +
-						'        "id": "description",\n' +
-						'        "value": "' + desc.replace(/"/g, '\\"') + '"\n' +
-						'      },\n' +
-						'      {\n' +
-						'        "id": "creator",\n' +
-						'        "value": ["' + usermediainfosToUpload.presenterUpload.replace(/"/g, '\\"')  + '"]\n' +
-						'      },\n' +
-						'      {\n' +
-						'        "id": "isPartOf",\n' +
-						'        "value": "' + usermediainfosToUpload.idSerie + '"\n' +
-						'      },\n' +
-						'      {\n' +
-						'        "id": "startDate",\n' +
-						'        "value": "' + startDate + '"\n' +
-						'      },\n' +
-						'      {\n' +
-						'        "id": "startTime",\n' +
-						'        "value": "' + startTime + '"\n' +
-						'      },\n' +
-						'      {\n' +
-						'        "id": "duration",\n' +
-						'        "value": "' + duration + '"\n' +
-						'      },\n' +
-						'      {\n' +
-						'        "id": "location",\n' +
-						'        "value": "' + location + '"\n' +
-						'      },\n' +
-						'      {\n' +
-						'        "id": "source",\n' +
-						'        "value": "UCAStudio"\n' +
-						'      }\n' +
-						'    ]\n' +
-						'  }\n' +
-						']';
-
+					let metadata = getMetadatasNewEvent(usermediainfosToUpload, desc, startDate, startTime, duration, location)
 
 					var js2xmlparser = require("js2xmlparser");
 					var metadataXML  = js2xmlparser.parse("media", JSON.parse(metadata)[0]);
@@ -558,54 +516,13 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 
 					if(mustBeUpload)
 					{
-						var acl = '[\n' +
-							'  {\n' +
-							'    "allow": true,\n' +
-							'    "role": "ROLE_EXTERNAL_APPLICATION",\n' +
-							'    "action": "read"\n' +
-							'  },\n' +
-							'  {\n' +
-							'    "allow": true,\n' +
-							'    "role": "ROLE_EXTERNAL_APPLICATION",\n' +
-							'    "action": "write"\n' +
-							'  },\n' +
-							'  {\n' +
-							'    "allow": true,\n' +
-							'    "role": "ROLE_GROUP_MOODLE",\n' +
-							'    "action": "read"\n' +
-							'  },\n' +
-							'  {\n' +
-							'    "allow": true,\n' +
-							'    "role": "ROLE_GROUP_MOODLE",\n' +
-							'    "action": "annotate"\n' +
-							'  },\n' +
-							'  {\n' +
-							'    "allow": true,\n' +
-							'    "role": "ROLE_USER_LDAP_' + uid.toUpperCase() + '",\n' +
-							'    "action": "read"\n' +
-							'  },\n' +
-							'  {\n' +
-							'    "allow": true,\n' +
-							'    "role": "ROLE_USER_LDAP_' + uid.toUpperCase() + '",\n' +
-							'    "action": "write"\n' +
-							'  }\n' +
-							'  {\n' +
-							'    "allow": true,\n' +
-							'    "role": "ROLE_USER_LDAP_' + uid.toUpperCase() + '",\n' +
-							'    "action": "annotate-admin"\n' +
-							'  }\n' +
-							']';
-
-
 						var processing;
-						if (isAudioFile)
-						{
+						if (isAudioFile) {
 							processing = '{\n' +
 								'  "workflow": "' + config.opencast_workflow_audio + '"\n' +
 								'}';
 						}
-						else
-						{
+						else {
 							processing = '{\n' +
 								'  "workflow": "' + config.opencast_workflow + '",\n' +
 								'  "configuration": {\n' +
@@ -614,78 +531,48 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 								'}'
 						}
 
-						if(onlydesktop) {
+						if(onlydesktop)
 							typeOfFlavor = "presentation";
-						}
 
-						var options = {
-							method: "POST",
-							url: config.opencast_events_url,
-							ca: fs.readFileSync(config.opencast_cert),
-							headers:
-								{
-									'cache-control': 'no-cache',
-									'Authorization': 'Basic ' + config.opencast_authentication,
-									'content-type': 'multipart/form-data;'
-								}
-						};
+						let FormData = require('form-data');
+						var data = new FormData();
 
 						if (hasSecondStream) {
-							options.formData = {
-										presenter:
-											{
-												value: fs.createReadStream(config.path_folder_record + uid + '/' + idFileUpload + '/' + idFileUpload + ".webm"),
-												options:
-													{
-														filename: 'metadata/' + idFileUpload + '.webm'
-													}
-											},
-										presentation:
-											{
-												value: fs.createReadStream(config.path_folder_record + uid + '/' + idFileUpload + '/' + idFileUpload + "screen.webm"),
-												options:
-													{
-														filename: 'metadata/' + idFileUpload + 'screen.webm'
-													}
-											}
-									};
-						} else if(!hasSecondStream && typeOfFlavor === "presenter") {
-							options.formData = {
-										presenter:
-											{
-												value: fs.createReadStream(config.path_folder_record + nameFile),
-												options:
-													{
-														filename: 'metadata/' + nameFile
-													}
-											}
-									};
+							data.append('presenter', fs.createReadStream(config.path_folder_record + uid + '/' + idFileUpload + '/' + idFileUpload + ".webm"), { filename: 'metadata/' + idFileUpload + '.webm'});
+							data.append('presentation', fs.createReadStream(config.path_folder_record + uid + '/' + idFileUpload + '/' + idFileUpload + "screen.webm"), { filename: 'metadata/' + idFileUpload + 'screen.webm'});
+						} else if(!hasSecondStream && typeOfFlavor === "presenter" && !isAudioFile) {
+							data.append('presenter', fs.createReadStream(config.path_folder_record + uid + '/' + idFileUpload + '/' + idFileUpload + ".webm"), { filename: 'metadata/' + idFileUpload + '.webm'});
 						} else {
-							options.formData = {
-										presentation:
-											{
-												value: fs.createReadStream(config.path_folder_record + nameFile),
-												options:
-													{
-														filename: 'metadata/' + nameFile
-													}
-											}
-									};
+							data.append('presentation', fs.createReadStream(config.path_folder_record + uid + '/' + idFileUpload + '/' + idFileUpload + "screen.webm"), { filename: 'metadata/' + idFileUpload + 'screen.webm'});
 						}
 
-						options.formData.processing = processing;
-						options.formData.metadata = metadata;
-						options.formData.acl = acl;
+						data.append('acl', getAclNewEvent(uid));
+						data.append('metadata', metadata);
+						data.append('processing', processing);
 
-						request(options, function (error) {
-							if (error)
-								throw new Error(error);
-							else
-								socket.emit('endupload', 1);
-						});
+						var options = {
+							method: 'POST',
+							url:  config.opencast_events_url,
+							headers: {
+								'cache-control': 'no-cache',
+								'Authorization': 'Basic ' + config.opencast_authentication,
+								'content-type': 'multipart/form-data;',
+								...data.getHeaders()
+							},
+							data : data
+						};
+
+						axios(options)
+							.then(function () {
+								socket.emit('endupload', 1)
+							})
+							.catch(function (error) {
+								console.log(error);
+							});
 					}
-					else
+					else {
 						socket.emit('endupload', 0); // pas nécessaire si on force l'upload
+					}
 				}
 				catch (e) {
 					sendEmailError(' errorrec ' + e, uid + ' / ' + agent.toString());
@@ -694,6 +581,109 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 		});
 		socket.emit('idRecord', socket.handshake.session.cas_user, socket.handshake.issued);
 	}
+}
+
+/**
+ * @param uid
+ * @returns {string}
+ */
+function getAclNewEvent(uid)
+{
+	return '[\n' +
+		'  {\n' +
+		'    "allow": true,\n' +
+		'    "role": "ROLE_EXTERNAL_APPLICATION",\n' +
+		'    "action": "read"\n' +
+		'  },\n' +
+		'  {\n' +
+		'    "allow": true,\n' +
+		'    "role": "ROLE_EXTERNAL_APPLICATION",\n' +
+		'    "action": "write"\n' +
+		'  },\n' +
+		'  {\n' +
+		'    "allow": true,\n' +
+		'    "role": "ROLE_GROUP_MOODLE",\n' +
+		'    "action": "read"\n' +
+		'  },\n' +
+		'  {\n' +
+		'    "allow": true,\n' +
+		'    "role": "ROLE_GROUP_MOODLE",\n' +
+		'    "action": "annotate"\n' +
+		'  },\n' +
+		'  {\n' +
+		'    "allow": true,\n' +
+		'    "role": "ROLE_USER_LDAP_' + uid.toUpperCase() + '",\n' +
+		'    "action": "read"\n' +
+		'  },\n' +
+		'  {\n' +
+		'    "allow": true,\n' +
+		'    "role": "ROLE_USER_LDAP_' + uid.toUpperCase() + '",\n' +
+		'    "action": "write"\n' +
+		'  }\n' +
+		'  {\n' +
+		'    "allow": true,\n' +
+		'    "role": "ROLE_USER_LDAP_' + uid.toUpperCase() + '",\n' +
+		'    "action": "annotate-admin"\n' +
+		'  }\n' +
+		']';
+
+}
+
+
+/**
+ * @param usermediainfosToUpload
+ * @param startDate
+ * @param startTime
+ * @param duration
+ * @param location
+ * @returns {string}
+ */
+function getMetadatasNewEvent(usermediainfosToUpload, desc, startDate, startTime, duration, location)
+{
+
+	return '[\n' +
+		'  {\n' +
+		'    "flavor": "dublincore/episode",\n' +
+		'    "fields": [\n' +
+		'      {\n' +
+		'        "id": "title",\n' +
+		'        "value": "' + usermediainfosToUpload.titleUpload.replace(/"/g, '\\"') + '"\n' +
+		'      },\n' +
+		'      {\n' +
+		'        "id": "description",\n' +
+		'        "value": "' + desc.replace(/"/g, '\\"') + '"\n' +
+		'      },\n' +
+		'      {\n' +
+		'        "id": "creator",\n' +
+		'        "value": ["' + usermediainfosToUpload.presenterUpload.replace(/"/g, '\\"')  + '"]\n' +
+		'      },\n' +
+		'      {\n' +
+		'        "id": "isPartOf",\n' +
+		'        "value": "' + usermediainfosToUpload.idSerie + '"\n' +
+		'      },\n' +
+		'      {\n' +
+		'        "id": "startDate",\n' +
+		'        "value": "' + startDate + '"\n' +
+		'      },\n' +
+		'      {\n' +
+		'        "id": "startTime",\n' +
+		'        "value": "' + startTime + '"\n' +
+		'      },\n' +
+		'      {\n' +
+		'        "id": "duration",\n' +
+		'        "value": "' + duration + '"\n' +
+		'      },\n' +
+		'      {\n' +
+		'        "id": "location",\n' +
+		'        "value": "' + location + '"\n' +
+		'      },\n' +
+		'      {\n' +
+		'        "id": "source",\n' +
+		'        "value": "UCAStudio"\n' +
+		'      }\n' +
+		'    ]\n' +
+		'  }\n' +
+		']';
 }
 
 /**
@@ -751,15 +741,18 @@ function getListSeries(socket, callback)
 			'X-RUN-WITH-ROLES': 'ROLE_USER_LDAP_'+uid
 		}
 	};
-	var request = require("request");
-	request(options, function (error, response, listSeriesTmp) {
-		var listSeries = JSON.parse(listSeriesTmp);
-		getListSeriresWritable(uid, listSeries).then(function(result) {
-			callback(result);
-		}, function(err) {
-			console.log(err);
+
+	axios.request(options)
+		.then(function (listSeries) {
+			getListSeriresWritable(uid, listSeries.data).then(function(result) {
+				callback(result);
+			}, function(err) {
+				throw new Error(error);
+			})
 		})
-	});
+		.catch(function (error) {
+			console.log(error);
+		});
 }
 
 /**
@@ -797,14 +790,18 @@ function checkSerieAcl(uid, serieinfo)
 				Authorization: 'Basic ' + config.opencast_authentication
 			}
 		};
-		var request = require("request");
-		request(options, function (error, response, listSeries2) {
-			serieInfo = JSON.parse(listSeries2);
-			for (var j = 0, len = serieInfo.length; j < len; j++)
-				if (serieInfo[j].action === 'write' && serieInfo[j].allow === true && serieInfo[j].role.indexOf(uid) > -1)
-					resolve(serieinfo);
-			resolve();
-		});
+
+		axios.request(options)
+			.then(function (listSeries2) {
+				serieInfo =listSeries2.data;
+				for (var j = 0, len = serieInfo.length; j < len; j++)
+					if (serieInfo[j].action === 'write' && serieInfo[j].allow === true && serieInfo[j].role.indexOf(uid) > -1)
+						resolve(serieinfo);
+				resolve();
+			})
+			.catch(function (error) {
+				console.log(error);
+			});
 	});
 }
 
@@ -822,34 +819,6 @@ function createSerie(uid, socket, idSerieSelect, mustBeUpload)
 
 		if(idSerieSelect === 'myfolder' && mustBeUpload) {
 
-			var acl = '[\n' +
-				'  {\n' +
-				'    "allow": true,\n' +
-				'    "action": "read"\n' +
-				'    "role": "ROLE_ADMIN",\n' +
-				'  },\n' +
-				'  {\n' +
-				'    "allow": true,\n' +
-				'    "action": "write"\n' +
-				'    "role": "ROLE_ADMIN",\n' +
-				'  },\n' +
-				'  {\n' +
-				'    "allow": true,\n' +
-				'    "action": "read"\n' +
-				'    "role": "ROLE_GROUP_MOODLE",\n' +
-				'  },\n' +
-				'  {\n' +
-				'    "allow": true,\n' +
-				'    "action": "read"\n' +
-				'    "role": "ROLE_USER_LDAP_' + uid.toUpperCase() + '",\n' +
-				'  },\n' +
-				'  {\n' +
-				'    "allow": true,\n' +
-				'    "action": "write"\n' +
-				'    "role": "ROLE_USER_LDAP_' + uid.toUpperCase() + '",\n' +
-				'  }\n' +
-				']';
-
 			if(socket.handshake.session.isEtudiant)
 				uid = 'etd_'+uid;
 
@@ -864,23 +833,10 @@ function createSerie(uid, socket, idSerieSelect, mustBeUpload)
 					resolve(idSerieMyFolder);
 				else
 				{
-					var metadata = '[\n' +
-						'  {\n' +
-						'    "label": "Opencast Series DublinCore",\n' +
-						'    "flavor": "dublincore/series",\n' +
-						'    "fields": [\n' +
-						'      {\n' +
-						'        "id": "title",\n' +
-						'        "value": "' + uid + '"\n' +
-						'      },\n' +
-						'      {\n' +
-						'        "id": "subject",\n' +
-						'        "value": "' + socket.handshake.session.mail + '"\n' +
-						'      }\n' +
-						'    ]\n' +
-						'  }\n' +
-						']';
-
+					var FormData = require('form-data');
+					var data = new FormData();
+					data.append('acl', getAclSerie(uid));
+					data.append('metadata', getMetadatasSerie(uid, socket));
 
 					var options = {
 						method: "POST",
@@ -890,30 +846,85 @@ function createSerie(uid, socket, idSerieSelect, mustBeUpload)
 							{
 								'cache-control': 'no-cache',
 								'Authorization': 'Basic ' + config.opencast_authentication,
-								'content-type': 'multipart/form-data;'
+								'content-type': 'multipart/form-data;',
+								...data.getHeaders()
 							},
-						formData:
-							{
-								metadata,
-								acl
-							}
+						data: data
 					};
 
-					var request = require("request");
-					request(options, function (error, response, body) {
-						if (error) {
-							throw new Error(error);
-						} else {
-							var obj = JSON.parse(body);
-							resolve(obj.identifier);
-						}
-					});
+					axios(options)
+						.then(function (response) {
+							resolve(response.data.identifier);
+						})
+						.catch(function (error) {
+							console.log(error);
+						});
 				}
 			});
 		}
 		else
 			resolve(idSerieSelect);
 	});
+}
+
+/**
+ * @param uid
+ * @returns {string}
+ */
+function getAclSerie(uid)
+{
+	return '[\n' +
+		'  {\n' +
+		'    "allow": true,\n' +
+		'    "action": "read"\n' +
+		'    "role": "ROLE_ADMIN",\n' +
+		'  },\n' +
+		'  {\n' +
+		'    "allow": true,\n' +
+		'    "action": "write"\n' +
+		'    "role": "ROLE_ADMIN",\n' +
+		'  },\n' +
+		'  {\n' +
+		'    "allow": true,\n' +
+		'    "action": "read"\n' +
+		'    "role": "ROLE_GROUP_MOODLE",\n' +
+		'  },\n' +
+		'  {\n' +
+		'    "allow": true,\n' +
+		'    "action": "read"\n' +
+		'    "role": "ROLE_USER_LDAP_' + uid.toUpperCase() + '",\n' +
+		'  },\n' +
+		'  {\n' +
+		'    "allow": true,\n' +
+		'    "action": "write"\n' +
+		'    "role": "ROLE_USER_LDAP_' + uid.toUpperCase() + '",\n' +
+		'  }\n' +
+		']';
+}
+
+/**
+ * @param uid
+ * @param socket
+ * @returns {string}
+ */
+function getMetadatasSerie(uid, socket)
+{
+	return '[\n' +
+		'  {\n' +
+		'    "label": "Opencast Series DublinCore",\n' +
+		'    "flavor": "dublincore/series",\n' +
+		'    "fields": [\n' +
+		'      {\n' +
+		'        "id": "title",\n' +
+		'        "value": "' + uid + '"\n' +
+		'      },\n' +
+		'      {\n' +
+		'        "id": "subject",\n' +
+		'        "value": "' + socket.handshake.session.mail + '"\n' +
+		'      }\n' +
+		'    ]\n' +
+		'  }\n' +
+		']';
 }
 
 /**
