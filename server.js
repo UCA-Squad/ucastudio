@@ -559,7 +559,9 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 								'content-type': 'multipart/form-data;',
 								...data.getHeaders()
 							},
-							data : data
+							data : data,
+							maxContentLength: Infinity,
+							maxBodyLength: Infinity
 						};
 
 						axios(options)
