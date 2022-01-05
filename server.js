@@ -410,7 +410,7 @@ io.on('connection', function(socket){
 		getLdapInfos(socket.handshake.session.cas_user, function (displayName, mail, clfdstatus) {
 			socket.handshake.session.cn = displayName;
 			socket.handshake.session.mail = mail;
-			socket.handshake.session.isEtudiant = clfdstatus === 0 || clfdstatus === 1;
+			socket.handshake.session.isEtudiant = clfdstatus === '0' || clfdstatus === '1';
 			socket.emit('displayName', displayName);
 			socket.emit('isEtudiant', socket.handshake.session.isEtudiant);
 		});
@@ -821,13 +821,14 @@ function createSerie(uid, socket, idSerieSelect, mustBeUpload)
 
 		if(idSerieSelect === 'myfolder' && mustBeUpload) {
 
+			let realUserName = uid;
 			if(socket.handshake.session.isEtudiant)
 				uid = 'etd_'+uid;
 
 			var idSerieMyFolder = null;
 			getListSeries(socket, function (listSeries) {
 				listSeries.forEach(function (serie) {
-					if(serie.title === uid)
+					if(serie.title === uid ||  serie.title === realUserName)
 						idSerieMyFolder = serie.identifier;
 				});
 
@@ -837,7 +838,7 @@ function createSerie(uid, socket, idSerieSelect, mustBeUpload)
 				{
 					var FormData = require('form-data');
 					var data = new FormData();
-					data.append('acl', getAclSerie(uid));
+					data.append('acl', getAclSerie(realUserName));
 					data.append('metadata', getMetadatasSerie(uid, socket));
 
 					var options = {
