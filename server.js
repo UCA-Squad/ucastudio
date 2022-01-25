@@ -542,6 +542,8 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 							data.append('presentation', fs.createReadStream(config.path_folder_record + uid + '/' + idFileUpload + '/' + idFileUpload + "screen.webm"), { filename: 'metadata/' + idFileUpload + 'screen.webm'});
 						} else if(!hasSecondStream && typeOfFlavor === "presenter" && !isAudioFile) {
 							data.append('presenter', fs.createReadStream(config.path_folder_record + uid + '/' + idFileUpload + '/' + idFileUpload + ".webm"), { filename: 'metadata/' + idFileUpload + '.webm'});
+						} else if (isAudioFile){
+							data.append('presenter', fs.createReadStream(config.path_folder_record + uid + '/' + idFileUpload + '/' + idFileUpload + "screen.webm"), { filename: 'metadata/' + idFileUpload + 'screen.webm'});
 						} else {
 							data.append('presentation', fs.createReadStream(config.path_folder_record + uid + '/' + idFileUpload + '/' + idFileUpload + "screen.webm"), { filename: 'metadata/' + idFileUpload + 'screen.webm'});
 						}
