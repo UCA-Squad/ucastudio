@@ -225,7 +225,11 @@ App.prototype = {
     const videoTrack = mediaStream.getVideoTracks()[0];
 
     if (isFirefox) {
-      return (-1 !== videoTrack.label.indexOf('Screen') || -1 !== videoTrack.label.indexOf('Monitor'));
+      const isNotWindow = (-1 !== videoTrack.label.indexOf('Screen') || -1 !== videoTrack.label.indexOf('Monitor'));
+      if(!isNotWindow) //on test si le label est vide ou non bug FF 98, label no set si Ecran
+        return ("" === videoTrack.label);
+
+      return isNotWindow;
     }
     else if (isChrome) {
       const videoSetting = videoTrack.getSettings();
