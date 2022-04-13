@@ -751,7 +751,7 @@ function getListSeries(socket, callback)
 			getListSeriresWritable(uid, listSeries.data).then(function(result) {
 				callback(result);
 			}, function(err) {
-				throw new Error(error);
+				throw new Error(err);
 			})
 		})
 		.catch(function (error) {
@@ -770,10 +770,17 @@ async function getListSeriresWritable (uid, listSeries)
 	let result = [];
 	for (var i = 0, len = listSeries.length; i < len; i++) {
 		rst = await checkSerieAcl(uid, listSeries[i]);
-		if(typeof rst !== 'undefined')
+		if(typeof rst !== 'undefined' && rst.title != uid.toLowerCase()+'_inwicast_medias')
 			result.push(rst);
 	}
-	return  result;
+
+	result.sort(function (a, b) {
+		var titleA = a.title.toUpperCase();
+		var titleB = b.title.toUpperCase();
+		return (titleA < titleB) ? -1 : (titleA > titleB) ? 1 : 0;
+	});
+
+	return result;
 }
 
 /**
