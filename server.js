@@ -413,15 +413,15 @@ io.on('connection', function(socket){
 			socket.handshake.session.isEtudiant = clfdstatus === '0' || clfdstatus === '1';
 			socket.emit('displayName', displayName);
 			socket.emit('isEtudiant', socket.handshake.session.isEtudiant);
-		});
 
-		getListSeries(socket, function (listSeries) {
-			socket.emit('listseries', listSeries, uid, socket.handshake.session.mail);
-			if(typeof socket.handshake.headers.referer !== 'undefined' && socket.handshake.headers.referer.indexOf('serieid') > -1) {
-				let infos = socket.handshake.headers.referer.split( '?' );
-				if(infos[1])
-					socket.emit('insidemoodle', infos[1]);
-			}
+			getListSeries(socket, function (listSeries) {
+				socket.emit('listseries', listSeries, uid, socket.handshake.session.mail);
+				if(typeof socket.handshake.headers.referer !== 'undefined' && socket.handshake.headers.referer.indexOf('serieid') > -1) {
+					let infos = socket.handshake.headers.referer.split( '?' );
+					if(infos[1])
+						socket.emit('insidemoodle', infos[1]);
+				}
+			});
 		});
 	}
 });
@@ -735,27 +735,33 @@ function getLdapInfos(uid, callback)
 function getListSeries(socket, callback)
 {
 	var uid = socket.handshake.session.cas_user.toUpperCase();
-	var options = {
-		method: 'GET',
-		url: config.opencast_series_url,
-		rejectUnauthorized: false,
-		headers: {
-			'cache-control': 'no-cache',
-			'Authorization': 'Basic '+config.opencast_authentication,
-			'X-RUN-WITH-ROLES': 'ROLE_USER_LDAP_'+uid
+	var data = JSON.stringify({
+		"query": {
+			"bool": {
+				"must": [
+					{ "term": { "acl_permission_write": "ROLE_USER_LDAP_"+uid} }
+				]
+			}
 		}
+	});
+
+	var configES = {
+		method: 'get',
+		url: config.opencast_series_ES_url,
+		headers: { 'Content-Type': 'application/json' },
+		data : data
 	};
 
-	axios.request(options)
-		.then(function (listSeries) {
-			getListSeriresWritable(uid, listSeries.data).then(function(result) {
-				callback(result);
-			}, function(err) {
-				throw new Error(err);
-			})
+	axios(configES)
+		.then(function (response) {
+			callback(response.data.hits.hits.map(function(hit){ return hit._source }).sort(function (a, b) {
+				var titleA = a.title[0].toUpperCase();
+				var titleB = b.title[0].toUpperCase();
+				return (titleA < titleB) ? -1 : (titleA > titleB) ? 1 : 0;
+			}));
 		})
 		.catch(function (error) {
-			console.log(error);
+			throw new Error(error);
 		});
 }
 

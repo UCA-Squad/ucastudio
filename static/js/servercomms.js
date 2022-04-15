@@ -101,23 +101,23 @@ function Communications() {
     if (typeof listSeries !== 'undefined' && listSeries.length > 0) {
       var hasMyFodler = false;
       $.each(listSeries, function (index, item) {
-        if(item.title == uid || item.title == 'etd_'+uid){
+        if(item.title[0] == uid || item.title[0] == 'etd_'+uid){
           hasMyFodler = true;
-          html += "<option value='" + item.identifier + "'>Mon dossier</option>";
+          html += "<option value='" + item.uid[0] + "'>Mon dossier</option>";
         }
       })
 
       htmlTmp += '<optgroup label="Mes bibliothèques">';
       $.each(listSeries, function (index, item) {
-          if(item.subjects[0] == email && item.title != uid && item.title != 'etd_'+uid)
-            htmlTmp += "<option value='" + item.identifier + "'>" + item.title + "</option>";
+        if(typeof item.subject != 'undefined' && item.subject[0].includes(email) && (item.title[0] != uid && item.title[0] != 'etd_'+uid && item.title[0] != uid+'_inwicast_medias'))
+          htmlTmp += "<option value='" + item.uid[0] + "'>" + item.title[0] + "</option>";
       });
       htmlTmp += '</optgroup>';
 
       htmlTmp += '<optgroup label="Partagées avec moi">';
       $.each(listSeries, function (index, item) {
-        if(item.subjects[0] != email && (item.title != uid || item.title != 'etd_'+uid))
-          htmlTmp += "<option value='" + item.identifier + "'>" + item.title + "</option>";
+        if((typeof item.subject == 'undefined' || !item.subject[0].includes(email) ) && (item.title[0] != uid && item.title[0] != 'etd_'+uid && item.title[0] != uid+'_inwicast_medias'))
+          htmlTmp += "<option value='" + item.uid[0] + "'>" + item.title[0] + "</option>";
       });
       htmlTmp += '</optgroup>';
 

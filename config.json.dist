@@ -10,6 +10,7 @@
   "opencast_authentication" : "xxxxxx",
   "opencast_events_url" : "/api/events",
   "opencast_series_url" : "/api/series",
+  "opencast_series_ES_url" : "/_search?size=1000",
   "opencast_cert" : "cert/xxxxxx.pem",
   "opencast_workflow" : "schedule-and-upload",
   "opencast_workflow_audio" : "schedule-and-upload-mp3",
