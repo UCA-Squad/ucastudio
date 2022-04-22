@@ -114,7 +114,7 @@ function Communications() {
       });
       htmlTmp += '</optgroup>';
 
-      htmlTmp += '<optgroup label="Partagées avec moi">';
+      htmlTmp += '<optgroup label="Partagées avec moi en écriture">';
       $.each(listSeries, function (index, item) {
         if((typeof item.subject == 'undefined' || !item.subject[0].includes(email) ) && (item.title[0] != uid && item.title[0] != 'etd_'+uid && item.title[0] != uid+'_inwicast_medias'))
           htmlTmp += "<option value='" + item.uid[0] + "'>" + item.title[0] + "</option>";
@@ -130,6 +130,10 @@ function Communications() {
       html += "<option value='myfolder'>Mon dossier</option>";
 
       $('#listseries').append(html);
+      $('#listseries').select2({
+        theme: 'bootstrap4',
+        style: 'display: inline-block'
+      });
   });
 
   this.socket.on('displayName',function(displayName){

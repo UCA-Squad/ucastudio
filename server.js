@@ -414,13 +414,37 @@ io.on('connection', function(socket){
 			socket.emit('displayName', displayName);
 			socket.emit('isEtudiant', socket.handshake.session.isEtudiant);
 
+			async function getDisplayNameIfUid(titleSerie) {
+				return new Promise((resolve, reject) => {
+					getLdapInfos(titleSerie, function (displayName) {
+						resolve(displayName);
+					});
+				})
+			}
+
 			getListSeries(socket, function (listSeries) {
-				socket.emit('listseries', listSeries, uid, socket.handshake.session.mail);
-				if(typeof socket.handshake.headers.referer !== 'undefined' && socket.handshake.headers.referer.indexOf('serieid') > -1) {
-					let infos = socket.handshake.headers.referer.split( '?' );
-					if(infos[1])
-						socket.emit('insidemoodle', infos[1]);
-				}
+				const tranlateSeries = new Promise((resolve, reject) => {
+					async function seriesIteration() {
+						for(const serie of listSeries){
+							if(serie['title'][0].match('^[a-zA-Z0-9_]+$') != null && serie['title'][0] != uid) {
+								let result = await getDisplayNameIfUid(serie["title"][0]);
+								if (result != '')
+									serie['title'][0] = 'Biblothèque de : ' + result;
+							}
+						}
+						resolve(listSeries);
+					}
+					resolve(seriesIteration());
+				});
+
+				tranlateSeries.then(function (value){
+					socket.emit('listseries', listSeries, uid, socket.handshake.session.mail);
+					if(typeof socket.handshake.headers.referer !== 'undefined' && socket.handshake.headers.referer.indexOf('serieid') > -1) {
+						let infos = socket.handshake.headers.referer.split( '?' );
+						if(infos[1])
+							socket.emit('insidemoodle', infos[1]);
+					}
+				})
 			});
 		});
 	}

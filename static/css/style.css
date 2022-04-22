@@ -2215,3 +2215,40 @@ ul#listMicAvailable li:last-child {
   display: none;
   text-align: center;
 }
+
+#select2-listseries-results li::before, #select2-listseries-results ul li::before {
+  color: transparent;
+  padding-right: 0;
+}
+
+#dropdownlistserie .select2-container{
+
+  width: 100% !important;
+  border: none !important;
+  border-radius: 3px !important;
+  -webkit-box-shadow: 0 0 1px 0 #5E5C5C !important;
+  box-shadow: 0 0 1px 0 #5E5C5C !important;
+  -webkit-box-sizing: border-box !important;
+  box-sizing: border-box !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  margin: 0 !important;
+  display: block !important;
+  font-size: 1em !important;
+  font-family: "Signika",sans-serif !important;
+  color: #5E5C5C !important;
+  background-color: #fff !important;
+  padding: 0 !important;
+}
+
+.select2-container--bootstrap4 .select2-selection{
+  border: none !important;
+}
+
+#select2-listseries-results{
+  font: 12pt "Merriweather Sans",sans-serif;
+}
+
+#select2-listseries-results li.select2-results__option{
+  line-height: normal !important;
+}
