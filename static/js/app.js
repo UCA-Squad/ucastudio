@@ -227,7 +227,13 @@ App.prototype = {
     if (isFirefox) {
       const isNotWindow = (-1 !== videoTrack.label.indexOf('Screen') || -1 !== videoTrack.label.indexOf('Monitor'));
       if(!isNotWindow) //on test si le label est vide ou non bug FF 98, label no set si Ecran
-        return ("" === videoTrack.label);
+      {
+        //bug linux label
+        if(videoTrack.label.startsWith('DP-') || videoTrack.label.startsWith('eDP-') || videoTrack.label.startsWith('HDMI-'))
+          return true;
+        else
+          return ("" === videoTrack.label);
+      }
 
       return isNotWindow;
     }
