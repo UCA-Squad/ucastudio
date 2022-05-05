@@ -2252,3 +2252,8 @@ ul#listMicAvailable li:last-child {
 #select2-listseries-results li.select2-results__option{
   line-height: normal !important;
 }
+
+#select2-listseries-results [aria-disabled="true"]
+{
+  color: rgb(170, 170, 170) !important;
+}

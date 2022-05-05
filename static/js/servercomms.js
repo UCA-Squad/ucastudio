@@ -97,34 +97,33 @@ function Communications() {
 
   this.socket.on('listseries',function(listSeries, uid, email){
     var html = '<option value="" disabled selected>Sélectionner votre bibliothèque</option>';
-    var htmlTmp = '';
+
     if (typeof listSeries !== 'undefined' && listSeries.length > 0) {
       var hasMyFodler = false;
+      html += '<optgroup label="Mes bibliothèques">';
       $.each(listSeries, function (index, item) {
         if(item.title[0] == uid || item.title[0] == 'etd_'+uid){
           hasMyFodler = true;
           html += "<option value='" + item.uid[0] + "'>Mon dossier</option>";
         }
+        else if(item.title[0] == uid+'_inwicast_medias')
+          html += "<option value='" + item.uid[0] + "'>Mes médias Inwicast</option>";
       })
-
-      htmlTmp += '<optgroup label="Mes bibliothèques">';
       $.each(listSeries, function (index, item) {
         if(typeof item.subject != 'undefined' && item.subject[0].includes(email) && (item.title[0] != uid && item.title[0] != 'etd_'+uid && item.title[0] != uid+'_inwicast_medias'))
-          htmlTmp += "<option value='" + item.uid[0] + "'>" + item.title[0] + "</option>";
+          html += "<option value='" + item.uid[0] + "'>" + item.title[0] + "</option>";
       });
-      htmlTmp += '</optgroup>';
+      html += '</optgroup>';
 
-      htmlTmp += '<optgroup label="Partagées avec moi en écriture">';
+      html += '<optgroup label="Partagées avec moi en écriture">';
       $.each(listSeries, function (index, item) {
         if((typeof item.subject == 'undefined' || !item.subject[0].includes(email) ) && (item.title[0] != uid && item.title[0] != 'etd_'+uid && item.title[0] != uid+'_inwicast_medias'))
-          htmlTmp += "<option value='" + item.uid[0] + "'>" + item.title[0] + "</option>";
+          html += "<option value='" + item.uid[0] + "'>" + item.title[0] + "</option>";
       });
-      htmlTmp += '</optgroup>';
+      html += '</optgroup>';
 
       if(!hasMyFodler)
         html += "<option value='myfolder'>Mon dossier</option>";
-
-      html += htmlTmp;
     }
     else
       html += "<option value='myfolder'>Mon dossier</option>";
