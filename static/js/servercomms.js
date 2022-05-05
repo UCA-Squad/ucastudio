@@ -97,10 +97,11 @@ function Communications() {
 
   this.socket.on('listseries',function(listSeries, uid, email){
     var html = '<option value="" disabled selected>Sélectionner votre bibliothèque</option>';
-
+    var htmlTmp = '';
+    html += '<optgroup label="Mes bibliothèques">';
     if (typeof listSeries !== 'undefined' && listSeries.length > 0) {
       var hasMyFodler = false;
-      html += '<optgroup label="Mes bibliothèques">';
+      var hasShareWritableSerie = false;
       $.each(listSeries, function (index, item) {
         if(item.title[0] == uid || item.title[0] == 'etd_'+uid){
           hasMyFodler = true;
@@ -109,21 +110,27 @@ function Communications() {
         else if(item.title[0] == uid+'_inwicast_medias')
           html += "<option value='" + item.uid[0] + "'>Mes médias Inwicast</option>";
       })
+
+      if(!hasMyFodler)
+        html += "<option value='myfolder'>Mon dossier</option>";
+
       $.each(listSeries, function (index, item) {
         if(typeof item.subject != 'undefined' && item.subject[0].includes(email) && (item.title[0] != uid && item.title[0] != 'etd_'+uid && item.title[0] != uid+'_inwicast_medias'))
           html += "<option value='" + item.uid[0] + "'>" + item.title[0] + "</option>";
       });
       html += '</optgroup>';
 
-      html += '<optgroup label="Partagées avec moi en écriture">';
+      htmlTmp += '<optgroup label="Partagées avec moi en écriture">';
       $.each(listSeries, function (index, item) {
-        if((typeof item.subject == 'undefined' || !item.subject[0].includes(email) ) && (item.title[0] != uid && item.title[0] != 'etd_'+uid && item.title[0] != uid+'_inwicast_medias'))
-          html += "<option value='" + item.uid[0] + "'>" + item.title[0] + "</option>";
+        if((typeof item.subject == 'undefined' || !item.subject[0].includes(email) ) && (item.title[0] != uid && item.title[0] != 'etd_'+uid && item.title[0] != uid+'_inwicast_medias')) {
+          hasShareWritableSerie = true;
+          htmlTmp += "<option value='" + item.uid[0] + "'>" + item.title[0] + "</option>";
+        }
       });
-      html += '</optgroup>';
+      htmlTmp += '</optgroup>';
 
-      if(!hasMyFodler)
-        html += "<option value='myfolder'>Mon dossier</option>";
+      if(hasShareWritableSerie)
+        html += htmlTmp;
     }
     else
       html += "<option value='myfolder'>Mon dossier</option>";
