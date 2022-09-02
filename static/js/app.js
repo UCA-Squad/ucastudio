@@ -666,7 +666,8 @@ App.prototype = {
 
     if($(".desktopDevice").hasClass('active'))
     {
-      if(!this.getTypeOfRec(deviceMgr.devices['desktop'].stream))
+      if(!this.getTypeOfRec(deviceMgr.devices['desktop'].stream) && window.navigator.userAgent.indexOf("Linux") == -1 &&
+          window.navigator.userAgent.indexOf("Ubuntu") == -1 && window.navigator.userAgent.indexOf("X11") == -1)
       {
         alert('Attention, l\'enregistrement d\'une fenêtre n\'est pas autorisé, merci de selectionner l\'intégralité de votre écran (cliquez sur "Écran" pour changer)');
         return false;
