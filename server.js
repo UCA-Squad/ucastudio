@@ -745,9 +745,17 @@ function getLdapInfos(uid, callback)
 		});
 		res.on('error', function(err) {
 			console.error('error: ' + err.message);
+			client.unbind(function (error) {
+				if (error)
+					console.log(error.message);
+			});
 		});
 		res.on('end', function() {
 			callback(displayName, mail, clfdstatus);
+			client.unbind(function (error) {
+				if (error)
+					console.log(error.message);
+			});
 		});
 	});
 }
