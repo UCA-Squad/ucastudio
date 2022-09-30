@@ -95,6 +95,10 @@ function Communications() {
     saveAs(file);
   });
 
+ this.socket.on('socketissuedValue',function(e){
+   $('#socketissuedValue').val(e);
+  });
+
   this.socket.on('listseries',function(listSeries, uid, email){
     var html = '<option value="" disabled selected>Sélectionner votre bibliothèque</option>';
     var htmlTmp = '';

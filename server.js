@@ -84,6 +84,9 @@ io.on('connection', function(socket){
 
 			fs.mkdirSync(config.path_folder_record + uid + '/'+socketissued+'/');
 
+
+			socket.emit('socketissuedValue', socketissued);
+
 			if (ffmpeg_process || feedStream || ffmpeg_process2 || feedStream2) {
 				socket.emit('fatal', 'stream already started.');
 				return;
@@ -328,17 +331,22 @@ io.on('connection', function(socket){
 			sendEmailError('socket.io error:' + e, uid+' / '+agent.toString())
 		});
 
-		socket.on('zipfiles', function (fusion) {
+		socket.on('zipfiles', function (fusion, idSocket = null) {
 			var JSZip = require("jszip");
 			var zip = new JSZip();
 
-			const webcamMedia = config.path_folder_record + uid + '/' + socketissued + '/' + socketissued + '.webm';
-			const screenMedia = config.path_folder_record + uid + '/' + socketissued + '/' + socketissued + 'screen.webm';
-			const metadataXML = config.path_folder_record + uid + '/' + socketissued + '/metadata.xml';
+			let socketTmp = socketissued;
+
+			if(idSocket != null)
+				socketTmp = idSocket;
+
+			const webcamMedia = config.path_folder_record + uid + '/' + socketTmp + '/' + socketTmp + '.webm';
+			const screenMedia = config.path_folder_record + uid + '/' + socketTmp + '/' + socketTmp + 'screen.webm';
+			const metadataXML = config.path_folder_record + uid + '/' + socketTmp + '/metadata.xml';
 
 			try {
 				if (fs.existsSync(webcamMedia))
-					zip.file(socketissued + '.webm', fs.createReadStream(webcamMedia));
+					zip.file(socketTmp + '.webm', fs.createReadStream(webcamMedia));
 			} catch(err) {
 				sendEmailError('zip file' + err, uid+' / '+agent.toString());
 				console.error(getDateNow()+' : '+err);
@@ -346,7 +354,7 @@ io.on('connection', function(socket){
 
 			try {
 				if (fs.existsSync(screenMedia))
-					zip.file(socketissued + 'screen.webm', fs.createReadStream(screenMedia));
+					zip.file(socketTmp + 'screen.webm', fs.createReadStream(screenMedia));
 			} catch(err) {
 				sendEmailError('zip file' + err, uid+' / '+agent.toString());
 				console.error(getDateNow()+' : '+err);
@@ -383,16 +391,16 @@ io.on('connection', function(socket){
 					.outputOption('-preset', 'fast')
 					.outputOption('-threads', '0')
 					.outputOption('-s', width + "x" + height)
-					.output(config.path_folder_record + uid + '/' + socketissued + '/' + socketissued + 'merged.mp4')
+					.output(config.path_folder_record + uid + '/' + socketTmp + '/' + socketTmp + 'merged.mp4')
 					.on("error",function(er){
 						console.log("error occured: "+er.message);
 					})
 					.on("end",function(){
-						zip.file(socketissued + 'merged.mp4', fs.createReadStream(config.path_folder_record + uid + '/' + socketissued + '/' + socketissued + 'merged.mp4'));
+						zip.file(socketTmp + 'merged.mp4', fs.createReadStream(config.path_folder_record + uid + '/' + socketTmp + '/' + socketTmp + 'merged.mp4'));
 						zip.generateNodeStream({type:'nodebuffer',streamFiles:true})
-							.pipe(fs.createWriteStream(config.path_folder_record + uid + '/' + socketissued + '/' + socketissued+'.zip'))
+							.pipe(fs.createWriteStream(config.path_folder_record + uid + '/' + socketTmp + '/' + socketTmp+'.zip'))
 							.on('finish', function () {
-								socket.emit('endzip', fs.readFileSync(config.path_folder_record + uid + '/' + socketissued + '/' + socketissued+'.zip'), socketissued);
+								socket.emit('endzip', fs.readFileSync(config.path_folder_record + uid + '/' + socketTmp + '/' + socketTmp+'.zip'), socketTmp);
 							});
 					})
 					.run();
@@ -400,9 +408,9 @@ io.on('connection', function(socket){
 			else
 			{
 				zip.generateNodeStream({type:'nodebuffer',streamFiles:true})
-					.pipe(fs.createWriteStream(config.path_folder_record + uid + '/' + socketissued + '/' + socketissued+'.zip'))
+					.pipe(fs.createWriteStream(config.path_folder_record + uid + '/' + socketTmp + '/' + socketTmp+'.zip'))
 					.on('finish', function () {
-						socket.emit('endzip', fs.readFileSync(config.path_folder_record + uid + '/' + socketissued + '/' + socketissued+'.zip'), socketissued);
+						socket.emit('endzip', fs.readFileSync(config.path_folder_record + uid + '/' + socketTmp + '/' + socketTmp+'.zip'), socketTmp);
 					});
 			}
 		});

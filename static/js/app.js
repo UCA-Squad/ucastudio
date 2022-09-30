@@ -862,13 +862,13 @@ App.prototype = {
     $('#uploadProgress').html('');
     $('#uploadProgress').show();
     this.addLoader(document.getElementById('uploadProgress'), 'Création en cours...', {fontSize: '1.5rem'});
-    comms.emit('zipfiles', false);
+    comms.emit('zipfiles', false, ($('#socketissuedValue').val() != '' ? $('#socketissuedValue').val() : null));
   },
   saveMediaFusion: function() {
     $('#uploadProgress').html('');
     $('#uploadProgress').show();
     this.addLoader(document.getElementById('uploadProgress'), 'Création en cours...', {fontSize: '1.5rem'});
-    comms.emit('zipfiles', true);
+    comms.emit('zipfiles', true, ($('#socketissuedValue').val() != '' ? $('#socketissuedValue').val() : null));
   },
   setDetails: function() {
     let keyupEvent = new Event('keyup');
