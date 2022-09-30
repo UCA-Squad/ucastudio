@@ -221,7 +221,7 @@ App.prototype = {
   getTypeOfRec: function(mediaStream) {
 
     const isFirefox = typeof InstallTrigger !== 'undefined';
-    const isChrome = !!window.chrome && (!!window.chrome.webstore || !!window.chrome.runtime);
+    const isChrome = !!window.chrome && navigator.userAgent.indexOf("Chrome") > -1;
     const videoTrack = mediaStream.getVideoTracks()[0];
 
     if (isFirefox) {
@@ -1047,7 +1047,7 @@ compositor.on('stream.remove', () => {
   app.removeStream('composite');
 });
 
-if (window.chrome && chrome.app) {
+if (window.chrome && (navigator.userAgent.indexOf("Chrome") > -1 )) {
   if (!navigator.mediaDevices || !('getDisplayMedia' in navigator.mediaDevices)) {
     //on active l'alert navigateur pas compatible
     $("#alertBrowserVersion").show();
