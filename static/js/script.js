@@ -195,7 +195,9 @@ $( document ).ready(function() {
         $('.logout').show();
 
     var isFirefox = typeof InstallTrigger !== 'undefined';
-    var isChrome = !!window.chrome && (!!window.chrome.webstore || !!window.chrome.runtime);
+    // var isChrome = !!window.chrome && (!!window.chrome.webstore || !!window.chrome.runtime);
+    var isChrome = !!window.chrome && (navigator.userAgent.indexOf("Chrome") > -1);
+
     if(!isFirefox && !isChrome)
         $("#alertBrowser").show();
     else if(!('mediaDevices' in navigator) || !('getUserMedia' in navigator.mediaDevices) || (window.MediaRecorder == undefined)){
