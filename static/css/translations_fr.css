@@ -1,5 +1,5 @@
 [lang=fr] .bigButton[for=create]::after {
-  content: "Créer une vidéo depuis son navigateur";
+  content: "Créer un média depuis son navigateur";
 }
 
 [lang=fr] .bigButton[for=edit]::after {

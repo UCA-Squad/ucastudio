@@ -59,8 +59,10 @@ $( document ).ready(function() {
         setTimeout(function () {
             $('body').removeClass('loading');
             $('.debitCircle').remove();
-            document.cookie = "debitValue="+Number(event.data);
-            setInformationsRelatedToDebitSpeed(Number(event.data))
+            // document.cookie = "debitValue="+Number(event.data);
+            // setInformationsRelatedToDebitSpeed(Number(event.data))
+            document.cookie = "debitValue=null";
+            setInformationsRelatedToDebitSpeed(null)
 
         }, 200)
     }
@@ -166,12 +168,12 @@ $( document ).ready(function() {
         
     });
 
-
-    if(getParameterByName('courseid') != null) {
-        $('label.bigButton:first-child')[0].style.marginLeft = "20%";
-        $('#live').css('display', 'inline-block');
-    }
-    else
+    //disable live OBS
+    // if(getParameterByName('courseid') != null) {
+    //     $('label.bigButton:first-child')[0].style.marginLeft = "20%";
+    //     $('#live').css('display', 'inline-block');
+    // }
+    // else
         $('label.bigButton:first-child')[0].style.marginLeft = "38%";
 
     $('.modal').show();

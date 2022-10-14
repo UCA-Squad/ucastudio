@@ -224,7 +224,7 @@ input:checked + section {
 }
 
 .bigButton[for=create]::after {
-  content: 'Créer une vidéo depuis son navigateur';
+  content: 'Créer un média depuis son navigateur';
 }
 
 .bigButton[for=edit]::after {
