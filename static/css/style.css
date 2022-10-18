@@ -191,10 +191,6 @@ section {
   border-color: #d39e00;
 }
 
-.button-blue:hover, .button-amber:hover{
-  color: #fff !important;
-}
-
 main section:first-of-type {
   transform: translateX(-100%);
 }
