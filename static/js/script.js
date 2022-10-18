@@ -59,10 +59,8 @@ $( document ).ready(function() {
         setTimeout(function () {
             $('body').removeClass('loading');
             $('.debitCircle').remove();
-            // document.cookie = "debitValue="+Number(event.data);
-            // setInformationsRelatedToDebitSpeed(Number(event.data))
-            document.cookie = "debitValue=null";
-            setInformationsRelatedToDebitSpeed(null)
+            document.cookie = "debitValue="+Number(event.data);
+            setInformationsRelatedToDebitSpeed(Number(event.data))
 
         }, 200)
     }
@@ -174,23 +172,23 @@ $( document ).ready(function() {
     //     $('#live').css('display', 'inline-block');
     // }
     // else
-        $('label.bigButton:first-child')[0].style.marginLeft = "38%";
+    $('label.bigButton:first-child')[0].style.marginLeft = "38%";
 
     $('.modal').show();
     $('main').css("visibility", "visible");
 
-    if(getParameterByName('ent') != null) {
-        $('#help').css('color', '#178F96');
-        $('#help').css('position', 'absolute');
-        $('#help').css('left', '-3rem', '!important');
-        $('#help').css('z-index', '10');
+    if(getParameterByName('ent') != null || getParameterByName('courseid') != null ) {
+        $('#help').attr('style', 'color:#178F96; position: absolute;left:-3rem !important;z-index:10;');
+        $('#helpList').attr('style', 'right:0 !important');
         $('#UCAStudio').hide();
         $('.logout').hide();
     	document.getElementsByTagName("header")[0].style.backgroundColor= "#FAF8F5";
 	    document.getElementsByTagName("header")[0].style.boxShadow = "none";
     	document.getElementsByTagName("header")[0].style.position = "absolute";
+        $('#language').show();
     }else {
 	    $('#help').css('color', 'white');
+        $('#language').show();
     }
 
     if(getParameterByName('courseid') == null && getParameterByName('ent') == null)

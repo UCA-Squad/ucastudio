@@ -182,6 +182,19 @@ section {
   overflow: hidden;
 }
 
+.modal .button{
+  color: #fff;
+}
+
+.button-amber:hover{
+  background-color: #e0a800;
+  border-color: #d39e00;
+}
+
+.button-blue:hover, .button-amber:hover{
+  color: #fff !important;
+}
+
 main section:first-of-type {
   transform: translateX(-100%);
 }
