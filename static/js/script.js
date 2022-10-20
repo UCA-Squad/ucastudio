@@ -28,7 +28,10 @@ $( document ).ready(function() {
          document.getElementById('helpList').style.visibility='hidden';
     });
 
-    if(document.cookie.indexOf('debitValue=') != -1) {
+    var cookieDebitInfo = document.cookie.match(new RegExp('debitValue' + '=([^;]+)'));
+    let cookieValueDebit = !!cookieDebitInfo ? cookieDebitInfo[1] : 'null';
+
+    if(document.cookie.indexOf('debitValue=') != -1 && cookieValueDebit != 'null') {
         $('body').removeClass('loading');
         $('.debitCircle').remove();
 

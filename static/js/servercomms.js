@@ -30,7 +30,10 @@ function Communications() {
 
   this.socket.on('clientConfig',function(config){
 
-    if(document.cookie.indexOf('debitValue=') == -1) {
+    var cookieDebitInfo = document.cookie.match(new RegExp('debitValue' + '=([^;]+)'));
+    let cookieValueDebit = !!cookieDebitInfo ? cookieDebitInfo[1] : 'null';
+
+    if(document.cookie.indexOf('debitValue=') == -1 || cookieValueDebit == 'null') {
       $('.checkWifi').attr('src', config.path_check_speed_ntwk).ready(function () {
         var actualprogress = 0;
         var itv = 0;
