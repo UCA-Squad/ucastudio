@@ -787,7 +787,7 @@ function getListSeries(socket, callback)
 
 	let httpsAgent = null;
 	if(config.opencast_series_ES_url_CERT != '') {
-		const httpsAgent = require('https').Agent({
+		httpsAgent = require('https').Agent({
 			ca: fs.readFileSync(config.opencast_series_ES_url_CERT)
 		});
 	}
