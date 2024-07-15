@@ -785,11 +785,19 @@ function getListSeries(socket, callback)
 		}
 	});
 
+	let httpsAgent = null;
+	if(config.opencast_series_ES_url_CERT != '') {
+		const httpsAgent = require('https').Agent({
+			ca: fs.readFileSync(config.opencast_series_ES_url_CERT)
+		});
+	}
+
 	var configES = {
 		method: 'get',
 		url: config.opencast_series_ES_url,
 		headers: { 'Content-Type': 'application/json' },
-		data : data
+		data : data,
+		httpsAgent: httpsAgent
 	};
 
 	axios(configES)
