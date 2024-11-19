@@ -508,7 +508,7 @@ input[id^=inputSource]:not(:checked) ~ label[for^=inputSource] ul {
   left: 0;
   width: 100%;
   text-align: center;
-  line-height: 2rem;
+  line-height: 4rem;
   font-size: 1.5rem;
   font-weight: 300;
   transition: opacity 0.5s;
@@ -1422,6 +1422,11 @@ svg {
   left: -1rem;
 }
 
+.audioDevice:hover {
+  transform: translateX(-50%) translateY(-5px) !important; /* Ajoute l'effet de translation verticale */
+  box-shadow: 0 5px 10px rgba(156, 156, 156, 1) !important;
+}
+
 button {
   font-family: Ubuntu, Roboto, "Open Sans", "Segoe UI", "Helvetica Neue", Verdana, sans-serif;
 }
@@ -2082,6 +2087,41 @@ input:focus {
   margin-bottom: 0;
   padding-bottom: 5px;
 }
+
+.card {
+  --bs-card-spacer-y: 1rem;
+  --bs-card-spacer-x: 1rem;
+  --bs-card-title-spacer-y: .5rem;
+  --bs-card-border-width: 1px;
+  --bs-card-border-radius: 1rem;
+  --bs-card-box-shadow: ;
+  --bs-card-inner-border-radius: calc(1rem - 1px);
+  --bs-card-cap-padding-y: .5rem;
+  --bs-card-cap-padding-x: 1rem;
+  /*--bs-card-cap-bg: rgba(0, 0, 0, .03);*/
+  --bs-card-cap-color: ;
+  --bs-card-height: ;
+  --bs-card-color: ;
+  /*--bs-card-bg: #fff;*/
+  --bs-card-img-overlay-padding: 1rem;
+  --bs-card-group-margin: .75rem;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: var(--bs-card-height);
+  word-wrap: break-word;
+  /*background-color: var(--bs-card-bg);*/
+  background-clip: border-box;
+  border: var(--bs-card-border-width) solid var(--bs-card-border-color);
+  border-radius: var(--bs-card-border-radius);
+}
+
+.card {
+  border-radius: 16px;
+  border: none;
+}
+
 
 #language ul li::before{
   content: none;
