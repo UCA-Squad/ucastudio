@@ -383,18 +383,27 @@ function getVersionOfBrowser()
 /**
  *
  */
-function shareAndReload(){
-    navigator.mediaDevices.getUserMedia({audio: true, video: true}).
-    then(function (){
-        //on reload la page
-        location.reload();
-    }).catch(function() {
-        navigator.mediaDevices.getUserMedia({audio: true}).
-        then(function (){
-            //on reload la page
-            location.reload();
-        }).catch(function() {
-            location.reload();
+function saveDevicesAndReload(devices) {
+    const deviceInfo = devices.map(device => ({
+        kind: device.kind,
+        label: device.label,
+        deviceId: device.deviceId,
+    }));
+    localStorage.setItem('devices', JSON.stringify(deviceInfo));
+    location.reload();
+}
+
+function shareAndReload() {
+    navigator.mediaDevices.getUserMedia({audio: true, video: true})
+        .then(() => navigator.mediaDevices.enumerateDevices())
+        .then(saveDevicesAndReload)
+        .catch(() => {
+            navigator.mediaDevices.getUserMedia({audio: true})
+                .then(() => navigator.mediaDevices.enumerateDevices())
+                .then(saveDevicesAndReload)
+                .catch(() => {
+                    localStorage.setItem('devices', JSON.stringify([]));
+                    location.reload();
+                });
         });
-    });
 }
