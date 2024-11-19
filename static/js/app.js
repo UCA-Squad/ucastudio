@@ -210,6 +210,9 @@ App.prototype = {
            console.log(err);
            if (e.target.value !== 'desktop')
              $('#alertNoWebcam').show();
+           else {
+             e.target.checked = false;
+           }
          }).then(function () {
            if(!$('#alertNoWebcam').is(':visible'))
             $("#startRecord").addClass('canRecord');
@@ -219,8 +222,13 @@ App.prototype = {
    }
   },
   getTypeOfRec: function(mediaStream) {
-
-    const isFirefox = typeof InstallTrigger !== 'undefined';
+    let isFirefox;
+    if (navigator.userAgentData) {
+      isFirefox = navigator.userAgentData.brands.some(brand => brand.brand === 'Firefox');
+    }
+    else {
+      isFirefox = navigator.userAgent.includes('Firefox');
+    }
     const isChrome = !!window.chrome && navigator.userAgent.indexOf("Chrome") > -1;
     const videoTrack = mediaStream.getVideoTracks()[0];
 
