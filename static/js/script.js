@@ -196,8 +196,13 @@ $( document ).ready(function() {
 
     if(getParameterByName('courseid') == null && getParameterByName('ent') == null)
         $('.logout').show();
-
-    var isFirefox = typeof InstallTrigger !== 'undefined';
+    let isFirefox;
+    if (navigator.userAgentData) {
+        isFirefox = navigator.userAgentData.brands.some(brand => brand.brand === 'Firefox');
+    }
+    else {
+        isFirefox = navigator.userAgent.includes('Firefox');
+    }
     // var isChrome = !!window.chrome && (!!window.chrome.webstore || !!window.chrome.runtime);
     var isChrome = !!window.chrome && (navigator.userAgent.indexOf("Chrome") > -1);
 

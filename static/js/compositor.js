@@ -46,9 +46,18 @@ class Compositor extends EventEmitter {
       }
     });
 
-    let _browser = window.hasOwnProperty('InstallTrigger') ? 'firefox' : (
-                     window.hasOwnProperty('chrome') && chrome.app ? 'chrome' : 'other'
-                   );
+    let _browser;
+    if (typeof InstallTrigger !== 'undefined') {
+      _browser = 'firefox';
+    } else if (typeof window.chrome !== 'undefined' && navigator.userAgent.includes('Chrome')) {
+      if (navigator.userAgent.includes('Edg')) {
+        _browser = 'edge';
+      } else {
+        _browser = 'chrome';
+      }
+    } else {
+      _browser = 'other';
+    }
 
     this.isChrome = _browser === 'chrome';
   }

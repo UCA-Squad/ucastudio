@@ -52,50 +52,77 @@ class DeviceManager extends EventEmitter {
       }
     });
 
-    navigator.mediaDevices.enumerateDevices()
-      .then(devices => {
-        ['audio', 'video'].forEach(deviceType => {
-          this[deviceType] = devices.filter(device => device.kind === `${deviceType}input` && device.deviceId !== `communications`)
-                               .reduce((result, info) => {
-                                 result[info.deviceId] = new Device(info);
+    setTimeout(() => {
+      this.listDevices();
+    }, 100);
 
-                                 if(info.deviceId == '')
-                                   this.emit('hasNotAlreadyAllowShare', true);
+  }
 
-                                 result[info.deviceId].on('stream', stream => {
-                                   this.emit('stream', {id: info.deviceId, stream: stream});
-                                   if (this.isRecording) {
-                                     result[info.deviceId].record();
-                                   }
+  listDevices() {
+    // Récupérer les périphériques sauvegardés dans localStorage
+    const savedDevices = JSON.parse(localStorage.getItem('devices')) || [];
+    // Si des périphériques sauvegardés sont disponibles, utilisez-les
+    const devicesToProcess = savedDevices.length > 0 ? savedDevices : null;
+    const processDevices = (devices) => {
+      ['audio', 'video'].forEach(deviceType => {
+        this[deviceType] = devices.filter(device => device.kind === `${deviceType}input` && device.deviceId !== `communications`)
+            .reduce((result, info) => {
+              result[info.deviceId] = new Device(info);
 
-                                   if (stream.getAudioTracks().length > 0) {
-                                     this.desktop.attachAudioTrack(stream);
-                                   }
-                                 });
-                                 return result;
-                               }, {});
-        });
+              // console.log(info.deviceId);
+              if (info.deviceId === '') {
+                this.emit('hasNotAlreadyAllowShare', true);
+              }
 
-        this.emit('enumerated', this.devices);
+              result[info.deviceId].on('stream', stream => {
+                this.emit('stream', { id: info.deviceId, stream: stream });
+                if (this.isRecording) {
+                  result[info.deviceId].record();
+                }
 
-        for (let dev in this.devices) {
-          this.devices[dev].on('record.prepare', label =>
+                if (stream.getAudioTracks().length > 0) {
+                  this.desktop.attachAudioTrack(stream);
+                }
+              });
+
+              return result;
+            }, {});
+      });
+
+      this.emit('enumerated', this.devices);
+
+      for (let dev in this.devices) {
+        this.devices[dev].on('record.prepare', label =>
             this.emit('record.prepare', {
-               label: label,
-                  id: dev,
+              label: label,
+              id: dev,
               flavor: dev === 'desktop' ? 'Écran' : 'Orateur'
             })
-          );
-          this.devices[dev].on('record.complete', obj =>
+        );
+        this.devices[dev].on('record.complete', obj =>
             this.emit('record.complete', {
-               media: obj.media,
-                 url: obj.url,
-                  id: dev,
+              media: obj.media,
+              url: obj.url,
+              id: dev,
             })
-          );
-          this.devices[dev].on('stream.mute', () => this.emit('stream.mute', dev));
-        }
-      });
+        );
+        this.devices[dev].on('stream.mute', () => this.emit('stream.mute', dev));
+      }
+    };
+
+    if (devicesToProcess) {
+      // Traiter les périphériques sauvegardés
+      processDevices(devicesToProcess);
+    } else {
+      // Si aucun périphérique sauvegardé, utiliser enumerateDevices
+      navigator.mediaDevices.enumerateDevices()
+          .then(devices => {
+            processDevices(devices);
+          })
+          .catch(error => {
+            this.emit('enumeration.error', error);
+          });
+    }
   }
 
   connect(id, opts, idAudio=null) {
