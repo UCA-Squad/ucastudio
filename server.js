@@ -70,9 +70,7 @@ io.on('connection', function(socket){
 
 	// if(typeof socket.handshake.session.cas_user !== 'undefined' ) {
 	if(session && session.cas_user !== 'undefined') {
-		const userAgentString = socket.request.headers['user-agent'];
-		const parser = new useragent(userAgentString);
-		const agent = parser.getResult();
+		const agent = parseUserAgent(socket);
 		var uid = session.cas_user;
 		var socketissued = socket.handshake.issued;
 
@@ -480,6 +478,15 @@ process.on('uncaughtException', function(err) {
     // Note: after client disconnect, the subprocess will cause an Error EPIPE, which can only be caught this way.
 });
 
+/**
+ * @param socket
+ * @returns {{os: *, engine: *, browser: *, cpu: *, ua: *, device: *}}
+ */
+function parseUserAgent(socket) {
+	const userAgentString = socket.request.headers['user-agent'];
+	const parser = new useragent(userAgentString);
+	return parser.getResult();
+}
 
 /**
  * Permet d'uploader un média
@@ -496,9 +503,7 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 	if(session &&  session.usermediadatas !== 'undefined') {
 		//on test si c'est pas undefined  ?
 		var usermediainfosToUpload = JSON.parse(session.usermediadatas);
-		const userAgentString = socket.request.headers['user-agent'];
-		const parser = new useragent(userAgentString);
-		const agent = parser.getResult();
+		const agent = parseUserAgent(socket);
 
 		var d = new Date();
 		var startDate = d.getFullYear() + '-' + ("0" + (d.getMonth() + 1)).slice(-2) + '-' + ("0" + d.getDate()).slice(-2);
