@@ -185,7 +185,7 @@ $( document ).ready(function() {
         $('#helpList').attr('style', 'right:0 !important');
         $('#UCAStudio').hide();
         $('.logout').hide();
-    	document.getElementsByTagName("header")[0].style.backgroundColor= "#FAF8F5";
+    	document.getElementsByTagName("header")[0].style.backgroundColor= "#FFFFFF";
 	    document.getElementsByTagName("header")[0].style.boxShadow = "none";
     	document.getElementsByTagName("header")[0].style.position = "absolute";
         $('#language').show();
