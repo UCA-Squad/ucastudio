@@ -496,7 +496,9 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 	if(session &&  session.usermediadatas !== 'undefined') {
 		//on test si c'est pas undefined  ?
 		var usermediainfosToUpload = JSON.parse(session.usermediadatas);
-		const agent = useragent.parse(socket.request.headers['user-agent']);
+		const userAgentString = socket.request.headers['user-agent'];
+		const parser = new useragent(userAgentString);
+		const agent = parser.getResult();
 
 		var d = new Date();
 		var startDate = d.getFullYear() + '-' + ("0" + (d.getMonth() + 1)).slice(-2) + '-' + ("0" + d.getDate()).slice(-2);
