@@ -2114,7 +2114,7 @@ input:focus {
   word-wrap: break-word;
   /*background-color: var(--bs-card-bg);*/
   background-clip: border-box;
-  border: var(--bs-card-border-width) solid var(--bs-card-border-color);
+  border: var(--bs-card-border-width) solid;
   border-radius: var(--bs-card-border-radius);
 }
 
@@ -2123,6 +2123,49 @@ input:focus {
   border: none;
 }
 
+/* Styles de base pour le tooltip */
+.hint {
+  position: absolute;
+  background-color: #333;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+  max-width: 200px;
+  z-index: 9999;
+  display: none; /* Initialement masqué */
+}
+
+/* Affiche le tooltip quand il est visible */
+.hint.visible {
+  display: block;
+}
+
+/* Flèche pointant vers le haut */
+.hint .arrow {
+  content: "";
+  position: absolute;
+  bottom: 100%; /* Place la flèche juste au-dessus du tooltip */
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 8px;
+  border-style: solid;
+  border-color: transparent transparent #333 transparent;
+}
+
+/* Personnalisation pour Firefox */
+.firefox {
+  top: 10px; /* Ajustez cette valeur si nécessaire */
+  left: 340px;
+  transform: translateX(-50%);
+}
+
+/*!* Personnalisation pour Safari *!*/
+/*.safari {*/
+/*  top: 40px; !* Ajustez cette valeur si nécessaire *!*/
+/*  left: 50%;*/
+/*  transform: translateX(-50%);*/
+/*}*/
 
 #language ul li::before{
   content: none;

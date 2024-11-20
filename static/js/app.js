@@ -5,6 +5,7 @@ const rafLoop = new RAFLoop();
 const audAnalyser = new AudioAnalyser();
 const peers = {};
 
+
 function App() {
   let deviceEls = document.querySelectorAll('.mediadevice[data-target]');
   this.mediaElements = [...deviceEls]
@@ -177,6 +178,16 @@ App.prototype = {
     document.querySelector('label.pull-left.inputSource.labelDesktop').addEventListener('click',this.chooseResolution.bind(this), false);
 
   },
+  detectBrowser: function() {
+    let isFirefox;
+    if (navigator.userAgentData) {
+      isFirefox = navigator.userAgentData.brands.some(brand => brand.brand === 'Firefox');
+    } else {
+      isFirefox = navigator.userAgent.includes('Firefox');
+    }
+    const isChrome = !!window.chrome && navigator.userAgent.indexOf("Chrome") > -1;
+    return { isFirefox, isChrome };
+  },
   toggleStream: function(e) {
 
     if(this.isRecording)
@@ -206,30 +217,63 @@ App.prototype = {
        deviceMgr.audio[audio.getAttribute('data-id')].stream.getTracks().forEach(track => track.stop());
 
      deviceMgr.connect(e.target.value, 'mustListReso')
-         .catch(function (err) {
+         .catch((err) => { // Utilisation d'une fonction fléchée
            console.log(err);
            if (e.target.value !== 'desktop')
              $('#alertNoWebcam').show();
            else {
+             const { isFirefox, isChrome } = this.detectBrowser();
+             if (isFirefox) {  // Ne l'afficher que si l'indication a déjà été bloquée une fois
+               this.afficherIndicationSuppressionBlocage();
+             }
              e.target.checked = false;
            }
-         }).then(function () {
-           if(!$('#alertNoWebcam').is(':visible'))
-            $("#startRecord").addClass('canRecord');
-           if(!$('#startStopTitle').is(':visible'))
+         })
+         .then(() => { // Ici aussi, utiliser une fonction fléchée
+           if (!$('#alertNoWebcam').is(':visible'))
+             $("#startRecord").addClass('canRecord');
+           if (!$('#startStopTitle').is(':visible'))
              $('#startStopTitle').show();
          });
    }
   },
+  afficherIndicationSuppressionBlocage: function() {
+    const hint = document.createElement('div');
+    hint.className = 'hint';
+    hint.textContent = "Le partage d'écran a peut être été bloqué précédemment. Veuillez cliquez ici, et supprimer la permission \"Bloquer\" pour partager à nouveau l'écran.";
+
+    // Détecte le navigateur
+    const userAgent = navigator.userAgent;
+
+    if (userAgent.includes('Firefox')) {
+      hint.classList.add('firefox');
+    } else if (userAgent.includes('Chrome') || window.chrome) {
+      hint.classList.add('chrome');
+    } else if (userAgent.includes('Safari') && !userAgent.includes('Chrome')) {
+      hint.classList.add('safari');
+    } else {
+      hint.style.top = '20px'; // Position par défaut si non détecté
+      hint.style.left = '300px';
+      hint.style.transform = 'translateX(-50%)';
+    }
+
+    // Ajout des styles pour le tooltip via une classe CSS
+    hint.classList.add('visible');
+
+    // Créer la flèche pointant vers le haut
+    const arrow = document.createElement('div');
+    arrow.className = 'arrow';
+    hint.appendChild(arrow);
+
+    document.body.appendChild(hint);
+
+    // Supprime l'indication après 10 secondes
+    setTimeout(() => {
+      hint.remove();
+    }, 10000);
+  },
   getTypeOfRec: function(mediaStream) {
-    let isFirefox;
-    if (navigator.userAgentData) {
-      isFirefox = navigator.userAgentData.brands.some(brand => brand.brand === 'Firefox');
-    }
-    else {
-      isFirefox = navigator.userAgent.includes('Firefox');
-    }
-    const isChrome = !!window.chrome && navigator.userAgent.indexOf("Chrome") > -1;
+    const { isFirefox, isChrome } = this.detectBrowser();
     const videoTrack = mediaStream.getVideoTracks()[0];
 
     if (isFirefox) {

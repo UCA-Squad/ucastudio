@@ -77,7 +77,8 @@
     <div class="content">
         <input type="radio" id="main" class="hiddenCheck" name="view" checked autocomplete="off" />
         <section>
-            <label class="bigButton action card card-hover" for="create"></label><label class="bigButton action card card-hover" for="edit" id="live"></label>
+            <label class="bigButton action card card-hover" for="create"></label>
+            <label class="bigButton action card card-hover" for="edit" id="live"></label>
         </section>
         <input type="radio" id="create" class="hiddenCheck" name="view" autocomplete="off" />
         <section id="mainSection">
@@ -258,17 +259,17 @@
         </section>
         <input type="radio" id="edit" class="hiddenCheck" name="view" autocomplete="off" />
         <section>
-	<label class="backBtn" for="main" title="Retour" data-translatetitle="BACK_TO_MAIN"></label>
-	<div class="card card-60" style="text-align: center">
-		<h3>Générer un live pour OBS Studio</h3><br />
-		<button class="button button-uca-blue" onclick="genLive()">Générer mon live</button>
-		<p id="idStream"></p>
-		<p id="email"></p>
-        <input type='hidden' id='moodle' value='' >
-        <input type='hidden' id='isEtudiant' value='' >
-		<h4>Pour télécharger le logiciel :</h4>
-		<a href="https://obsproject.com/fr/download" target="_blank">Télécharger OBS Studio</a>
-	</div>
+            <label class="backBtn" for="main" title="Retour" data-translatetitle="BACK_TO_MAIN"></label>
+            <div class="card card-60" style="text-align: center">
+                <h3>Générer un live pour OBS Studio</h3><br />
+                <button class="button button-uca-blue" onclick="genLive()">Générer mon live</button>
+                <p id="idStream"></p>
+                <p id="email"></p>
+                <input type='hidden' id='moodle' value='' >
+                <input type='hidden' id='isEtudiant' value='' >
+                <h4>Pour télécharger le logiciel :</h4>
+                <a href="https://obsproject.com/fr/download" target="_blank">Télécharger OBS Studio</a>
+            </div>
         </section>
     </div>
 </main>
