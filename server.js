@@ -1,5 +1,3 @@
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-
 const config = require('./config.json');
 const express = require('express');
 const app = express();
