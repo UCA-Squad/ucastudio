@@ -2156,7 +2156,7 @@ input:focus {
 /* Personnalisation pour Firefox */
 .firefox {
   top: 10px; /* Ajustez cette valeur si nécessaire */
-  left: 340px;
+  left: 320px;
   transform: translateX(-50%);
 }
 

@@ -240,9 +240,7 @@ App.prototype = {
   afficherIndicationSuppressionBlocage: function() {
     const hint = document.createElement('div');
     hint.className = 'hint';
-    hint.textContent = "Le partage d'écran a peut être été bloqué précédemment. Veuillez cliquez ici, et supprimer la permission \"Bloquer\" pour partager à nouveau l'écran.";
-
-    // Détecte le navigateur
+    hint.innerHTML = "Le partage d'écran a peut-être été bloqué précédemment.<br /> Veuillez cliquer sur <img src='img/display_slash.png' /> ci-dessus afin de supprimer la permission \"Bloquer\" concernant le partage d'écran.";    // Détecte le navigateur
     const userAgent = navigator.userAgent;
 
     if (userAgent.includes('Firefox')) {

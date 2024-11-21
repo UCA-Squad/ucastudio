@@ -10,12 +10,15 @@ const axios = require('axios');
 const fs = require('fs');
 let debitValue = null;
 global.hasSendMailError = false;
-const server = require('https').createServer({
-	key: fs.readFileSync(config.path_cert_key),
-	cert: fs.readFileSync(config.path_cert)
 
-},app);
-var io = require('socket.io')(server, {
+//uncomment if https
+// const server = require('https').createServer({
+// 	key: fs.readFileSync(config.path_cert_key),
+// 	cert: fs.readFileSync(config.path_cert)
+//
+// },app);
+const server = require('http').createServer(app)
+const io = require('socket.io')(server, {
 	'maxHttpBufferSize': '1e8'
 });
 
@@ -24,12 +27,12 @@ spawn('ffmpeg',['-h']).on('error',function(){
 	process.exit(-1);
 });
 
-var cas = new CASAuthentication({
+const cas = new CASAuthentication({
 	cas_url         : config.cas_url,
 	service_url     : config.service_url,
 });
 
-var session = require("express-session")({
+const session = require("express-session")({
 	secret: config.session_secret_key,
 	resave: false,
 	saveUninitialized: false
@@ -467,8 +470,8 @@ io.on('error',function(e){
 	console.log('socket.io error:'+e);
 });
 
-server.listen(8888, function(){
-  console.log('https and websocket listening on *:8888');
+server.listen(80, function(){
+  console.log('http and websocket listening on *:80');
 });
 
 
