@@ -256,12 +256,12 @@ $( document ).ready(function() {
         //escape
         if(charCode == 27 && document.getElementById('toggleSaveCreationModal').checked) {
             e.preventDefault();
-            $('.modalFooter label.button.button-amber').trigger('click');
+            $('.modalFooter label.button.btn-info').trigger('click');
         }
 
     });
 
-    $('.modalFooter label.button.button-amber').on('click',  function (e) {
+    $('.modalFooter label.button.btn-info').on('click',  function (e) {
         e.preventDefault(); // stops its action
         location.reload();
     });

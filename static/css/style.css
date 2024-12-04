@@ -1798,6 +1798,23 @@ input:focus {
   background: #F4FF81;
 }
 
+
+.btn-primary {
+  background-color: #178F96 !important;
+  border-color: #178F96 !important;
+  border-radius: 12px;
+}
+
+.btn-info {
+  background-color: #17a2b8 !important;
+  border-color: #17a2b8 !important;
+  border-radius: 12px;
+}
+
+.btn-info:hover, .btn-primary:hover {
+  color: rgb(94, 92, 92);
+}
+
 .centreText {
   font-size: 1rem;
   position: absolute;
