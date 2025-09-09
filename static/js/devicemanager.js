@@ -54,8 +54,7 @@ class DeviceManager extends EventEmitter {
 
     setTimeout(() => {
       this.listDevices();
-    }, 100);
-
+    }, 500);
   }
 
   listDevices() {

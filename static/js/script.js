@@ -185,7 +185,7 @@ $( document ).ready(function() {
         $('#helpList').attr('style', 'right:0 !important');
         $('#UCAStudio').hide();
         $('.logout').hide();
-    	document.getElementsByTagName("header")[0].style.backgroundColor= "#FAF8F5";
+    	document.getElementsByTagName("header")[0].style.backgroundColor= "#FFFFFF";
 	    document.getElementsByTagName("header")[0].style.boxShadow = "none";
     	document.getElementsByTagName("header")[0].style.position = "absolute";
         $('#language').show();
@@ -256,12 +256,12 @@ $( document ).ready(function() {
         //escape
         if(charCode == 27 && document.getElementById('toggleSaveCreationModal').checked) {
             e.preventDefault();
-            $('.modalFooter label.button.button-amber').trigger('click');
+            $('.modalFooter label.button.btn-info').trigger('click');
         }
 
     });
 
-    $('.modalFooter label.button.button-amber').on('click',  function (e) {
+    $('.modalFooter label.button.btn-info').on('click',  function (e) {
         e.preventDefault(); // stops its action
         location.reload();
     });

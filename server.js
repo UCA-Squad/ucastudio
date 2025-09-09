@@ -4,18 +4,21 @@ const app = express();
 const spawn = require('child_process').spawn;
 const fluentFFMPEG = require('fluent-ffmpeg');
 const CASAuthentication = require('connect-cas-uca');
-const useragent = require('useragent');
+const useragent = require('ua-parser-js');
 const logFileEvents = config.path_log_file_events;
 const axios = require('axios');
 const fs = require('fs');
 let debitValue = null;
 global.hasSendMailError = false;
-const server = require('https').createServer({
-	key: fs.readFileSync(config.path_cert_key),
-	cert: fs.readFileSync(config.path_cert)
 
-},app);
-var io = require('socket.io')(server, {
+//uncomment if https
+// const server = require('https').createServer({
+// 	key: fs.readFileSync(config.path_cert_key),
+// 	cert: fs.readFileSync(config.path_cert)
+//
+// },app);
+const server = require('http').createServer(app)
+const io = require('socket.io')(server, {
 	'maxHttpBufferSize': '1e8'
 });
 
@@ -24,20 +27,21 @@ spawn('ffmpeg',['-h']).on('error',function(){
 	process.exit(-1);
 });
 
-var cas = new CASAuthentication({
+const cas = new CASAuthentication({
 	cas_url         : config.cas_url,
 	service_url     : config.service_url,
 });
 
-var session = require("express-session")({
+const session = require("express-session")({
 	secret: config.session_secret_key,
 	resave: false,
 	saveUninitialized: false
 });
 
-var sharedsession = require("express-socket.io-session");
 app.use(session);
-io.use(sharedsession(session));
+io.use((socket, next) => {
+	session(socket.request, socket.request.res || {}, next);
+});
 
 app.get( '/', cas.bounce );
 app.get( '/index.html', cas.bounce );
@@ -47,7 +51,7 @@ app.use(express.static(__dirname + "/static/"));
 
 
 io.on('connection', function(socket){
-
+	const session = socket.request.session;
 	socket.on('debitValue', function (debit) {
 		debitValue = debit;
 	});
@@ -67,9 +71,10 @@ io.on('connection', function(socket){
 	var ffmpeg_process2, feedStream2=false;
 	var hasCheckFileIsWrite = false,  hasCheckFileIsWrite2 = false;
 
-	if(typeof socket.handshake.session.cas_user !== 'undefined' ) {
-		var agent = useragent.parse(socket.request.headers['user-agent']);
-		var uid = socket.handshake.session.cas_user;
+	// if(typeof socket.handshake.session.cas_user !== 'undefined' ) {
+	if(session && session.cas_user !== 'undefined') {
+		const agent = parseUserAgent(socket);
+		var uid = session.cas_user;
 		var socketissued = socket.handshake.issued;
 
 		try {
@@ -275,7 +280,7 @@ io.on('connection', function(socket){
 			}
 		});
 		socket.on('infos', function (m) {
-			socket.handshake.session.usermediadatas = m;
+			session.usermediadatas = m;
 		});
 		socket.on('stop', function (m) {
 			if(m === 'video-and-desktop' || m === 'onlyvideo') {
@@ -415,46 +420,49 @@ io.on('connection', function(socket){
 			}
 		});
 
-		getLdapInfos(socket.handshake.session.cas_user, function (displayName, mail, clfdstatus) {
-			socket.handshake.session.cn = displayName;
-			socket.handshake.session.mail = mail;
-			socket.handshake.session.isEtudiant = clfdstatus === '0' || clfdstatus === '1';
-			socket.emit('displayName', displayName);
-			socket.emit('isEtudiant', socket.handshake.session.isEtudiant);
+		if (session && session.cas_user) {
+			getLdapInfos(session.cas_user, function (displayName, mail, clfdstatus) {
+				session.cn = displayName;
+				session.mail = mail;
+				session.isEtudiant = clfdstatus === '0' || clfdstatus === '1';
+				socket.emit('displayName', displayName);
+				socket.emit('isEtudiant', session.isEtudiant);
 
-			async function getDisplayNameIfUid(titleSerie) {
-				return new Promise((resolve, reject) => {
-					getLdapInfos(titleSerie, function (displayName) {
-						resolve(displayName);
-					});
-				})
-			}
+				async function getDisplayNameIfUid(titleSerie) {
+					return new Promise((resolve, reject) => {
+						getLdapInfos(titleSerie, function (displayName) {
+							resolve(displayName);
+						});
+					})
+				}
 
-			getListSeries(socket, function (listSeries) {
-				const tranlateSeries = new Promise((resolve, reject) => {
-					async function seriesIteration() {
-						for(const serie of listSeries){
-							if(serie['title'][0].match('^[a-zA-Z0-9_]+$') != null && serie['title'][0] != uid) {
-								let result = await getDisplayNameIfUid(serie["title"][0]);
-								if (result != '')
-									serie['title'][0] = 'Biblothèque de : ' + result;
+				getListSeries(socket, function (listSeries) {
+					const tranlateSeries = new Promise((resolve, reject) => {
+						async function seriesIteration() {
+							for (const serie of listSeries) {
+								if (serie['title'][0].match('^[a-zA-Z0-9_]+$') != null && serie['title'][0] != uid) {
+									let result = await getDisplayNameIfUid(serie["title"][0]);
+									if (result != '')
+										serie['title'][0] = 'Biblothèque de : ' + result;
+								}
 							}
+							resolve(listSeries);
 						}
-						resolve(listSeries);
-					}
-					resolve(seriesIteration());
-				});
 
-				tranlateSeries.then(function (value){
-					socket.emit('listseries', listSeries, uid, socket.handshake.session.mail);
-					if(typeof socket.handshake.headers.referer !== 'undefined' && socket.handshake.headers.referer.indexOf('serieid') > -1) {
-						let infos = socket.handshake.headers.referer.split( '?' );
-						if(infos[1])
-							socket.emit('insidemoodle', infos[1]);
-					}
-				})
+						resolve(seriesIteration());
+					});
+
+					tranlateSeries.then(function (value) {
+						socket.emit('listseries', listSeries, uid, session.mail);
+						if (typeof socket.handshake.headers.referer !== 'undefined' && socket.handshake.headers.referer.indexOf('serieid') > -1) {
+							let infos = socket.handshake.headers.referer.split('?');
+							if (infos[1])
+								socket.emit('insidemoodle', infos[1]);
+						}
+					})
+				});
 			});
-		});
+		}
 	}
 });
 
@@ -462,8 +470,8 @@ io.on('error',function(e){
 	console.log('socket.io error:'+e);
 });
 
-server.listen(8888, function(){
-  console.log('https and websocket listening on *:8888');
+server.listen(80, function(){
+  console.log('http and websocket listening on *:80');
 });
 
 
@@ -473,6 +481,15 @@ process.on('uncaughtException', function(err) {
     // Note: after client disconnect, the subprocess will cause an Error EPIPE, which can only be caught this way.
 });
 
+/**
+ * @param socket
+ * @returns {{os: *, engine: *, browser: *, cpu: *, ua: *, device: *}}
+ */
+function parseUserAgent(socket) {
+	const userAgentString = socket.request.headers['user-agent'];
+	const parser = new useragent(userAgentString);
+	return parser.getResult();
+}
 
 /**
  * Permet d'uploader un média
@@ -484,17 +501,19 @@ process.on('uncaughtException', function(err) {
  */
 function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFile = false, onlydesktop = false)
 {
-	if(typeof socket.handshake.session.usermediadatas !== 'undefined') {
+	const session = socket.request.session;
+
+	if(session &&  session.usermediadatas !== 'undefined') {
 		//on test si c'est pas undefined  ?
-		var usermediainfosToUpload = JSON.parse(socket.handshake.session.usermediadatas);
-		const agent = useragent.parse(socket.request.headers['user-agent']);
+		var usermediainfosToUpload = JSON.parse(session.usermediadatas);
+		const agent = parseUserAgent(socket);
 
 		var d = new Date();
 		var startDate = d.getFullYear() + '-' + ("0" + (d.getMonth() + 1)).slice(-2) + '-' + ("0" + d.getDate()).slice(-2);
 		var startTime = d.getUTCHours() + ':' + (d.getMinutes()<10?'0':'') + d.getMinutes();
 
 		var idFileUpload = socket.handshake.issued;
-		var uid = socket.handshake.session.cas_user;
+		var uid = session.cas_user;
 		var mustBeUpload = usermediainfosToUpload.mustBeUpload;
 		var desc = 'N/R';
 		var typeOfFlavor = "presenter";
@@ -615,7 +634,7 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 				}
 			});
 		});
-		socket.emit('idRecord', socket.handshake.session.cas_user, socket.handshake.issued);
+		socket.emit('idRecord', session.cas_user, socket.handshake.issued);
 	}
 }
 
@@ -668,6 +687,7 @@ function getAclNewEvent(uid)
 
 /**
  * @param usermediainfosToUpload
+ * @param desc
  * @param startDate
  * @param startTime
  * @param duration
@@ -774,43 +794,48 @@ function getLdapInfos(uid, callback)
  */
 function getListSeries(socket, callback)
 {
-	var uid = socket.handshake.session.cas_user.toUpperCase();
-	var data = JSON.stringify({
-		"query": {
-			"bool": {
-				"must": [
-					{ "term": { "acl_permission_write": "ROLE_USER_LDAP_"+uid} }
-				]
+	const session = socket.request.session;
+	if (session && session.cas_user) {
+		var uid = session.cas_user.toUpperCase();
+		var data = JSON.stringify({
+			"query": {
+				"bool": {
+					"must": [
+						{"term": {"acl_permission_write": "ROLE_USER_LDAP_" + uid}}
+					]
+				}
 			}
+		});
+
+		let httpsAgent = null;
+		if (config.opencast_series_ES_url_CERT != '') {
+			httpsAgent = require('https').Agent({
+				ca: fs.readFileSync(config.opencast_series_ES_url_CERT)
+			});
 		}
-	});
 
-	let httpsAgent = null;
-	if(config.opencast_series_ES_url_CERT != '') {
-		httpsAgent = require('https').Agent({
-			ca: fs.readFileSync(config.opencast_series_ES_url_CERT)
-		});
+		var configES = {
+			method: 'get',
+			url: config.opencast_series_ES_url,
+			headers: {'Content-Type': 'application/json'},
+			data: data,
+			httpsAgent: httpsAgent
+		};
+
+		axios(configES)
+			.then(function (response) {
+				callback(response.data.hits.hits.map(function (hit) {
+					return hit._source
+				}).sort(function (a, b) {
+					var titleA = a.title[0].toUpperCase();
+					var titleB = b.title[0].toUpperCase();
+					return (titleA < titleB) ? -1 : (titleA > titleB) ? 1 : 0;
+				}));
+			})
+			.catch(function (error) {
+				throw new Error(error);
+			});
 	}
-
-	var configES = {
-		method: 'get',
-		url: config.opencast_series_ES_url,
-		headers: { 'Content-Type': 'application/json' },
-		data : data,
-		httpsAgent: httpsAgent
-	};
-
-	axios(configES)
-		.then(function (response) {
-			callback(response.data.hits.hits.map(function(hit){ return hit._source }).sort(function (a, b) {
-				var titleA = a.title[0].toUpperCase();
-				var titleB = b.title[0].toUpperCase();
-				return (titleA < titleB) ? -1 : (titleA > titleB) ? 1 : 0;
-			}));
-		})
-		.catch(function (error) {
-			throw new Error(error);
-		});
 }
 
 /**
@@ -883,9 +908,9 @@ function createSerie(uid, socket, idSerieSelect, mustBeUpload)
 	return new Promise(function (resolve) {
 
 		if(idSerieSelect === 'myfolder' && mustBeUpload) {
-
+			const session = socket.request.session;
 			let realUserName = uid;
-			if(socket.handshake.session.isEtudiant)
+			if(session.isEtudiant)
 				uid = 'etd_'+uid;
 
 			var idSerieMyFolder = null;
@@ -975,6 +1000,8 @@ function getAclSerie(uid)
  */
 function getMetadatasSerie(uid, socket)
 {
+	const session = socket.request.session;
+
 	return '[\n' +
 		'  {\n' +
 		'    "label": "Opencast Series DublinCore",\n' +
@@ -986,7 +1013,7 @@ function getMetadatasSerie(uid, socket)
 		'      },\n' +
 		'      {\n' +
 		'        "id": "subject",\n' +
-		'        "value": "' + socket.handshake.session.mail + '"\n' +
+		'        "value": "' + session.mail + '"\n' +
 		'      }\n' +
 		'    ]\n' +
 		'  }\n' +
@@ -1002,7 +1029,8 @@ function getMetadatasSerie(uid, socket)
  */
 function checkIsFileIsWrite(socket, path, typeOfRec, agent)
 {
-	var uid = socket.handshake.session.cas_user;
+	const session = socket.request.session;
+	var uid = session.cas_user;
 	var socketissued = socket.handshake.issued;
 
 	fs.readdir(config.path_folder_record + uid + '/' + socketissued + '/', function (err, files) {
