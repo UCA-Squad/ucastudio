@@ -1076,30 +1076,31 @@ function getDateNow() {
  * @param err
  * @param user
  */
-function sendEmailError(err, user) {
-	if(!hasSendMailError) {
-		const nodemailer = require("nodemailer");
-		var transporter = nodemailer.createTransport({
-			host: config.mail_host,
-			port: config.mail_port,
-			secure: false,
-			tls: {rejectUnauthorized: false}
-		});
+async function sendEmailError(err, user) {
+    if (!hasSendMailError) {
+        const nodemailer = require("nodemailer");
+        let transporter = nodemailer.createTransport({
+            host: config.mail_host,
+            port: config.mail_port,
+            secure: false,
+            tls: { rejectUnauthorized: false }
+        });
 
-		var mailOptions = {
-			from: config.mail_from,
-			to: config.mail_to,
-			subject: '[Warn] UCAStudio Error',
-			text: 'Une erreur a été détectée \nDate : ' + getDateNow() + '\nUser : ' + user + '\nErreur : \n' + err
-		};
+        let mailOptions = {
+            from: config.mail_from,
+            to: config.mail_to,
+            subject: '[Warn] UCAStudio Error',
+            text: 'Une erreur a été détectée \nDate : ' + getDateNow() + '\nUser : ' + user + '\nErreur : \n' + err
+        };
 
-		transporter.sendMail(mailOptions, function (error) {
-			if (error)
-				console.log(error);
-		});
+        try {
+            await transporter.sendMail(mailOptions);
+        } catch (error) {
+            console.log(error);
+        }
 
-		hasSendMailError = true;
-	}
+        hasSendMailError = true;
+    }
 }
 
 /**
