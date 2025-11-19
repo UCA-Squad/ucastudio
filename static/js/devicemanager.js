@@ -418,21 +418,42 @@ class Device extends EventEmitter {
                 navigator.mediaDevices.enumerateDevices().then(devices => {
                   for (var key in devices) {
                     if (this.deviceType === 'video' && devices[key].kind === 'videoinput' && this.constraints.video.exact == devices[key].deviceId) {
-                      // var labelWebcam = (devices[key].label.includes(worToExclude) ? devices[key].label.replace(worToExclude, '') : devices[key].label);
-                      let camera = {};
-                      camera.id = devices[key].deviceId;
-                      camera.label = devices[key].label;
+                        // var labelWebcam = (devices[key].label.includes(worToExclude) ? devices[key].label.replace(worToExclude, '') : devices[key].label);
+                        let camera = {};
+                        camera.id = devices[key].deviceId;
+                        camera.label = devices[key].label;
 
-                        // this.gum(this.candidates[0], camera);
-                        this.detectResolutions(camera, this.candidates)
-                            .then(supported => {
-                                for (const cand of this.candidates) {
-                                    if (supported.some(r => r.id === cand.id))
-                                        $('.' + cand.id).show();
-                                    else
-                                        $('.' + cand.id).hide();
-                                }
-                            });
+                        // On ouvre un flux minimal pour vérifier getCapabilities
+                        navigator.mediaDevices.getUserMedia({
+                            video: { deviceId: { exact: camera.id }, width: { ideal: 640 }, height: { ideal: 480 } },
+                            audio: false
+                        }).then(stream => {
+
+                            const track = stream.getVideoTracks()[0];
+                            if (track.getCapabilities) {
+                                // Toujours arrêter le track après vérification
+                                track.stop();
+                                // getCapabilities disponible → utiliser detectResolutions
+                                this.detectResolutions(camera, this.candidates)
+                                    .then(supported => {
+                                        this.candidates.forEach(cand => {
+                                            if (supported.some(r => r.id === cand.id))
+                                                $('.' + cand.id).show();
+                                            else
+                                                $('.' + cand.id).hide();
+                                        });
+                                    })
+                                    .catch(err => console.error(err));
+                            } else {
+                                track.stop();
+                                // getCapabilities non disponible → fallback sur gum()
+                                this.gum(this.candidates[0], camera);
+                            }
+                        }).catch(err => {
+                            console.error("Impossible d'ouvrir la caméra pour vérifier les resolutions :", err);
+                            // fallback éventuel
+                            this.gum(this.candidates[0], camera);
+                        });
                     }
                   }
                 });
@@ -595,16 +616,36 @@ class Device extends EventEmitter {
                     camera.id = devices[key].deviceId;
                     camera.label = devices[key].label;
 
-                    // this.gum(this.candidates[0], camera);
-                    this.detectResolutions(camera, this.candidates)
-                      .then(supported => {
-                          for (const cand of this.candidates) {
-                              if (supported.some(r => r.id === cand.id))
-                                  $('.' + cand.id).show();
-                              else
-                                  $('.' + cand.id).hide();
-                          }
-                      });
+                    navigator.mediaDevices.getUserMedia({
+                      video: { deviceId: { exact: camera.id }, width: { ideal: 640 }, height: { ideal: 480 } },
+                      audio: false
+                    }).then(stream => {
+
+                      const track = stream.getVideoTracks()[0];
+                      if (track.getCapabilities) {
+                          // Toujours arrêter le track après vérification
+                          track.stop();
+                          // getCapabilities disponible → utiliser detectResolutions
+                          this.detectResolutions(camera, this.candidates)
+                              .then(supported => {
+                                  this.candidates.forEach(cand => {
+                                      if (supported.some(r => r.id === cand.id))
+                                          $('.' + cand.id).show();
+                                      else
+                                          $('.' + cand.id).hide();
+                                  });
+                              })
+                              .catch(err => console.error(err));
+                      } else {
+                          track.stop();
+                          // getCapabilities non disponible → fallback sur gum()
+                          this.gum(this.candidates[0], camera);
+                      }
+                    }).catch(err => {
+                      console.error("Impossible d'ouvrir la caméra pour vérifier les resolutions :", err);
+                      // fallback éventuel
+                      this.gum(this.candidates[0], camera);
+                    });
                   }
                 }
               })
@@ -690,63 +731,63 @@ class Device extends EventEmitter {
       //MediaStream has no audio tracks
     }
   }
-    // gum(candidate, device, cmpt = 1) {
-    //
-    //     let constraints = {
-    //         audio: false,
-    //         video: {
-    //             deviceId: device.id ? { exact: device.id } : undefined,
-    //             width: { ideal: candidate.width },
-    //             height: { ideal: candidate.height }
-    //         }
-    //     };
-    //
-    //     if (cmpt == 1) {
-    //         //durant le check de reso, on desactive la possiblite de lancer un rec
-    //         $('#startRecord').addClass('cantRecord');
-    //         document.getElementById("startRecord").disabled = true;
-    //         if($('#startStopTitle').is(':visible'))
-    //             $('#startStopTitle').hide();
-    //         $('main').append('<input type="hidden" id="gumRunning" />');
-    //     }
-    //     else if (cmpt >= this.candidates.length) {
-    //         $('#startRecord').removeClass('cantRecord');
-    //         $('#startRecord').addClass('canRecord');
-    //         document.getElementById("startRecord").disabled = false;
-    //         $('#gumRunning').remove();
-    //         if(!$('#startStopTitle').is(':visible'))
-    //             $('#startStopTitle').show();
-    //         $('#listResoWebCam > li:visible:last').addClass('last-visible-li');
-    //     }
-    //
-    //     setTimeout(() => {
-    //         navigator.mediaDevices.getUserMedia(constraints)
-    //             .then(stream => {
-    //                 const track = stream.getVideoTracks()[0];
-    //                 const settings = track.getSettings();
-    //
-    //                 // Vérifie si la résolution obtenue correspond vraiment
-    //                 if(settings.width === candidate.width &&
-    //                     settings.height === candidate.height) {
-    //                     if(candidate.id) $('.' + candidate.id).show();
-    //                 } else {
-    //                     if(candidate.id) $('#listResoWebCam .' + candidate.id).hide();
-    //                 }
-    //
-    //                 stream.getTracks().forEach(track => track.stop());
-    //
-    //                 if (cmpt < this.candidates.length)
-    //                     this.gum(this.candidates[cmpt++], device, cmpt);
-    //             })
-    //             .catch(err => {
-    //                 if(candidate.id)
-    //                     $('#listResoWebCam .' + candidate.id).hide();
-    //
-    //                 if (cmpt < this.candidates.length)
-    //                     this.gum(this.candidates[cmpt++], device, cmpt);
-    //             });
-    //     }, (this.stream ? 200 : 0));
-    // }
+    gum(candidate, device, cmpt = 1) {
+
+        let constraints = {
+            audio: false,
+            video: {
+                deviceId: device.id ? { exact: device.id } : undefined,
+                width: { ideal: candidate.width },
+                height: { ideal: candidate.height }
+            }
+        };
+
+        if (cmpt == 1) {
+            //durant le check de reso, on desactive la possiblite de lancer un rec
+            $('#startRecord').addClass('cantRecord');
+            document.getElementById("startRecord").disabled = true;
+            if($('#startStopTitle').is(':visible'))
+                $('#startStopTitle').hide();
+            $('main').append('<input type="hidden" id="gumRunning" />');
+        }
+        else if (cmpt >= this.candidates.length) {
+            $('#startRecord').removeClass('cantRecord');
+            $('#startRecord').addClass('canRecord');
+            document.getElementById("startRecord").disabled = false;
+            $('#gumRunning').remove();
+            if(!$('#startStopTitle').is(':visible'))
+                $('#startStopTitle').show();
+            $('#listResoWebCam > li:visible:last').addClass('last-visible-li');
+        }
+
+        setTimeout(() => {
+            navigator.mediaDevices.getUserMedia(constraints)
+                .then(stream => {
+                    const track = stream.getVideoTracks()[0];
+                    const settings = track.getSettings();
+
+                    // Vérifie si la résolution obtenue correspond vraiment
+                    if(settings.width === candidate.width &&
+                        settings.height === candidate.height) {
+                        if(candidate.id) $('.' + candidate.id).show();
+                    } else {
+                        if(candidate.id) $('#listResoWebCam .' + candidate.id).hide();
+                    }
+
+                    stream.getTracks().forEach(track => track.stop());
+
+                    if (cmpt < this.candidates.length)
+                        this.gum(this.candidates[cmpt++], device, cmpt);
+                })
+                .catch(err => {
+                    if(candidate.id)
+                        $('#listResoWebCam .' + candidate.id).hide();
+
+                    if (cmpt < this.candidates.length)
+                        this.gum(this.candidates[cmpt++], device, cmpt);
+                });
+        }, (this.stream ? 200 : 0));
+    }
 
   changeResolution(res) {
     var objectOpts;
