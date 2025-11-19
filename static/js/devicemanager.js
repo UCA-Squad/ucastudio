@@ -672,55 +672,63 @@ class Device extends EventEmitter {
       //MediaStream has no audio tracks
     }
   }
-  gum(candidate, device, cmpt = 1 ) {
+    gum(candidate, device, cmpt = 1) {
 
-    let constraints = {
-      audio: false,
-      video: {
-        deviceId: device.id ? {exact: device.id} : undefined,
-        width: {exact: candidate.width},    //new syntax
-        height: {exact: candidate.height}   //new syntax
-      }
-    };
+        let constraints = {
+            audio: false,
+            video: {
+                deviceId: device.id ? { exact: device.id } : undefined,
+                width: { ideal: candidate.width },
+                height: { ideal: candidate.height }
+            }
+        };
 
-    if(cmpt == 1) {
-      //durant le check de reso, on desactive la possiblite de lancer un rec
-      $('#startRecord').addClass('cantRecord');
-      document.getElementById("startRecord").disabled = true;
-      if($('#startStopTitle').is(':visible'))
-        $('#startStopTitle').hide();
-      $('main').append('<input type="hidden" id="gumRunning" />');
+        if (cmpt == 1) {
+            //durant le check de reso, on desactive la possiblite de lancer un rec
+            $('#startRecord').addClass('cantRecord');
+            document.getElementById("startRecord").disabled = true;
+            if($('#startStopTitle').is(':visible'))
+                $('#startStopTitle').hide();
+            $('main').append('<input type="hidden" id="gumRunning" />');
+        }
+        else if (cmpt >= this.candidates.length) {
+            $('#startRecord').removeClass('cantRecord');
+            $('#startRecord').addClass('canRecord');
+            document.getElementById("startRecord").disabled = false;
+            $('#gumRunning').remove();
+            if(!$('#startStopTitle').is(':visible'))
+                $('#startStopTitle').show();
+            $('#listResoWebCam > li:visible:last').addClass('last-visible-li');
+        }
+
+        setTimeout(() => {
+            navigator.mediaDevices.getUserMedia(constraints)
+                .then(stream => {
+                    const track = stream.getVideoTracks()[0];
+                    const settings = track.getSettings();
+
+                    // Vérifie si la résolution obtenue correspond vraiment
+                    if(settings.width === candidate.width &&
+                        settings.height === candidate.height) {
+                        if(candidate.id) $('.' + candidate.id).show();
+                    } else {
+                        if(candidate.id) $('#listResoWebCam .' + candidate.id).hide();
+                    }
+
+                    stream.getTracks().forEach(track => track.stop());
+
+                    if (cmpt < this.candidates.length)
+                        this.gum(this.candidates[cmpt++], device, cmpt);
+                })
+                .catch(err => {
+                    if(candidate.id)
+                        $('#listResoWebCam .' + candidate.id).hide();
+
+                    if (cmpt < this.candidates.length)
+                        this.gum(this.candidates[cmpt++], device, cmpt);
+                });
+        }, (this.stream ? 200 : 0));
     }
-    else if(cmpt >= this.candidates.length) {
-      $('#startRecord').removeClass('cantRecord');
-      $('#startRecord').addClass('canRecord');
-      document.getElementById("startRecord").disabled = false;
-      $('#gumRunning').remove();
-      if(!$('#startStopTitle').is(':visible'))
-        $('#startStopTitle').show();
-      $('#listResoWebCam > li:visible:last').addClass('last-visible-li');
-    }
-
-    setTimeout(() => {
-      navigator.mediaDevices.getUserMedia(constraints)
-          .then(stream => {
-            if(candidate.id)
-              $('.' + candidate.id).show();
-
-            stream.getTracks().forEach(track => track.stop());
-
-            if (cmpt < this.candidates.length)
-              this.gum(this.candidates[cmpt++], device, cmpt);
-          })
-          .catch(() => {
-            if(candidate.id)
-              $('#listResoWebCam .' + candidate.id).hide();
-            if (cmpt < this.candidates.length)
-              this.gum(this.candidates[cmpt++], device, cmpt);
-          });
-    }, (this.stream ? 200 : 0));  //official examples had this at 200
-
-  }
 
   changeResolution(res) {
     var objectOpts;
