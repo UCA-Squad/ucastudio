@@ -81,7 +81,7 @@ io.on('connection', function(socket){
 			//on check si l'user est co via cas, et on créer un folder si existe pas
 			fs.existsSync(config.path_folder_record + uid) || fs.mkdirSync(config.path_folder_record + uid);
 		} catch(err) {
-			sendEmailError('error create new folder user' + err, uid+' / '+agent.toString());
+			sendEmailError('error create new folder user' + err, uid+' / '+agent);
 			console.error(getDateNow()+' : '+err);
 		}
 
@@ -179,7 +179,7 @@ io.on('connection', function(socket){
 				});
 				ffmpeg_process2.on('error', function (e) {
 					console.log('child process error' + e);
-					sendEmailError('ffmpeg child process error' + e, uid+' / '+agent.toString());
+					sendEmailError('ffmpeg child process error' + e, uid+' / '+agent);
 					socket.emit('fatal', 'ffmpeg error!' + e);
 					feedStream = false;
 					socket.disconnect();
@@ -211,7 +211,7 @@ io.on('connection', function(socket){
 				});
 				ffmpeg_process.on('error', function (e) {
 					console.log('child process error' + e);
-					sendEmailError('ffmpeg child process error' + e, uid+' / '+agent.toString());
+					sendEmailError('ffmpeg child process error' + e, uid+' / '+agent);
 					socket.emit('fatal', 'ffmpeg error!' + e);
 					feedStream = false;
 					socket.disconnect();
@@ -226,9 +226,9 @@ io.on('connection', function(socket){
 			}
 
 			try {
-				fs.writeFileSync(logFileEvents, 'startrec;'+uid+';'+getDateNow()+';'+socketissued+';'+m+';ismonitor=>'+isMonitor+';'+debitValue+'Mbps'+';"'+agent.toString()+'"'+"\n", {flag: 'a'});
+				fs.writeFileSync(logFileEvents, 'startrec;'+uid+';'+getDateNow()+';'+socketissued+';'+m+';ismonitor=>'+isMonitor+';'+debitValue+'Mbps'+';"'+agent+'"'+"\n", {flag: 'a'});
 			} catch (err) {
-				sendEmailError('error write logFileEvents' + err, uid+' / '+agent.toString());
+				sendEmailError('error write logFileEvents' + err, uid+' / '+agent);
 				console.error(getDateNow()+' : '+err)
 			}
 
@@ -248,7 +248,7 @@ io.on('connection', function(socket){
 			else {
 				if (typeof feedStream === "function") {
 					try { feedStream(m); }
-					catch (e) { sendEmailError('feedStream error:' + e, uid+' / '+agent.toString()); }
+					catch (e) { sendEmailError('feedStream error:' + e, uid+' / '+agent); }
 				}
 				else {
 					socket.emit('errorffmpeg');
@@ -271,7 +271,7 @@ io.on('connection', function(socket){
 			else {
 				if (typeof feedStream2 === "function") {
 					try { feedStream2(m); }
-					catch (e) { sendEmailError('feedStream2 error:' + e, uid+' / '+agent.toString()); }
+					catch (e) { sendEmailError('feedStream2 error:' + e, uid+' / '+agent); }
 				}
 				else {
 					socket.emit('errorffmpeg');
@@ -289,7 +289,7 @@ io.on('connection', function(socket){
 					try {
 						ffmpeg_process.stdin.end();
 					} catch (e) {
-						sendEmailError('End ffmpeg process attempt failed ' + e, uid+' / '+agent.toString());
+						sendEmailError('End ffmpeg process attempt failed ' + e, uid+' / '+agent);
 						console.warn('End ffmpeg process attempt failed...');
 					}
 				}
@@ -307,9 +307,9 @@ io.on('connection', function(socket){
 
 			// socket.emit('idRecord', socketissued, uid);
 			try {
-				fs.writeFileSync(logFileEvents, 'stoprec;'+uid+';'+getDateNow()+';'+socketissued+';'+m+';ismonitor=>'+isMonitor+';'+agent.toString()+'"'+"\n", {flag: 'a'});
+				fs.writeFileSync(logFileEvents, 'stoprec;'+uid+';'+getDateNow()+';'+socketissued+';'+m+';ismonitor=>'+isMonitor+';'+agent+'"'+"\n", {flag: 'a'});
 			} catch (err) {
-				sendEmailError('error write logFileEvents' + err, uid+' / '+agent.toString());
+				sendEmailError('error write logFileEvents' + err, uid+' / '+agent);
 				console.error(getDateNow()+' : '+err)
 			}
 		});
@@ -333,7 +333,7 @@ io.on('connection', function(socket){
 		});
 		socket.on('error', function (e) {
 			console.log('socket.io error:' + e);
-			sendEmailError('socket.io error:' + e, uid+' / '+agent.toString())
+			sendEmailError('socket.io error:' + e, uid+' / '+agent)
 		});
 
 		socket.on('zipfiles', function (fusion, idSocket = null) {
@@ -353,7 +353,7 @@ io.on('connection', function(socket){
 				if (fs.existsSync(webcamMedia))
 					zip.file(socketTmp + '.webm', fs.createReadStream(webcamMedia));
 			} catch(err) {
-				sendEmailError('zip file' + err, uid+' / '+agent.toString());
+				sendEmailError('zip file' + err, uid+' / '+agent);
 				console.error(getDateNow()+' : '+err);
 			}
 
@@ -361,7 +361,7 @@ io.on('connection', function(socket){
 				if (fs.existsSync(screenMedia))
 					zip.file(socketTmp + 'screen.webm', fs.createReadStream(screenMedia));
 			} catch(err) {
-				sendEmailError('zip file' + err, uid+' / '+agent.toString());
+				sendEmailError('zip file' + err, uid+' / '+agent);
 				console.error(getDateNow()+' : '+err);
 			}
 
@@ -369,7 +369,7 @@ io.on('connection', function(socket){
 				if (fs.existsSync(metadataXML))
 					zip.file('metadata.xml', fs.createReadStream(metadataXML));
 			} catch(err) {
-				sendEmailError('zip file' + err, uid+' / '+agent.toString());
+				sendEmailError('zip file' + err, uid+' / '+agent);
 				console.error(getDateNow()+' : '+err);
 			}
 
@@ -486,9 +486,12 @@ process.on('uncaughtException', function(err) {
  * @returns {{os: *, engine: *, browser: *, cpu: *, ua: *, device: *}}
  */
 function parseUserAgent(socket) {
-	const userAgentString = socket.request.headers['user-agent'];
+	const userAgentString = socket.request.headers['user-agent'] || '';
 	const parser = new useragent(userAgentString);
-	return parser.getResult();
+	const infoAgent = parser.getResult();
+    return `${infoAgent.browser.name || ''} ${infoAgent.browser.version || ''} / ` +
+        `${infoAgent.os.name || ''} ${infoAgent.os.version || ''} / ` +
+        `${infoAgent.device.type || 'desktop'}`;
 }
 
 /**
@@ -561,7 +564,7 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 					try {
 						fs.writeFileSync(config.path_folder_record + uid + '/' + idFileUpload + '/metadata.xml', metadataXML);
 					} catch (err) {
-						sendEmailError('write file metadata' + err, uid+' / '+agent.toString());
+						sendEmailError('write file metadata' + err, uid+' / '+agent);
 						console.error(getDateNow()+' : '+err)
 					}
 
@@ -630,7 +633,7 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 					}
 				}
 				catch (e) {
-					sendEmailError(' errorrec ' + e, uid + ' / ' + agent.toString());
+					sendEmailError(' errorrec ' + e, uid + ' / ' + agent);
 				}
 			});
 		});
@@ -1037,9 +1040,9 @@ function checkIsFileIsWrite(socket, path, typeOfRec, agent)
 		try {
 			if (!files.length) {
 				try {
-					fs.writeFileSync(logFileEvents, 'errorrec;' + uid + ';' + getDateNow() + ';' + socketissued + ';' + typeOfRec + ';"' + agent.toString() + '"' + "\n", {flag: 'a'});
+					fs.writeFileSync(logFileEvents, 'errorrec;' + uid + ';' + getDateNow() + ';' + socketissued + ';' + typeOfRec + ';"' + agent + '"' + "\n", {flag: 'a'});
 				} catch (err) {
-					sendEmailError('ffmpeg errorrec' + err, uid + ' / ' + agent.toString());
+					sendEmailError('ffmpeg errorrec' + err, uid + ' / ' + agent);
 					console.error(getDateNow()+' : '+err)
 				}
 				socket.emit('errorffmpeg');
@@ -1047,9 +1050,9 @@ function checkIsFileIsWrite(socket, path, typeOfRec, agent)
 			} else if (typeOfRec === 'video-and-desktop') {
 				if (!fs.existsSync(config.path_folder_record + uid + '/' + socketissued + '/' + socketissued + 'screen.webm') || !fs.existsSync(config.path_folder_record + uid + '/' + socketissued + '/' + socketissued + '.webm')) {
 					try {
-						fs.writeFileSync(logFileEvents, 'errorrec;' + uid + ';' + getDateNow() + ';' + socketissued + ';' + typeOfRec + ';"' + agent.toString() + '"' + "\n", {flag: 'a'});
+						fs.writeFileSync(logFileEvents, 'errorrec;' + uid + ';' + getDateNow() + ';' + socketissued + ';' + typeOfRec + ';"' + agent + '"' + "\n", {flag: 'a'});
 					} catch (err) {
-						sendEmailError('ffmpeg errorrec' + err, uid + ' / ' + agent.toString());
+						sendEmailError('ffmpeg errorrec' + err, uid + ' / ' + agent);
 						console.error(getDateNow()+' : '+err)
 					}
 					socket.emit('errorffmpeg');
@@ -1058,7 +1061,7 @@ function checkIsFileIsWrite(socket, path, typeOfRec, agent)
 			}
 		}
 		catch (err) {
-			sendEmailError('file length error' + err, uid+' / '+agent.toString());
+			sendEmailError('file length error' + err, uid+' / '+agent);
 			console.error(getDateNow()+' : '+err)
 		}
 	});
