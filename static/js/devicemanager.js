@@ -423,7 +423,16 @@ class Device extends EventEmitter {
                       camera.id = devices[key].deviceId;
                       camera.label = devices[key].label;
 
-                      this.gum(this.candidates[0], camera);
+                        // this.gum(this.candidates[0], camera);
+                        this.detectResolutions(camera, this.candidates)
+                            .then(supported => {
+                                for (const cand of this.candidates) {
+                                    if (supported.some(r => r.id === cand.id))
+                                        $('.' + cand.id).show();
+                                    else
+                                        $('.' + cand.id).hide();
+                                }
+                            });
                     }
                   }
                 });
@@ -586,7 +595,16 @@ class Device extends EventEmitter {
                     camera.id = devices[key].deviceId;
                     camera.label = devices[key].label;
 
-                    this.gum(this.candidates[0], camera);
+                    // this.gum(this.candidates[0], camera);
+                    this.detectResolutions(camera, this.candidates)
+                      .then(supported => {
+                          for (const cand of this.candidates) {
+                              if (supported.some(r => r.id === cand.id))
+                                  $('.' + cand.id).show();
+                              else
+                                  $('.' + cand.id).hide();
+                          }
+                      });
                   }
                 }
               })
@@ -672,63 +690,63 @@ class Device extends EventEmitter {
       //MediaStream has no audio tracks
     }
   }
-    gum(candidate, device, cmpt = 1) {
-
-        let constraints = {
-            audio: false,
-            video: {
-                deviceId: device.id ? { exact: device.id } : undefined,
-                width: { ideal: candidate.width },
-                height: { ideal: candidate.height }
-            }
-        };
-
-        if (cmpt == 1) {
-            //durant le check de reso, on desactive la possiblite de lancer un rec
-            $('#startRecord').addClass('cantRecord');
-            document.getElementById("startRecord").disabled = true;
-            if($('#startStopTitle').is(':visible'))
-                $('#startStopTitle').hide();
-            $('main').append('<input type="hidden" id="gumRunning" />');
-        }
-        else if (cmpt >= this.candidates.length) {
-            $('#startRecord').removeClass('cantRecord');
-            $('#startRecord').addClass('canRecord');
-            document.getElementById("startRecord").disabled = false;
-            $('#gumRunning').remove();
-            if(!$('#startStopTitle').is(':visible'))
-                $('#startStopTitle').show();
-            $('#listResoWebCam > li:visible:last').addClass('last-visible-li');
-        }
-
-        setTimeout(() => {
-            navigator.mediaDevices.getUserMedia(constraints)
-                .then(stream => {
-                    const track = stream.getVideoTracks()[0];
-                    const settings = track.getSettings();
-
-                    // Vérifie si la résolution obtenue correspond vraiment
-                    if(settings.width === candidate.width &&
-                        settings.height === candidate.height) {
-                        if(candidate.id) $('.' + candidate.id).show();
-                    } else {
-                        if(candidate.id) $('#listResoWebCam .' + candidate.id).hide();
-                    }
-
-                    stream.getTracks().forEach(track => track.stop());
-
-                    if (cmpt < this.candidates.length)
-                        this.gum(this.candidates[cmpt++], device, cmpt);
-                })
-                .catch(err => {
-                    if(candidate.id)
-                        $('#listResoWebCam .' + candidate.id).hide();
-
-                    if (cmpt < this.candidates.length)
-                        this.gum(this.candidates[cmpt++], device, cmpt);
-                });
-        }, (this.stream ? 200 : 0));
-    }
+    // gum(candidate, device, cmpt = 1) {
+    //
+    //     let constraints = {
+    //         audio: false,
+    //         video: {
+    //             deviceId: device.id ? { exact: device.id } : undefined,
+    //             width: { ideal: candidate.width },
+    //             height: { ideal: candidate.height }
+    //         }
+    //     };
+    //
+    //     if (cmpt == 1) {
+    //         //durant le check de reso, on desactive la possiblite de lancer un rec
+    //         $('#startRecord').addClass('cantRecord');
+    //         document.getElementById("startRecord").disabled = true;
+    //         if($('#startStopTitle').is(':visible'))
+    //             $('#startStopTitle').hide();
+    //         $('main').append('<input type="hidden" id="gumRunning" />');
+    //     }
+    //     else if (cmpt >= this.candidates.length) {
+    //         $('#startRecord').removeClass('cantRecord');
+    //         $('#startRecord').addClass('canRecord');
+    //         document.getElementById("startRecord").disabled = false;
+    //         $('#gumRunning').remove();
+    //         if(!$('#startStopTitle').is(':visible'))
+    //             $('#startStopTitle').show();
+    //         $('#listResoWebCam > li:visible:last').addClass('last-visible-li');
+    //     }
+    //
+    //     setTimeout(() => {
+    //         navigator.mediaDevices.getUserMedia(constraints)
+    //             .then(stream => {
+    //                 const track = stream.getVideoTracks()[0];
+    //                 const settings = track.getSettings();
+    //
+    //                 // Vérifie si la résolution obtenue correspond vraiment
+    //                 if(settings.width === candidate.width &&
+    //                     settings.height === candidate.height) {
+    //                     if(candidate.id) $('.' + candidate.id).show();
+    //                 } else {
+    //                     if(candidate.id) $('#listResoWebCam .' + candidate.id).hide();
+    //                 }
+    //
+    //                 stream.getTracks().forEach(track => track.stop());
+    //
+    //                 if (cmpt < this.candidates.length)
+    //                     this.gum(this.candidates[cmpt++], device, cmpt);
+    //             })
+    //             .catch(err => {
+    //                 if(candidate.id)
+    //                     $('#listResoWebCam .' + candidate.id).hide();
+    //
+    //                 if (cmpt < this.candidates.length)
+    //                     this.gum(this.candidates[cmpt++], device, cmpt);
+    //             });
+    //     }, (this.stream ? 200 : 0));
+    // }
 
   changeResolution(res) {
     var objectOpts;
@@ -811,6 +829,64 @@ class Device extends EventEmitter {
         .catch(function(err) {
           console.log(err.name + ": " + err.message);
         });
+    }
+
+
+
+    async detectResolutions(camera, candidates) {
+
+        // Ouvre un flux léger pour lire capabilities
+        const baseStream = await navigator.mediaDevices.getUserMedia({
+            video: {
+                deviceId: { exact: camera.id },
+                width: { ideal: 640 },
+                height: { ideal: 480 }
+            }
+        });
+
+        const track = baseStream.getVideoTracks()[0];
+        const caps = track.getCapabilities();
+
+        const minW = caps.width?.min || 0;
+        const maxW = caps.width?.max || 10000;
+        const minH = caps.height?.min || 0;
+        const maxH = caps.height?.max || 10000;
+
+        const filtered = candidates.filter(c =>
+            c.width >= minW && c.width <= maxW &&
+            c.height >= minH && c.height <= maxH
+        );
+
+        track.stop();
+
+        const supported = [];
+
+        for (const cand of filtered) {
+            try {
+                const testStream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        deviceId: { exact: camera.id },
+                        width: { ideal: cand.width },
+                        height: { ideal: cand.height }
+                    }
+                });
+
+                const testTrack = testStream.getVideoTracks()[0];
+                const settings = testTrack.getSettings();
+
+                if (settings.width === cand.width &&
+                    settings.height === cand.height) {
+                    supported.push(cand);
+                }
+
+                testTrack.stop();
+
+            } catch (e) {
+                // ignore
+            }
+        }
+
+        return supported;
     }
 }
 
