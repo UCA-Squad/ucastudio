@@ -267,6 +267,10 @@ class Device extends EventEmitter {
         return _stream;
       },
       set: function(stream) {
+        if (stream === null) {
+          _stream = null;
+          return;
+        }
         if (stream instanceof MediaStream) {
           _stream = stream;
           this.emit('stream', _stream);
