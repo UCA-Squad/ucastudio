@@ -659,24 +659,52 @@ class Device extends EventEmitter {
     });
   }
 
-  connectDisplayMedia(opts) {
-    return new Promise((resolve, reject) => {
-      var constraints = this.constraints;
-      if(typeof opts != 'undefined')
-        constraints = { audio: false, video: { width: opts.width, height: opts.height, frameRate: { ideal :25, max: 30 } } };
-      else if($("#debitValue").val() < 2.5 && $("#debitValue").val() > 0.6 )
-        constraints = { audio: false, video: { width: {ideal: 960}, height: {ideal: 540} , frameRate: { ideal :20, max: 30 } } };
-      else if($("#debitValue").val() <= 0.6  )
-        constraints = { audio: false, video: { width: {ideal: 640}, height: {ideal: 480} , frameRate: { ideal :20, max: 30 } } };
+  async connectDisplayMedia(opts, captureAudio = false) {
+    let constraints;
 
-      return navigator.mediaDevices.getDisplayMedia(constraints)
-               .then(stream => {
-                 this.stream = stream;
-                 this.cachedAudioTracks.forEach(track => this.stream.addTrack(track));
-                 resolve(stream);
-               })
-               .catch(err => reject(err));
-    });
+    const audioConstraints = captureAudio ? { audio: true } : { audio: false };
+
+    if (typeof opts !== 'undefined') {
+      constraints = {
+        ...audioConstraints,
+        video: {
+          width: opts.width,
+          height: opts.height,
+          frameRate: { ideal: 25, max: 30 }
+        }
+      };
+    } else {
+      const debit = parseFloat($("#debitValue").val());
+
+      if (debit > 0.6 && debit < 2.5) {
+        constraints = {
+          ...audioConstraints,
+          video: { width: { ideal: 960 }, height: { ideal: 540 }, frameRate: { ideal: 20, max: 30 } }
+        };
+      } else if (debit <= 0.6) {
+        constraints = {
+          ...audioConstraints,
+          video: { width: { ideal: 640 }, height: { ideal: 480 }, frameRate: { ideal: 20, max: 30 } }
+        };
+      } else {
+        constraints = { ...audioConstraints, ...this.constraints };
+      }
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getDisplayMedia(constraints);
+      this.stream = stream;
+
+      // N'ajouter les cachedAudioTracks que s'il n'y a pas déjà de piste audio système
+      const hasSystemAudio = stream.getAudioTracks().length > 0;
+      if (!hasSystemAudio) {
+        this.cachedAudioTracks.forEach(track => this.stream.addTrack(track));
+      }
+
+      return stream;
+    } catch (err) {
+      throw err;
+    }
   }
 
   connectChromeDesktop(opts) {
