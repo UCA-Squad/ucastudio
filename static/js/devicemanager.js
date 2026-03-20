@@ -126,7 +126,7 @@ class DeviceManager extends EventEmitter {
 
   connect(id, opts, idAudio=null) {
     if (id === 'desktop') {
-      return this.desktop.connect();
+      return this.desktop.connect(opts, idAudio);
     }
 
     if (this.video.hasOwnProperty(id)) {
@@ -142,7 +142,7 @@ class DeviceManager extends EventEmitter {
   }
 
   record() {
-    for (var dev in this.devices) {
+    for (const dev in this.devices) {
       if (this.devices[dev].stream) {
         this.devices[dev].record();
       }
@@ -151,7 +151,7 @@ class DeviceManager extends EventEmitter {
   }
 
   pauseRecording() {
-    for (var dev in this.devices) {
+    for (const dev in this.devices) {
       if (this.devices[dev].stream)
         if(this.devices[dev].stream.active)
           this.devices[dev].pauseRecording();
@@ -159,7 +159,7 @@ class DeviceManager extends EventEmitter {
   }
 
   stopRecording() {
-    for (var dev in this.devices) {
+    for (const dev in this.devices) {
       if (this.devices[dev].stream) {
         this.devices[dev].stopRecording();
         let tracks = this.devices[dev].stream.getTracks();
@@ -172,16 +172,11 @@ class DeviceManager extends EventEmitter {
   }
 
   changeResolution(id, res) {
-    return new Promise((resolve, reject) => {
-      if (this.devices.hasOwnProperty(id)) {
-        this.devices[id].changeResolution(res)
-          .then(stream => resolve({id: id, stream: stream}))
-          .catch(err => reject(err));
-      }
-      else {
-        reject("no such device");
-      }
-    });
+    if (!this.devices.hasOwnProperty(id)) {
+      return Promise.reject("no such device");
+    }
+    return this.devices[id].changeResolution(res)
+        .then(stream => ({ id, stream }));
   }
 }
 
@@ -193,6 +188,8 @@ class Device extends EventEmitter {
     let _stream = null;
     this.recorder = null;
     this.cachedAudioTracks = [];
+    this.audioContext = null;
+    this.captureSystemAudio = false;
 
     let _candidates = [
       {
@@ -290,8 +287,7 @@ class Device extends EventEmitter {
     this.deviceType = device.deviceType || (device.kind === 'audioinput' ? 'audio' : 'video');
 
     let _audConstraints = {audio: {exact: device.deviceId}};
-    let _vidConstraints = {audio: true, video: { exact: device.deviceId, width: {exact: 640}, height: {exact: 480}, facingMode: "user" , frameRate: { ideal :20, max: 30 } } };
-
+    let _vidConstraints = { audio: true, video: { deviceId: { exact: device.deviceId }, width: { exact: 640 }, height: { exact: 480 }, facingMode: "user", frameRate: { ideal: 20, max: 30 } }};
     let desktopValue = { width: {ideal: 1280}, height: {ideal: 720} , frameRate: { ideal :25, max: 30 } };
     let _desktop = {
       firefox: {
@@ -304,11 +300,28 @@ class Device extends EventEmitter {
       },
       other: null
     }
-    let _browser = window.hasOwnProperty('InstallTrigger') ? 'firefox' : (
-                     window.hasOwnProperty('chrome') && chrome.app ? 'chrome' : 'other'
-                   );
+
+    const isChromiumBased = () => {
+      if (navigator.userAgentData) {
+        return navigator.userAgentData.brands.some(b =>
+            b.brand === 'Chromium' || b.brand === 'Google Chrome'
+        );
+      }
+      return /Chrome|Chromium/.test(navigator.userAgent);
+    };
+
+    const _browser = window.hasOwnProperty('InstallTrigger') ? 'firefox'
+        : isChromiumBased() ? 'chrome'
+            : 'other';
 
     this.isChrome = _browser === 'chrome';
+
+    const isWindows = navigator.platform.toLowerCase().includes('win');
+    const isChromeOS = navigator.userAgent.includes('CrOS');
+
+    this.captureSystemAudio = this.deviceType === 'desktop'
+        && _browser === 'chrome'
+        && (isWindows || isChromeOS);
 
     Object.defineProperty(this, 'browser', {
       get: function() {
@@ -345,7 +358,7 @@ class Device extends EventEmitter {
   connect(opts, idAudio) {
 
     if (this.deviceType === 'desktop' && 'getDisplayMedia' in navigator.mediaDevices) {
-      return this.connectDisplayMedia(opts);
+      return this.connectDisplayMedia(opts, this.captureSystemAudio);
     }
     else if (this.deviceType === 'desktop' && this.isChrome) {
       return this.connectChromeDesktop(opts);
@@ -364,18 +377,19 @@ class Device extends EventEmitter {
     }
 
     return new Promise((resolve, reject) => {
+      let exactAudio;
       opts = opts || {};
 
-      var videoTmp = document.getElementById("video");
-      var deviceVideoIdTmp = videoTmp.getAttribute('data-id');
+      const videoTmp = document.getElementById("video");
+      const deviceVideoIdTmp = videoTmp.getAttribute('data-id');
 
-      var audioTmp = document.getElementById("audio");
-      var deviceAudioIdTmp = audioTmp.getAttribute('data-id');
+      const audioTmp = document.getElementById("audio");
+      const deviceAudioIdTmp = audioTmp.getAttribute('data-id');
 
       if(opts === 'isSwitch' || opts === 'isOnlyChangeMic')
       {
-        var audio = document.querySelector('#audio');
-        var video = document.querySelector('#video');
+        const audio = document.querySelector('#audio');
+        const video = document.querySelector('#video');
 
         if ( $(".videoDevice").hasClass('active'))
         {
@@ -386,7 +400,10 @@ class Device extends EventEmitter {
             constraintAudio = {deviceId: {exact: deviceAudioIdTmp}}
 
           //new add
-          var constraintMedia = {audio: constraintAudio, video: { deviceId: { exact: this.constraints.video.exact, facingMode: "user"} } };
+          let constraintMedia = {
+            audio: constraintAudio,
+            video: {deviceId: {exact: this.constraints.video.exact, facingMode: "user"}}
+          };
 
           if(opts === 'isOnlyChangeMic' && deviceVideoIdTmp != null) {
             constraintMedia = {audio: constraintAudio, video: {deviceId: {exact: deviceVideoIdTmp, facingMode: "user"}}};
@@ -395,22 +412,24 @@ class Device extends EventEmitter {
           navigator.mediaDevices.getUserMedia(constraintMedia)
               .then(stream => {
 
+                let i;
+                let tracks;
                 if(opts !== 'isOnlyChangeMic')
                   $('.labelWebcam').trigger('click');
 
                 if(opts === 'isOnlyChangeMic') {
                   $('.labelAudio').trigger('click');
 
-                  var tracks = stream.getTracks();
-                  for(var i = 0; i < tracks.length; i++){
+                  tracks = stream.getTracks();
+                  for(i = 0; i < tracks.length; i++){
                     if(tracks[i].kind === 'audio')
                       this.getDevice(tracks[i].getSettings().deviceId)
                   }
                 }
                 else
                 {
-                  var tracks = stream.getTracks();
-                  for(var i = 0; i < tracks.length; i++){
+                  tracks = stream.getTracks();
+                  for(i = 0; i < tracks.length; i++){
                     this.getDevice(tracks[i].getSettings().deviceId)
                   }
                 }
@@ -420,7 +439,7 @@ class Device extends EventEmitter {
 
                 //manque foreac
                 navigator.mediaDevices.enumerateDevices().then(devices => {
-                  for (var key in devices) {
+                  for (const key in devices) {
                     if (this.deviceType === 'video' && devices[key].kind === 'videoinput' && this.constraints.video.exact == devices[key].deviceId) {
                         // var labelWebcam = (devices[key].label.includes(worToExclude) ? devices[key].label.replace(worToExclude, '') : devices[key].label);
                         let camera = {};
@@ -490,9 +509,13 @@ class Device extends EventEmitter {
         {
           //new add
           if(idAudio != null)
-            var exactAudio = idAudio;
+            {
+              exactAudio = idAudio;
+            }
           else
-            var exactAudio = this.constraints.audio.exact;
+            {
+              exactAudio = this.constraints.audio.exact;
+            }
           //new add
           navigator.mediaDevices.getUserMedia({ audio: { deviceId: { exact: exactAudio } }})
               .then(stream => {
@@ -503,8 +526,8 @@ class Device extends EventEmitter {
 
                 $('.labelAudio').trigger('click');
 
-                var tracks = stream.getTracks();
-                for(var i = 0; i < tracks.length; i++){
+                const tracks = stream.getTracks();
+                for(let i = 0; i < tracks.length; i++){
                   this.getDevice(tracks[i].getSettings().deviceId)
                 }
 
@@ -519,7 +542,8 @@ class Device extends EventEmitter {
       }
       else
       {
-        for (var key in opts) {
+        let key;
+        for (key in opts) {
           if (this.deviceType === 'desktop') {
             this.constraints.video[key] = opts[key];
           }
@@ -528,7 +552,7 @@ class Device extends EventEmitter {
           }
         }
 
-        let constraintMedia = this.constraints;
+        let constraintMedia;
         if(opts === "mustListReso") {
 
           if($("#debitValue").val() <= 1  && $('#resoWebCamChoose').val() === 'nhd')
@@ -570,7 +594,7 @@ class Device extends EventEmitter {
           if(deviceAudioIdTmp != null)
             this.constraints['audio'] = {deviceId: {exact: deviceAudioIdTmp}};
 
-          for (var key in opts) {
+          for (key in opts) {
             if (this.deviceType === 'desktop') {
               this.constraints.video[key] = opts[key];
             }
@@ -595,8 +619,8 @@ class Device extends EventEmitter {
 
               this.stream = stream;
 
-              var tracks = stream.getTracks();
-              for(var i = 0; i < tracks.length; i++)
+              const tracks = stream.getTracks();
+              for(let i = 0; i < tracks.length; i++)
                 this.getDevice(tracks[i].getSettings().deviceId)
 
               resolve(stream);
@@ -605,7 +629,7 @@ class Device extends EventEmitter {
               $('#audiostream').val(deviceAudioIdTmp);
 
               navigator.mediaDevices.enumerateDevices().then(devices => {
-                for (var key in devices.filter(device => device.kind  !== 'audiooutput')) {
+                for (const key in devices.filter(device => device.kind  !== 'audiooutput')) {
                   if ($('.labelWebcam').find('li[data-id="' + devices[key].deviceId + '"]').length != 0) {
                     $('.labelWebcam').find('li[data-id="' + devices[key].deviceId + '"]').find('button').attr('data-label', devices[key].label);
                     $('.labelWebcam').find('li[data-id="' + devices[key].deviceId + '"]').find('button').html(devices[key].label.replace(/\s*\(.{4}:.{4}\)\s*/g, ''));
@@ -692,16 +716,55 @@ class Device extends EventEmitter {
     }
 
     try {
-      const stream = await navigator.mediaDevices.getDisplayMedia(constraints);
-      this.stream = stream;
+      const micStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+          .catch(() => null);
 
-      // N'ajouter les cachedAudioTracks que s'il n'y a pas déjà de piste audio système
-      const hasSystemAudio = stream.getAudioTracks().length > 0;
-      if (!hasSystemAudio) {
-        this.cachedAudioTracks.forEach(track => this.stream.addTrack(track));
+      const screenStream = await navigator.mediaDevices.getDisplayMedia(constraints);
+
+      const hasSystemAudio = screenStream.getAudioTracks().length > 0;
+      const hasMic = micStream && micStream.getAudioTracks().length > 0;
+
+      let audioTracks;
+
+      if (hasSystemAudio && hasMic) {
+        // Les deux sources → mixer via AudioContext (Chrome uniquement en pratique)
+        if (this.audioContext) {
+          this.audioContext.close();
+        }
+
+        this.audioContext = new AudioContext();
+        const destination = this.audioContext.createMediaStreamDestination();
+
+        const systemSource = this.audioContext.createMediaStreamSource(
+            new MediaStream(screenStream.getAudioTracks())
+        );
+        systemSource.connect(destination);
+
+        const micSource = this.audioContext.createMediaStreamSource(micStream);
+        micSource.connect(destination);
+
+        audioTracks = destination.stream.getAudioTracks();
+
+      } else if (hasMic) {
+        // Micro seul (Firefox) → pas besoin d'AudioContext, ajout direct
+        audioTracks = micStream.getAudioTracks();
+
+      } else if (hasSystemAudio) {
+        // Audio système seul → ajout direct
+        audioTracks = screenStream.getAudioTracks();
+
+      } else {
+        // Aucune source → fallback cachedAudioTracks
+        audioTracks = this.cachedAudioTracks;
       }
+      const mergedStream = new MediaStream([
+        ...screenStream.getVideoTracks(),
+        ...audioTracks
+      ]);
 
-      return stream;
+      this.stream = mergedStream;
+      return mergedStream;
+
     } catch (err) {
       throw err;
     }
@@ -709,27 +772,24 @@ class Device extends EventEmitter {
 
   connectChromeDesktop(opts) {
     return new Promise((resolve, reject) => {
-      this.once('streamId', {
-        fn: function(id) {
-          this.constraints.video.mandatory.chromeMediaSourceId = id;
-          opts = opts || {};
-          for (var key in opts) {
-            this.constraints.video.mandatory['max' + key.charAt(0).toUpperCase() + key.substring(1)] = opts[key];
-          }
-          navigator.mediaDevices.getUserMedia(this.constraints)
+      this.once('streamId', (id) => {
+        this.constraints.video.mandatory.chromeMediaSourceId = id;
+        opts = opts || {};
+        for (const key in opts) {
+          this.constraints.video.mandatory['max' + key.charAt(0).toUpperCase() + key.substring(1)] = opts[key];
+        }
+        navigator.mediaDevices.getUserMedia(this.constraints)
             .then(stream => {
               this.stream = stream;
               this.cachedAudioTracks.forEach(track => this.stream.addTrack(track));
               resolve(stream);
             })
             .catch(err => reject(err));
-        },
-        scope: this
       });
       window.postMessage({
         type: 'SS_UI_REQUEST',
         text: 'start',
-         url: location.origin
+        url: location.origin
       }, '*');
     });
   }
@@ -744,6 +804,8 @@ class Device extends EventEmitter {
       let audioTrack = streamOrTrack instanceof MediaStreamTrack ?
                          streamOrTrack :
                          streamOrTrack.getAudioTracks()[0];
+
+      if (!audioTrack) return;
 
       if (!this.stream) {
         this.cachedAudioTracks.push(audioTrack);
@@ -822,10 +884,11 @@ class Device extends EventEmitter {
     }
 
   changeResolution(res) {
-    var objectOpts;
+    let i;
+    let objectOpts;
     if (typeof res === 'string' && this.deviceType === 'desktop') {
       // res = {width: parseInt(res) * 4 / 3, height: parseInt(res)};
-      for(var i = 0; i < this.candidates.length; i++) {
+      for(i = 0; i < this.candidates.length; i++) {
         if(this.candidates[i].id == res) {
           objectOpts = {width: {ideal: this.candidates[i].width }, height: {ideal: this.candidates[i].height }, frameRate: { ideal :25, max: 30 } };
           break;
@@ -834,7 +897,7 @@ class Device extends EventEmitter {
       $("#resoDesktopChoose").val(res);
     }
     else {
-      for(var i = 0; i < this.candidates.length; i++) {
+      for(i = 0; i < this.candidates.length; i++) {
         if(this.candidates[i].id == res) {
 
           if (res === 'nhd' ||res === 'hd' || res === 'fullhd')
@@ -881,6 +944,11 @@ class Device extends EventEmitter {
       this.recorder.stop();
       this.emit('record.prepare', this.info.label);
     }
+
+    if (this.audioContext) {
+      this.audioContext.close();
+      this.audioContext = null;
+    }
   }
 
   pauseRecording() {
@@ -893,9 +961,9 @@ class Device extends EventEmitter {
           devices.forEach(function(device) {
               if (device.deviceId === id) {
                 if (device.kind === 'audioinput')
-                  $('.labelMicSelect').html(trimLabelDevice(device.label), 'audio');
+                  $('.labelMicSelect').html(trimLabelDevice(device.label));
                 if (device.kind === 'videoinput')
-                  $('.labelCamSelect').html(trimLabelDevice(device.label), 'video');
+                  $('.labelCamSelect').html(trimLabelDevice(device.label));
               }
           });
         })
@@ -966,17 +1034,16 @@ class Device extends EventEmitter {
 /**
  *
  * @param deviceLabelTmp
- * @param type
  */
-function trimLabelDevice(deviceLabelTmp, type)
+function trimLabelDevice(deviceLabelTmp)
 {
-  var length = 50;
-  var wordsToExclude = ['Par défaut -', "Microphone", "Webcam", "LifeCam"];
+  const length = 50;
+  const wordsToExclude = ['Par défaut -', "Microphone", "Webcam", "LifeCam"];
 
-  for(var i = 0; i < wordsToExclude.length; i++)
+  for(let i = 0; i < wordsToExclude.length; i++)
     deviceLabelTmp = deviceLabelTmp.replace(wordsToExclude[i], '');
 
-  var trimmedString = deviceLabelTmp.length > length ?
+  const trimmedString = deviceLabelTmp.length > length ?
       deviceLabelTmp.substring(0, length - 3) + "..." :
       deviceLabelTmp;
 
