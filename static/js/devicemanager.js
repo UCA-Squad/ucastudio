@@ -716,15 +716,16 @@ class Device extends EventEmitter {
     }
 
     try {
-      const micStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false })
-          .catch(() => null);
+      const micStream = captureAudio
+          ? await navigator.mediaDevices.getUserMedia({ audio: true, video: false }).catch(() => null)
+          : null;
 
       const screenStream = await navigator.mediaDevices.getDisplayMedia(constraints);
 
       const hasSystemAudio = screenStream.getAudioTracks().length > 0;
       const hasMic = micStream && micStream.getAudioTracks().length > 0;
 
-      let audioTracks;
+      let audioTracks = [];
 
       if (hasSystemAudio && hasMic) {
         // Les deux sources → mixer via AudioContext (Chrome uniquement en pratique)
@@ -753,8 +754,8 @@ class Device extends EventEmitter {
         // Audio système seul → ajout direct
         audioTracks = screenStream.getAudioTracks();
 
-      } else {
-        // Aucune source → fallback cachedAudioTracks
+      } else if (captureAudio) {
+        // Fallback cachedAudioTracks uniquement si l'audio était demandé
         audioTracks = this.cachedAudioTracks;
       }
       const mergedStream = new MediaStream([
