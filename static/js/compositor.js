@@ -5,6 +5,9 @@ class Compositor extends EventEmitter {
 
     this.streams = {};
     this.streamOrder = [];
+    this._audioContext = null;
+    this._audioDestination = null;
+    this._audioSourcesMap = new Map();
 
     this.codecs = ('MediaRecorder' in window) ?
                     [
@@ -90,6 +93,18 @@ class Compositor extends EventEmitter {
     if (this.streams.hasOwnProperty(streamObj.id)) {
       this.streams[streamObj.id].active = true;
       if (this.streams[streamObj.id].stream.id != streamObj.stream.id) {
+
+        // ✅ Détecter les nouvelles tracks audio
+        if (this.stream) {
+          const existingAudioIds = new Set(
+              Object.values(this.streams)
+                  .flatMap(s => s.stream.getAudioTracks().map(t => t.id))
+          );
+          streamObj.stream.getAudioTracks()
+              .filter(t => !existingAudioIds.has(t.id))
+              .forEach(t => this.addAudioTrack(t));
+        }
+
         this.streams[streamObj.id].stream = streamObj.stream;
         this.streams[streamObj.id].video.srcObject = streamObj.stream;
       }
@@ -204,9 +219,16 @@ class Compositor extends EventEmitter {
     this.stream = this.canvas.captureStream(30);
     for (let key in this.streams) {
       let streamObj = this.streams[key];
-      if (streamObj.stream.getAudioTracks().length) {
-        this.addAudioTrack(streamObj.stream.getAudioTracks()[0]);
+      // ✅ Toutes les tracks, pas seulement [0]
+      streamObj.stream.getAudioTracks().forEach(track => {
+        this.addAudioTrack(track);
+      });
       }
+
+    // ✅ Tracks en attente (mic ajouté avant start)
+    if (this._pendingAudioTracks && this._pendingAudioTracks.length) {
+      this._pendingAudioTracks.forEach(track => this.addAudioTrack(track));
+      this._pendingAudioTracks = [];
     }
   }
 
@@ -214,15 +236,48 @@ class Compositor extends EventEmitter {
     this.emit('unsubscribe.raf', this.rafToken, () => this.rafToken = null);
     this.stream = null;
     this.emit('stream.remove', 'composite');
+
+    if (this._audioContext) {
+      this._audioContext.close();
+      this._audioContext = null;
+      this._audioDestination = null;
+      this._audioSourcesMap = new Map();
+    }
   }
 
-  addAudioTrack(track) {
-    if (this.isChrome) {
-      this.stream.addTrack(track);
+  _getOrCreateMixer() {
+    if (!this._audioContext) {
+      this._audioContext = new AudioContext();
+      this._audioDestination = this._audioContext.createMediaStreamDestination();
+  }
+    return this._audioDestination;
+  }
+
+  addAudioTrack(track, sourceStream = null) {
+    if (!track) return;
+
+    if (!this.stream) {
+      this._pendingAudioTracks = this._pendingAudioTracks || [];
+      if (!this._pendingAudioTracks.some(t => t.id === track.id)) {
+        this._pendingAudioTracks.push({ track, sourceStream });
     }
-    else {
-      this.stream = new MediaStream([track, ...this.stream.getVideoTracks(), ...this.stream.getAudioTracks()])
+      return;
     }
+
+    if (this._audioSourcesMap.has(track.id)) return;
+
+    const destination = this._getOrCreateMixer();
+
+    const audioStream = new MediaStream([track]);
+
+    const source = this._audioContext.createMediaStreamSource(audioStream);
+    source.connect(destination);
+    this._audioSourcesMap.set(track.id, source);
+
+    const mixedTrack = destination.stream.getAudioTracks()[0];
+    this.stream.getAudioTracks().forEach(t => this.stream.removeTrack(t));
+    if (mixedTrack) this.stream.addTrack(mixedTrack);
+
     this.emit('stream.mute');
   }
 

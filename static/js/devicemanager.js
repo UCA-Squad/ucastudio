@@ -188,7 +188,6 @@ class Device extends EventEmitter {
     let _stream = null;
     this.recorder = null;
     this.cachedAudioTracks = [];
-    this.audioContext = null;
     this.captureSystemAudio = false;
 
     let _candidates = [
@@ -399,10 +398,9 @@ class Device extends EventEmitter {
           else if(deviceAudioIdTmp != null) //new add
             constraintAudio = {deviceId: {exact: deviceAudioIdTmp}}
 
-          //new add
           let constraintMedia = {
             audio: constraintAudio,
-            video: {deviceId: {exact: this.constraints.video.exact, facingMode: "user"}}
+            video: {deviceId: {exact: this.constraints.video.deviceId?.exact, facingMode: "user"}}
           };
 
           if(opts === 'isOnlyChangeMic' && deviceVideoIdTmp != null) {
@@ -440,7 +438,7 @@ class Device extends EventEmitter {
                 //manque foreac
                 navigator.mediaDevices.enumerateDevices().then(devices => {
                   for (const key in devices) {
-                    if (this.deviceType === 'video' && devices[key].kind === 'videoinput' && this.constraints.video.exact == devices[key].deviceId) {
+                    if (this.deviceType === 'video' && devices[key].kind === 'videoinput' && this.constraints.video.deviceId?.exact == devices[key].deviceId) {
                         // var labelWebcam = (devices[key].label.includes(worToExclude) ? devices[key].label.replace(worToExclude, '') : devices[key].label);
                         let camera = {};
                         camera.id = devices[key].deviceId;
@@ -493,8 +491,8 @@ class Device extends EventEmitter {
                   $('#webcamstream').val(deviceVideoIdTmp);
                 }
                 else {
-                  $('#video').attr('data-id', this.constraints.video.exact);
-                  $('#webcamstream').val(this.constraints.video.exact);
+                  $('#video').attr('data-id', this.constraints.video.deviceId?.exact);
+                  $('#webcamstream').val(this.constraints.video.deviceId?.exact);
                 }
 
                 resolve(stream);
@@ -639,7 +637,7 @@ class Device extends EventEmitter {
                     $('.labelAudio').find('li[data-id="' + devices[key].deviceId + '"]').find('button').html(devices[key].label.replace(/\s*\(.{4}:.{4}\)\s*/g, ''));
                   }
 
-                  if(opts === "mustListReso" && this.deviceType === 'video' && devices[key].kind === 'videoinput' && this.constraints.video.exact ==  devices[key].deviceId) {
+                  if(opts === "mustListReso" && this.deviceType === 'video' && devices[key].kind === 'videoinput' && this.constraints.video.deviceId?.exact ==  devices[key].deviceId) {
                     let camera = {};
                     camera.id = devices[key].deviceId;
                     camera.label = devices[key].label;
@@ -716,52 +714,37 @@ class Device extends EventEmitter {
     }
 
     try {
-      const micStream = captureAudio
-          ? await navigator.mediaDevices.getUserMedia({ audio: true, video: false }).catch(() => null)
-          : null;
-
       const screenStream = await navigator.mediaDevices.getDisplayMedia(constraints);
 
       const hasSystemAudio = screenStream.getAudioTracks().length > 0;
       const hasMic = micStream && micStream.getAudioTracks().length > 0;
 
-      let audioTracks = [];
+      // Rassembler : audio système + éventuels tracks mic mis en cache
+      const allAudioTracks = [
+        ...(hasSystemAudio ? screenStream.getAudioTracks() : []),
+        ...this.cachedAudioTracks
+      ];
+      this.cachedAudioTracks = []; // vider le cache
 
-      if (hasSystemAudio && hasMic) {
-        // Les deux sources → mixer via AudioContext (Chrome uniquement en pratique)
-        if (this.audioContext) {
-          this.audioContext.close();
-        }
-
-        this.audioContext = new AudioContext();
-        const destination = this.audioContext.createMediaStreamDestination();
-
-        const systemSource = this.audioContext.createMediaStreamSource(
-            new MediaStream(screenStream.getAudioTracks())
-        );
-        systemSource.connect(destination);
-
-        const micSource = this.audioContext.createMediaStreamSource(micStream);
-        micSource.connect(destination);
-
-        audioTracks = destination.stream.getAudioTracks();
-
-      } else if (hasMic) {
-        // Micro seul (Firefox) → pas besoin d'AudioContext, ajout direct
-        audioTracks = micStream.getAudioTracks();
-
-      } else if (hasSystemAudio) {
-        // Audio système seul → ajout direct
-        audioTracks = screenStream.getAudioTracks();
-
-      } else if (captureAudio) {
-        // Fallback cachedAudioTracks uniquement si l'audio était demandé
-        audioTracks = this.cachedAudioTracks;
+      let finalAudioTrack = null;
+      if (allAudioTracks.length > 1) {
+        finalAudioTrack = this._mixAudioTracks(allAudioTracks);
+      } else if (allAudioTracks.length === 1) {
+        finalAudioTrack = allAudioTracks[0];
       }
+
       const mergedStream = new MediaStream([
         ...screenStream.getVideoTracks(),
-        ...audioTracks
+        ...(finalAudioTrack ? [finalAudioTrack] : [])
       ]);
+
+      $('#desktopAudioIndicator').css(
+          'display',
+          hasSystemAudio ? 'inline-block' : 'none'
+      );
+      screenStream.getVideoTracks()[0].onended = () => {
+        $('#desktopAudioIndicator').hide();
+      };
 
       this.stream = mergedStream;
       return mergedStream;
@@ -795,35 +778,53 @@ class Device extends EventEmitter {
     });
   }
 
+  _mixAudioTracks(tracks) {
+    if (!tracks || tracks.length === 0) return null;
+    if (tracks.length === 1) return tracks[0];
+
+    if (this._audioContext) this._audioContext.close();
+    this._audioContext = new AudioContext();
+    const destination = this._audioContext.createMediaStreamDestination();
+
+    tracks.forEach(track => {
+      const source = this._audioContext.createMediaStreamSource(new MediaStream([track]));
+      source.connect(destination);
+    });
+
+    return destination.stream.getAudioTracks()[0];
+  }
+
   attachAudioTrack(streamOrTrack) {
     if (!(streamOrTrack instanceof MediaStream) &&
-        !(streamOrTrack instanceof MediaStreamTrack)) {
-      return;
-    }
+        !(streamOrTrack instanceof MediaStreamTrack)) return;
 
     try {
-      let audioTrack = streamOrTrack instanceof MediaStreamTrack ?
-                         streamOrTrack :
-                         streamOrTrack.getAudioTracks()[0];
+      const audioTrack = streamOrTrack instanceof MediaStreamTrack
+          ? streamOrTrack
+          : streamOrTrack.getAudioTracks()[0];
 
       if (!audioTrack) return;
 
       if (!this.stream) {
         this.cachedAudioTracks.push(audioTrack);
+        return;
       }
-      else {
-        //correction pb share son chrome ?
-        /*
-        if (this.isChrome) {
-          this.stream.addTrack(audioTrack);
-        }
-        else {*/
-          this.stream = new MediaStream([audioTrack, ...this.stream.getVideoTracks(), ...this.stream.getAudioTracks()])
-        //}
+
+      const existing = this.stream.getAudioTracks();
+
+      // ✅ Construire la piste finale mixée
+      const mixed = existing.length > 0
+          ? this._mixAudioTracks([...existing, audioTrack])
+          : audioTrack;
+
+      // ✅ Modifier le stream EN PLACE → pas d'émission 'stream', pas de cascade
+      existing.forEach(t => this.stream.removeTrack(t));
+      if (mixed) this.stream.addTrack(mixed);
+
+      // Pas de this.stream = new MediaStream(...) ici !
         this.emit('stream.mute');
-      }
     } catch(e) {
-      //MediaStream has no audio tracks
+      console.error('attachAudioTrack error:', e);
     }
   }
     gum(candidate, device, cmpt = 1) {
@@ -946,9 +947,9 @@ class Device extends EventEmitter {
       this.emit('record.prepare', this.info.label);
     }
 
-    if (this.audioContext) {
-      this.audioContext.close();
-      this.audioContext = null;
+    if (this._audioContext) {
+      this._audioContext.close();
+      this._audioContext = null;
     }
   }
 
