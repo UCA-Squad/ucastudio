@@ -210,7 +210,7 @@ input:checked + section {
   width: 20%;
   margin: 0 20% 0 0;
   position: relative;
-  background: #ddd;
+  background: #efefef;
   border-radius: 0.25rem;
 }
 
@@ -227,10 +227,10 @@ input:checked + section {
   left: 50%;
   transform: translate(-50%, -50%);
   text-align: center;
-  font-size: 1.5rem;
+  font-size: 2rem;
   font-weight: 300;
-  color: #666;
-  width: 100%;
+  color: #3d3d3c;
+  width: 85%;
 }
 
 .bigButton[for=create]::after {
@@ -265,10 +265,10 @@ input:checked + section {
 }
 
 .mediadevice {
-  background: #ddd;
+  background: #efefef;
   width: 30%;
   position: relative;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+  box-shadow: 0 2px 4px #efefef;
   overflow: hidden;
   visibility: visible;
   max-height: calc(100vh - 14rem);
@@ -308,7 +308,7 @@ input:checked + section {
 }
 
 .mediadevice.desktopDevice.active {
-  background: black;
+  background: #3d3d3c;
 }
 
 .mediadevice .streamControls {
@@ -317,7 +317,7 @@ input:checked + section {
   left: 0;
   width: 100%;
   height: 3rem;
-  background: rgba(48,48,48,0.9);
+  background: #3d3d3c;
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.3s, visibility 0s 0.3s;
@@ -474,8 +474,9 @@ input[id^=inputSource]:not(:checked) ~ label[for^=inputSource] ul {
 }
 
 .streamControls label:hover, .labelWebcam:hover, .streamControls label[for^="inputSource"]:hover  {
-  background: white !important;
+  background:  #efefef !important;
   color: black !important;
+  border-radius: 0.5em;
 }
 
 #advancedUserView:checked ~ .mediadevice.active .streamControls,
@@ -1925,6 +1926,13 @@ input:focus {
   opacity: 0;
   visibility: hidden;
   transition: width 0.5s, opacity 0.25s, visibility 0s 0.25s;
+}
+
+
+#desktopAudioIndicator {
+  display: none;
+  margin-left: 5px;
+  background: transparent;
 }
 
 .close {
