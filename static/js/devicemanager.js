@@ -717,7 +717,6 @@ class Device extends EventEmitter {
       const screenStream = await navigator.mediaDevices.getDisplayMedia(constraints);
 
       const hasSystemAudio = screenStream.getAudioTracks().length > 0;
-      const hasMic = micStream && micStream.getAudioTracks().length > 0;
 
       // Rassembler : audio système + éventuels tracks mic mis en cache
       const allAudioTracks = [
