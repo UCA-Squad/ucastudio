@@ -311,8 +311,10 @@ App.prototype = {
     let audioContainer = this.mediaElements.audio.parentNode;
     if (stream.getAudioTracks().length > 0){
       // (!audioContainer.classList.contains('active') || stream.getVideoTracks().length === 0) ) {
-      audioContainer.classList.add('active');
-      audAnalyser.analyse(stream);
+      if (value !== 'desktop') {
+        audioContainer.classList.add('active');
+        audAnalyser.analyse(stream);
+      }
     }
 
     if (stream.getVideoTracks().length > 0 && mediaContainer && mediaContainer.parentNode.id === 'videoView') {
@@ -1075,7 +1077,7 @@ deviceMgr.once('hasNotAlreadyAllowShare', {
     if (streamObj.stream.getVideoTracks().length > 0) {
       compositor.addStream(streamObj);
     }
-    else if (streamObj.stream.getVideoTracks().length > 0) {
+    else if (streamObj.stream.getAudioTracks().length > 0) {
       compositor.addAudioTrack(streamObj.stream.getAudioTracks()[0]);
     }
   });
