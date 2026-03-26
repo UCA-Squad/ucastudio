@@ -22,37 +22,35 @@ class Recorder extends EventEmitter {
     let chosenCodec = stream.getVideoTracks().length ? _vidCodecs[0] : _audioCodecs[0];
 
     // this.recorder = new MediaRecorder(stream, {mimeType: chosenCodec});
-    var opts = {mimeType: chosenCodec, videoBitsPerSecond : getRate(typeDevice)};
+    const opts = {mimeType: chosenCodec, videoBitsPerSecond: getRate(typeDevice)};
     this.recorder = new MediaRecorder(stream, opts);
     this.recorder.ondataavailable = function(e) {
-          var isAudioDesktopRec = false;
-          if($(".desktopDevice").hasClass('active') && $(".audioDevice").hasClass('active') && !$(".videoDevice").hasClass('active'))
-            isAudioDesktopRec = true;
+      let isAudioDesktopRec = false;
+      if($(".desktopDevice").hasClass('active') && $(".audioDevice").hasClass('active') && !$(".videoDevice").hasClass('active'))
+        isAudioDesktopRec = true;
 
-          if(isAudioDesktopRec && typeDevice !== 'audio')
-            comms.emit("binarystream"+typeDevice,e.data);
-          else if(!isAudioDesktopRec){
-            if(typeDevice === 'audio')
-              typeDevice = 'desktop';
-
-            comms.emit("binarystream"+typeDevice,e.data);
-          }
+      if(isAudioDesktopRec && typeDevice !== 'audio')
+        comms.emit("binarystream"+typeDevice,e.data);
+      else if(!isAudioDesktopRec){
+        const effectiveType = typeDevice === 'audio' ? 'desktop' : typeDevice;
+        comms.emit('binarystream' + effectiveType, e.data);
+      }
     };
 
     this.recorder.onerror = e => {
-      //Erreur A GERER !!! Pas de on derrière
+      //Erreur À GÉRER !!! Pas de on derrière
       this.emit('record.error', e);
     };
 
     this.recorder.onstart = () => {
-      //A GERER !!! Pas de on derrière
+      //À GÉRER !!! Pas de on derrière
       this.emit('record.start', true);
     };
 
     this.result = null;
 
     this.recorder.onstop = () => {
-      self.recorder = null;
+      this.recorder = null;
     };
 
     Object.defineProperty(this, 'recData', {
@@ -108,9 +106,8 @@ class Recorder extends EventEmitter {
  */
 function getRate(type)
 {
-  var rateValue;
-
-  var reso;
+  let rateValue;
+  let reso;
   if(type === 'webcam') {
     reso = $("#resoWebCamChoose").val();
     switch (reso) {
@@ -133,6 +130,7 @@ function getRate(type)
         break;
       case 'fullhd':
         rateValue = '4000000';
+        break;
       default:
         rateValue = '';
     }

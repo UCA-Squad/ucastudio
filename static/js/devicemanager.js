@@ -2,6 +2,7 @@ class DeviceManager extends EventEmitter {
 
   constructor() {
     super();
+    this._deviceLabels = new Map();
     this.video = {};
     this.audio = {};
     this.desktop = new Device({
@@ -63,6 +64,16 @@ class DeviceManager extends EventEmitter {
     // Si des périphériques sauvegardés sont disponibles, utilisez-les
     const devicesToProcess = savedDevices.length > 0 ? savedDevices : null;
     const processDevices = (devices) => {
+      // ✅ Stocker tous les labels au moment de l'énumération
+      devices.forEach(device => {
+        if (device.deviceId) {
+          this._deviceLabels.set(device.deviceId, {
+            label: device.label,
+            kind: device.kind
+          });
+        }
+      });
+
       ['audio', 'video'].forEach(deviceType => {
         this[deviceType] = devices.filter(device => device.kind === `${deviceType}input` && device.deviceId !== `communications`)
             .reduce((result, info) => {
@@ -79,7 +90,7 @@ class DeviceManager extends EventEmitter {
                   result[info.deviceId].record();
                 }
 
-                if (stream.getAudioTracks().length > 0) {
+                if (stream.getAudioTracks().length > 0 && deviceType === 'audio') {
                   this.desktop.attachAudioTrack(stream);
                 }
               });
@@ -709,7 +720,7 @@ class Device extends EventEmitter {
           video: { width: { ideal: 640 }, height: { ideal: 480 }, frameRate: { ideal: 20, max: 30 } }
         };
       } else {
-        constraints = { ...audioConstraints, ...this.constraints };
+        constraints = { ...audioConstraints, ...this.constraints.video };
       }
     }
 
@@ -781,8 +792,13 @@ class Device extends EventEmitter {
     if (!tracks || tracks.length === 0) return null;
     if (tracks.length === 1) return tracks[0];
 
-    if (this._audioContext) this._audioContext.close();
-    this._audioContext = new AudioContext();
+    // ✅ Réutiliser l'AudioContext existant au lieu de le recréer
+    if (!this._audioContext) {
+      this._audioContext = new AudioContext();
+      this._audioContext.resume(); // fire-and-forget
+    }
+
+    // Nouvelle destination à chaque mix (obligatoire)
     const destination = this._audioContext.createMediaStreamDestination();
 
     tracks.forEach(track => {
@@ -804,6 +820,13 @@ class Device extends EventEmitter {
 
       if (!audioTrack) return;
 
+      // ✅ Pré-créer et résumer l'AudioContext ICI pendant le clic utilisateur
+      // pour éviter la suspension Chrome au moment du mix
+      if (!this._audioContext) {
+        this._audioContext = new AudioContext();
+        this._audioContext.resume();
+      }
+
       if (!this.stream) {
         this.cachedAudioTracks.push(audioTrack);
         return;
@@ -811,78 +834,78 @@ class Device extends EventEmitter {
 
       const existing = this.stream.getAudioTracks();
 
-      // ✅ Construire la piste finale mixée
       const mixed = existing.length > 0
           ? this._mixAudioTracks([...existing, audioTrack])
           : audioTrack;
 
-      // ✅ Modifier le stream EN PLACE → pas d'émission 'stream', pas de cascade
       existing.forEach(t => this.stream.removeTrack(t));
-      if (mixed) this.stream.addTrack(mixed);
+      if (mixed) {
+        this.stream.addTrack(mixed);
+      }
 
-      // Pas de this.stream = new MediaStream(...) ici !
-        this.emit('stream.mute');
+      this.emit('stream.mute');
     } catch(e) {
       console.error('attachAudioTrack error:', e);
     }
   }
-    gum(candidate, device, cmpt = 1) {
 
-        let constraints = {
-            audio: false,
-            video: {
-                deviceId: device.id ? { exact: device.id } : undefined,
-                width: { ideal: candidate.width },
-                height: { ideal: candidate.height }
-            }
-        };
+  gum(candidate, device, cmpt = 1) {
 
-        if (cmpt == 1) {
-            //durant le check de reso, on desactive la possiblite de lancer un rec
-            $('#startRecord').addClass('cantRecord');
-            document.getElementById("startRecord").disabled = true;
-            if($('#startStopTitle').is(':visible'))
-                $('#startStopTitle').hide();
-            $('main').append('<input type="hidden" id="gumRunning" />');
-        }
-        else if (cmpt >= this.candidates.length) {
-            $('#startRecord').removeClass('cantRecord');
-            $('#startRecord').addClass('canRecord');
-            document.getElementById("startRecord").disabled = false;
-            $('#gumRunning').remove();
-            if(!$('#startStopTitle').is(':visible'))
-                $('#startStopTitle').show();
-            $('#listResoWebCam > li:visible:last').addClass('last-visible-li');
-        }
+      let constraints = {
+          audio: false,
+          video: {
+              deviceId: device.id ? { exact: device.id } : undefined,
+              width: { ideal: candidate.width },
+              height: { ideal: candidate.height }
+          }
+      };
 
-        setTimeout(() => {
-            navigator.mediaDevices.getUserMedia(constraints)
-                .then(stream => {
-                    const track = stream.getVideoTracks()[0];
-                    const settings = track.getSettings();
+      if (cmpt == 1) {
+          //durant le check de reso, on desactive la possiblite de lancer un rec
+          $('#startRecord').addClass('cantRecord');
+          document.getElementById("startRecord").disabled = true;
+          if($('#startStopTitle').is(':visible'))
+              $('#startStopTitle').hide();
+          $('main').append('<input type="hidden" id="gumRunning" />');
+      }
+      else if (cmpt >= this.candidates.length) {
+          $('#startRecord').removeClass('cantRecord');
+          $('#startRecord').addClass('canRecord');
+          document.getElementById("startRecord").disabled = false;
+          $('#gumRunning').remove();
+          if(!$('#startStopTitle').is(':visible'))
+              $('#startStopTitle').show();
+          $('#listResoWebCam > li:visible:last').addClass('last-visible-li');
+      }
 
-                    // Vérifie si la résolution obtenue correspond vraiment
-                    if(settings.width === candidate.width &&
-                        settings.height === candidate.height) {
-                        if(candidate.id) $('.' + candidate.id).show();
-                    } else {
-                        if(candidate.id) $('#listResoWebCam .' + candidate.id).hide();
-                    }
+      setTimeout(() => {
+          navigator.mediaDevices.getUserMedia(constraints)
+              .then(stream => {
+                  const track = stream.getVideoTracks()[0];
+                  const settings = track.getSettings();
 
-                    stream.getTracks().forEach(track => track.stop());
+                  // Vérifie si la résolution obtenue correspond vraiment
+                  if(settings.width === candidate.width &&
+                      settings.height === candidate.height) {
+                      if(candidate.id) $('.' + candidate.id).show();
+                  } else {
+                      if(candidate.id) $('#listResoWebCam .' + candidate.id).hide();
+                  }
 
-                    if (cmpt < this.candidates.length)
-                        this.gum(this.candidates[cmpt++], device, cmpt);
-                })
-                .catch(err => {
-                    if(candidate.id)
-                        $('#listResoWebCam .' + candidate.id).hide();
+                  stream.getTracks().forEach(track => track.stop());
 
-                    if (cmpt < this.candidates.length)
-                        this.gum(this.candidates[cmpt++], device, cmpt);
-                });
-        }, (this.stream ? 200 : 0));
-    }
+                  if (cmpt < this.candidates.length)
+                      this.gum(this.candidates[cmpt++], device, cmpt);
+              })
+              .catch(err => {
+                  if(candidate.id)
+                      $('#listResoWebCam .' + candidate.id).hide();
+
+                  if (cmpt < this.candidates.length)
+                      this.gum(this.candidates[cmpt++], device, cmpt);
+              });
+      }, (this.stream ? 200 : 0));
+  }
 
   changeResolution(res) {
     let i;
@@ -924,9 +947,8 @@ class Device extends EventEmitter {
         throw new Error("Can't record as stream is not active");
       }
 
-      if(this.stream.active != false)
-      {
-        this.recorder = new Recorder(this.stream, this.deviceType);
+      if(this.stream.active != false) {
+        this.recorder = new Recorder(this.stream, this.deviceType === 'video' ? 'webcam' : this.deviceType);
         this.recorder.on('record.complete', media => {
           this.emit('record.complete', media);
           this.recorder = null;
@@ -957,20 +979,12 @@ class Device extends EventEmitter {
   }
 
   getDevice(id)  {
-    navigator.mediaDevices.enumerateDevices()
-        .then(function(devices) {
-          devices.forEach(function(device) {
-              if (device.deviceId === id) {
-                if (device.kind === 'audioinput')
-                  $('.labelMicSelect').html(trimLabelDevice(device.label));
-                if (device.kind === 'videoinput')
-                  $('.labelCamSelect').html(trimLabelDevice(device.label));
-              }
-          });
-        })
-        .catch(function(err) {
-          console.log(err.name + ": " + err.message);
-        });
+      const device = this._deviceLabels.get(id);
+      if (!device) return;
+
+      const label = trimLabelDevice(device.label);
+      if (device.kind === 'audioinput') $('.labelMicSelect').html(label);
+      if (device.kind === 'videoinput') $('.labelCamSelect').html(label);
     }
 
 

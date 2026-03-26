@@ -4,6 +4,16 @@ const compositor = new Compositor();
 const rafLoop = new RAFLoop();
 const audAnalyser = new AudioAnalyser();
 const peers = {};
+const _browser = (() => {
+  let isFirefox;
+  if (navigator.userAgentData) {
+    isFirefox = navigator.userAgentData.brands.some(brand => brand.brand === 'Firefox');
+  } else {
+    isFirefox = navigator.userAgent.includes('Firefox');
+  }
+  const isChrome = !!window.chrome && navigator.userAgent.indexOf("Chrome") > -1;
+  return { isFirefox, isChrome };
+})();
 
 
 function App() {
@@ -21,7 +31,6 @@ function App() {
                         }, {});
 
   this.addDeviceToggle = document.getElementById('addDevice');
-  this.cover = document.getElementById('cover');
 
   this.audioCanvas = document.querySelector('#audio ~ canvas');
 
@@ -127,7 +136,7 @@ App.prototype = {
         this.mediaToggles[deviceType].value = (deviceMgr[deviceType].info || {}).deviceId ||
             Object.keys(deviceMgr[deviceType])
                 .filter(device => device !== 'default')
-                .reduce((id, current) => id = id || current, null);
+                .reduce((id, current) => id || current, null);
       }
     });
 
@@ -178,16 +187,6 @@ App.prototype = {
     document.querySelector('label.pull-left.inputSource.labelDesktop').addEventListener('click',this.chooseResolution.bind(this), false);
 
   },
-  detectBrowser: function() {
-    let isFirefox;
-    if (navigator.userAgentData) {
-      isFirefox = navigator.userAgentData.brands.some(brand => brand.brand === 'Firefox');
-    } else {
-      isFirefox = navigator.userAgent.includes('Firefox');
-    }
-    const isChrome = !!window.chrome && navigator.userAgent.indexOf("Chrome") > -1;
-    return { isFirefox, isChrome };
-  },
   toggleStream: function(e) {
 
     if(this.isRecording)
@@ -222,7 +221,7 @@ App.prototype = {
            if (e.target.value !== 'desktop')
              $('#alertNoWebcam').show();
            else {
-             const { isFirefox, isChrome } = this.detectBrowser();
+             const { isFirefox} = _browser;
              if (isFirefox) {  // Ne l'afficher que si l'indication a déjà été bloquée une fois
                this.afficherIndicationSuppressionBlocage();
              }
@@ -271,7 +270,7 @@ App.prototype = {
     }, 10000);
   },
   getTypeOfRec: function(mediaStream) {
-    const { isFirefox, isChrome } = this.detectBrowser();
+    const { isFirefox, isChrome } = _browser;
     const videoTrack = mediaStream.getVideoTracks()[0];
 
     if (isFirefox) {
@@ -433,7 +432,7 @@ App.prototype = {
     else //swich de mic ou de video, les deux run
     {
       //on vérifie si c'est just un switch de mic
-      var isOnlyChangeMic = false;
+      let isOnlyChangeMic = false;
       if(parent.parentNode.parentNode.classList.contains('labelAudio'))
         isOnlyChangeMic = true;
 
@@ -647,7 +646,7 @@ App.prototype = {
     });
 
 
-    //on ajoute un event click sur le switch de l'audio et on créer la liste
+    //on ajoute un event click sur le switch de l'audio et ont créé la liste
     let inputSourcesAudio = document.querySelectorAll('.inputSourceAudio ul');
     Object.keys(details)
         .filter(key => details[key].deviceType === 'audio')
@@ -701,19 +700,6 @@ App.prototype = {
           .forEach(input => input.checked = false);
     }
   },
-  chromeInstall: function() {
-    if (chrome && chrome.app) {
-      chrome.webstore.install(
-        this.chromeStoreLink,
-        function() {
-          location.reload();
-        },
-        function(e) {
-          console.log('error installing', e);
-        }
-      );
-    }
-  },
   startRecord: function() {
 
     if($(".desktopDevice").hasClass('active'))
@@ -753,8 +739,8 @@ App.prototype = {
     $('#startRecord').attr("title", "Arrêter l'enregistrement");
     $('#pauseTitle').show();
 
-    var resDesktop = $('#resoDesktopChoose').val();
-    var resWebCam = $('#resoWebCamChoose').val();
+    const resDesktop = $('#resoDesktopChoose').val();
+    const resWebCam = $('#resoWebCamChoose').val();
 
     if ($(".videoDevice").hasClass('active') && $(".desktopDevice").hasClass('active'))
       comms.emit('start', 'video-and-desktop', resDesktop, resWebCam);
@@ -929,13 +915,13 @@ App.prototype = {
     this.locationEl.dispatchEvent(keyupEvent)
   },
   uploadMedia: function() {
-      var infos = {};
+      const infos = {};
       infos['titleUpload'] = document.getElementById('titleUpload').value;
       infos['presenterUpload'] = document.getElementById('presenterUpload').value;
       infos['locationUpload'] = document.getElementById('locationUpload').value;
       infos['descUpload'] = document.getElementById('descUpload').value;
       infos['mustBeUpload'] = document.getElementById('uploadMedia').checked;
-      var select = document.getElementById('listseries');
+      const select = document.getElementById('listseries');
       infos['idSerie'] = select.options[select.selectedIndex].value;
       comms.emit('infos', JSON.stringify(infos));
   },

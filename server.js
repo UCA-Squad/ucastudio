@@ -114,7 +114,7 @@ io.on('connection', function(socket){
 					'-loglevel', 'quiet',
 					'-i', '-',
 					'-c:v', 'copy', '-preset', 'fast',
-					'-an',
+					'-c:a', 'copy', //attention !!
 					'-use_wallclock_as_timestamps', '1',
 					'-threads', '0',
 					'-f', 'webm',
@@ -240,6 +240,7 @@ io.on('connection', function(socket){
 					socket.emit('fatal', 'ffmpep not processing video.');
 					ffmpeg_process.stdin.end();
 					ffmpeg_process.kill('SIGINT');
+					return;
 				} catch (e) {
 					console.warn('End ffmpeg not processing failed video...');
 				}
@@ -262,6 +263,7 @@ io.on('connection', function(socket){
 					socket.emit('fatal', 'ffmpep not processing desktop.');
 					ffmpeg_process2.stdin.end();
 					ffmpeg_process2.kill('SIGINT');
+					return;
 				} catch (e) {
 					console.warn('End ffmpeg2 not processing failed desktop...');
 				}
@@ -312,8 +314,7 @@ io.on('connection', function(socket){
 			}
 		});
 		socket.on('disconnect', function () {
-			feedStream = false;
-			feedStream2 = false;
+			feedStream = false, feedStream2 = false;
 			if (ffmpeg_process)
 				try {
 					ffmpeg_process.stdin.end();
@@ -377,7 +378,7 @@ io.on('connection', function(socket){
 
 				const width = 1920;
 				const height = 1080;
-				const videowidth = 640;
+				const videowidth = 640; //480;
 				const slidewidth = 1280;
 				const leftmargin = 0; //10;
 
@@ -428,7 +429,7 @@ io.on('connection', function(socket){
 				socket.emit('isEtudiant', session.isEtudiant);
 
 				async function getDisplayNameIfUid(titleSerie) {
-					return new Promise((resolve) => {
+					return new Promise((resolve, reject) => {
 						getLdapInfos(titleSerie, function (displayName) {
 							resolve(displayName);
 						});
@@ -436,7 +437,7 @@ io.on('connection', function(socket){
 				}
 
 				getListSeries(socket, function (listSeries) {
-					const tranlateSeries = new Promise((resolve) => {
+					const tranlateSeries = new Promise((resolve, reject) => {
 						async function seriesIteration() {
 							for (const serie of listSeries) {
 								if (serie['title'][0].match('^[a-zA-Z0-9_]+$') != null && serie['title'][0] != uid) {
@@ -451,7 +452,7 @@ io.on('connection', function(socket){
 						resolve(seriesIteration());
 					});
 
-					tranlateSeries.then(function () {
+					tranlateSeries.then(function (value) {
 						socket.emit('listseries', listSeries, uid, session.mail);
 						if (typeof socket.handshake.headers.referer !== 'undefined' && socket.handshake.headers.referer.indexOf('serieid') > -1) {
 							let infos = socket.handshake.headers.referer.split('?');
@@ -506,26 +507,26 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 	const session = socket.request.session;
 
 	if(session &&  session.usermediadatas !== 'undefined') {
-		//on test si c'est pas undefined ?
-		const usermediainfosToUpload = JSON.parse(session.usermediadatas);
+		//on test si c'est pas undefined  ?
+		var usermediainfosToUpload = JSON.parse(session.usermediadatas);
 		const agent = parseUserAgent(socket);
 
-		const d = new Date();
-		const startDate = d.getFullYear() + '-' + ("0" + (d.getMonth() + 1)).slice(-2) + '-' + ("0" + d.getDate()).slice(-2);
-		const startTime = d.getUTCHours() + ':' + (d.getMinutes() < 10 ? '0' : '') + d.getMinutes();
+		var d = new Date();
+		var startDate = d.getFullYear() + '-' + ("0" + (d.getMonth() + 1)).slice(-2) + '-' + ("0" + d.getDate()).slice(-2);
+		var startTime = d.getUTCHours() + ':' + (d.getMinutes()<10?'0':'') + d.getMinutes();
 
-		const idFileUpload = socket.handshake.issued;
-		const uid = session.cas_user;
-		const mustBeUpload = usermediainfosToUpload.mustBeUpload;
-		let desc = 'N/R';
-		let typeOfFlavor = "presenter";
+		var idFileUpload = socket.handshake.issued;
+		var uid = session.cas_user;
+		var mustBeUpload = usermediainfosToUpload.mustBeUpload;
+		var desc = 'N/R';
+		var typeOfFlavor = "presenter";
 		if(usermediainfosToUpload.descUpload !== '')
 			desc = usermediainfosToUpload.descUpload;
-		let location = 'N/R';
+		var location = 'N/R';
 		if(usermediainfosToUpload.locationUpload !== '')
 			location = usermediainfosToUpload.locationUpload;
 
-		let nameFile = uid + '/' + idFileUpload + '/' + idFileUpload + ".webm";
+		var nameFile = uid + '/' + idFileUpload + '/' + idFileUpload + ".webm";
 
 		if(onlySecondStream)
 			nameFile = uid + '/' + idFileUpload + '/' + idFileUpload + "screen.webm";
@@ -535,19 +536,19 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 
 			usermediainfosToUpload.idSerie = idSerie;
 
-			let pathMediaToFFprobe;
+			var pathMediaToFFprobe;
 			if(hasSecondStream || onlySecondStream)
 				pathMediaToFFprobe = config.path_folder_record + uid + '/' + idFileUpload + '/' + idFileUpload + "screen.webm";
 			else
 				pathMediaToFFprobe = config.path_folder_record + nameFile;
 
 			//on récup la duration du média
-			let duration = '00:00:00';
+			var duration = '00:00:00';
 			fluentFFMPEG.ffprobe(pathMediaToFFprobe, function(err, metadataFFprobe) {
 
 				try {
 
-					let typeEncode = '';
+					var typeEncode = '';
 
 					metadataFFprobe.streams.forEach(function(obj) {
 						if(obj.codec_type === 'video')
@@ -558,8 +559,8 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 
 					let metadata = getMetadatasNewEvent(usermediainfosToUpload, desc, startDate, startTime, duration, location)
 
-					const js2xmlparser = require("js2xmlparser");
-					const metadataXML = js2xmlparser.parse("media", JSON.parse(metadata)[0]);
+					var js2xmlparser = require("js2xmlparser");
+					var metadataXML  = js2xmlparser.parse("media", JSON.parse(metadata)[0]);
 					try {
 						fs.writeFileSync(config.path_folder_record + uid + '/' + idFileUpload + '/metadata.xml', metadataXML);
 					} catch (err) {
@@ -569,7 +570,7 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 
 					if(mustBeUpload)
 					{
-						let processing;
+						var processing;
 						if (isAudioFile) {
 							processing = '{\n' +
 								'  "workflow": "' + config.opencast_workflow_audio + '"\n' +
@@ -588,7 +589,7 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 							typeOfFlavor = "presentation";
 
 						let FormData = require('form-data');
-						const data = new FormData();
+						var data = new FormData();
 
 						if (hasSecondStream) {
 							data.append('presenter', fs.createReadStream(config.path_folder_record + uid + '/' + idFileUpload + '/' + idFileUpload + ".webm"), { filename: 'metadata/' + idFileUpload + '.webm'});
@@ -605,16 +606,16 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 						data.append('metadata', metadata);
 						data.append('processing', processing);
 
-						const options = {
+						var options = {
 							method: 'POST',
-							url: config.opencast_events_url,
+							url:  config.opencast_events_url,
 							headers: {
 								'cache-control': 'no-cache',
 								'Authorization': 'Basic ' + config.opencast_authentication,
 								'content-type': 'multipart/form-data;',
 								...data.getHeaders()
 							},
-							data: data,
+							data : data,
 							maxContentLength: Infinity,
 							maxBodyLength: Infinity
 						};
@@ -751,12 +752,12 @@ function getMetadatasNewEvent(usermediainfosToUpload, desc, startDate, startTime
  */
 function getLdapInfos(uid, callback)
 {
-	const ldap = require('ldapjs');
-	const client = ldap.createClient({
+	var ldap = require('ldapjs');
+	var client = ldap.createClient({
 		url: config.path_ldap_uca
 	});
-	const opts = {
-		filter: '(uid=' + uid + ')',
+	var opts = {
+		filter: '(uid='+uid+')',
 		scope: 'sub',
 		attributes: ['sn', 'cn', 'displayName', 'mail', 'CLFDstatus']
 	};
@@ -798,8 +799,8 @@ function getListSeries(socket, callback)
 {
 	const session = socket.request.session;
 	if (session && session.cas_user) {
-		const uid = session.cas_user.toUpperCase();
-		const data = JSON.stringify({
+		var uid = session.cas_user.toUpperCase();
+		var data = JSON.stringify({
 			"query": {
 				"bool": {
 					"must": [
@@ -816,7 +817,7 @@ function getListSeries(socket, callback)
 			});
 		}
 
-		const configES = {
+		var configES = {
 			method: 'get',
 			url: config.opencast_series_ES_url,
 			headers: {'Content-Type': 'application/json'},
@@ -829,8 +830,8 @@ function getListSeries(socket, callback)
 				callback(response.data.hits.hits.map(function (hit) {
 					return hit._source
 				}).sort(function (a, b) {
-					const titleA = a.title[0].toUpperCase();
-					const titleB = b.title[0].toUpperCase();
+					var titleA = a.title[0].toUpperCase();
+					var titleB = b.title[0].toUpperCase();
 					return (titleA < titleB) ? -1 : (titleA > titleB) ? 1 : 0;
 				}));
 			})
@@ -849,17 +850,15 @@ function getListSeries(socket, callback)
 async function getListSeriresWritable (uid, listSeries)
 {
 	let result = [];
-	let i = 0, len = listSeries.length;
-	let rst;
-	for (; i < len; i++) {
+	for (var i = 0, len = listSeries.length; i < len; i++) {
 		rst = await checkSerieAcl(uid, listSeries[i]);
-		if (typeof rst !== 'undefined' && rst.title != uid.toLowerCase() + '_inwicast_medias')
+		if(typeof rst !== 'undefined' && rst.title != uid.toLowerCase()+'_inwicast_medias')
 			result.push(rst);
 	}
 
 	result.sort(function (a, b) {
-		const titleA = a.title.toUpperCase();
-		const titleB = b.title.toUpperCase();
+		var titleA = a.title.toUpperCase();
+		var titleB = b.title.toUpperCase();
 		return (titleA < titleB) ? -1 : (titleA > titleB) ? 1 : 0;
 	});
 
@@ -875,7 +874,7 @@ async function getListSeriresWritable (uid, listSeries)
 function checkSerieAcl(uid, serieinfo)
 {
 	return new Promise(function (resolve) {
-		const options = {
+		var options = {
 			method: 'GET',
 			url: config.opencast_series_url + '/' + serieinfo.identifier + '/acl',
 			rejectUnauthorized: false,
@@ -887,9 +886,8 @@ function checkSerieAcl(uid, serieinfo)
 
 		axios.request(options)
 			.then(function (listSeries2) {
-				let serieInfo = listSeries2.data;
-				let j = 0, len = serieInfo.length;
-				for (; j < len; j++)
+				serieInfo =listSeries2.data;
+				for (var j = 0, len = serieInfo.length; j < len; j++)
 					if (serieInfo[j].action === 'write' && serieInfo[j].allow === true && serieInfo[j].role.indexOf(uid) > -1)
 						resolve(serieinfo);
 				resolve();
@@ -918,7 +916,7 @@ function createSerie(uid, socket, idSerieSelect, mustBeUpload)
 			if(session.isEtudiant)
 				uid = 'etd_'+uid;
 
-			let idSerieMyFolder = null;
+			var idSerieMyFolder = null;
 			getListSeries(socket, function (listSeries) {
 				listSeries.forEach(function (serie) {
 					if(serie.title === uid ||  serie.title === realUserName)
@@ -929,12 +927,12 @@ function createSerie(uid, socket, idSerieSelect, mustBeUpload)
 					resolve(idSerieMyFolder);
 				else
 				{
-					const FormData = require('form-data');
-					const data = new FormData();
+					var FormData = require('form-data');
+					var data = new FormData();
 					data.append('acl', getAclSerie(realUserName));
 					data.append('metadata', getMetadatasSerie(uid, socket));
 
-					const options = {
+					var options = {
 						method: "POST",
 						url: config.opencast_series_url,
 						ca: fs.readFileSync(config.opencast_cert),
@@ -1035,8 +1033,8 @@ function getMetadatasSerie(uid, socket)
 function checkIsFileIsWrite(socket, path, typeOfRec, agent)
 {
 	const session = socket.request.session;
-	const uid = session.cas_user;
-	const socketissued = socket.handshake.issued;
+	var uid = session.cas_user;
+	var socketissued = socket.handshake.issued;
 
 	fs.readdir(config.path_folder_record + uid + '/' + socketissued + '/', function (err, files) {
 		try {
@@ -1073,7 +1071,7 @@ function checkIsFileIsWrite(socket, path, typeOfRec, agent)
  * @returns {string}
  */
 function getDateNow() {
-	const dateNowTmp = new Date();
+	var dateNowTmp = new Date();
 	return dateNowTmp.getDate() + '-' + (dateNowTmp.getMonth() + 1) + '-' + dateNowTmp.getFullYear() + ';' + dateNowTmp.getHours() + ':' + dateNowTmp.getMinutes() + ':' + dateNowTmp.getSeconds();
 }
 
@@ -1116,7 +1114,7 @@ async function sendEmailError(err, user) {
  */
 function getRate(type, reso)
 {
-	let rateValue;
+	var rateValue;
 
 	if(type === 'webcam') {
 		switch (reso) {
