@@ -2,7 +2,12 @@ class DeviceManager extends EventEmitter {
 
   constructor() {
     super();
-    this._deviceLabels = new Map();
+    Object.defineProperty(this, '_deviceLabels', {
+      value: new Map(),
+      writable: true,
+      enumerable: false,
+      configurable: true
+    });
     this.video = {};
     this.audio = {};
     this.desktop = new Device({

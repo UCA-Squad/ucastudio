@@ -144,8 +144,26 @@ class Compositor extends EventEmitter {
       video.play();
     }
 
-    if (this.stream && streamObj.stream.getAudioTracks().length) {
-      this.addAudioTrack(streamObj.stream.getAudioTracks()[0]);
+    // if (this.stream && streamObj.stream.getAudioTracks().length) {
+    //   this.addAudioTrack(streamObj.stream.getAudioTracks()[0]);
+    // }
+
+    if (streamObj.stream.getAudioTracks().length) {
+      streamObj.stream.getAudioTracks().forEach(track => {
+        if (this.stream) {
+          // Compositor déjà démarré → ajouter directement
+          this.addAudioTrack(track, streamObj.stream);
+        } else {
+          // Compositor pas encore démarré → mettre en attente
+          this._pendingAudioTracks = this._pendingAudioTracks || [];
+          if (!this._pendingAudioTracks.some(item => {
+            const t = item instanceof MediaStreamTrack ? item : item.track;
+            return t.id === track.id;
+          })) {
+            this._pendingAudioTracks.push({ track, sourceStream: streamObj.stream });
+          }
+        }
+      });
     }
   }
 
@@ -157,6 +175,7 @@ class Compositor extends EventEmitter {
       }
 
       delete this.streams[id];
+      resolve();
     });
   }
 
@@ -211,40 +230,6 @@ class Compositor extends EventEmitter {
       });
   }
 
-  start() {
-    this.emit('subscribe.raf', this.draw, function(token) {
-      this.rafToken = token;
-    });
-
-    this.stream = this.canvas.captureStream(30);
-    for (let key in this.streams) {
-      let streamObj = this.streams[key];
-      // ✅ Toutes les tracks, pas seulement [0]
-      streamObj.stream.getAudioTracks().forEach(track => {
-        this.addAudioTrack(track);
-      });
-      }
-
-    // ✅ Tracks en attente (mic ajouté avant start)
-    if (this._pendingAudioTracks && this._pendingAudioTracks.length) {
-      this._pendingAudioTracks.forEach(track => this.addAudioTrack(track));
-      this._pendingAudioTracks = [];
-    }
-  }
-
-  stop() {
-    this.emit('unsubscribe.raf', this.rafToken, () => this.rafToken = null);
-    this.stream = null;
-    this.emit('stream.remove', 'composite');
-
-    if (this._audioContext) {
-      this._audioContext.close();
-      this._audioContext = null;
-      this._audioDestination = null;
-      this._audioSourcesMap = new Map();
-    }
-  }
-
   _getOrCreateMixer() {
     if (!this._audioContext) {
       this._audioContext = new AudioContext();
@@ -254,29 +239,36 @@ class Compositor extends EventEmitter {
   }
 
   addAudioTrack(track, sourceStream = null) {
-    if (!track) return;
+    // ✅ Sécurité : rejeter si c'est un objet au lieu d'un MediaStreamTrack
+    if (!track || !(track instanceof MediaStreamTrack)) {
+      console.warn('[addAudioTrack] track invalide:', track);
+      return;
+    }
 
     if (!this.stream) {
       this._pendingAudioTracks = this._pendingAudioTracks || [];
-      if (!this._pendingAudioTracks.some(t => t.id === track.id)) {
+      if (!this._pendingAudioTracks.some(item => {
+        const t = item instanceof MediaStreamTrack ? item : item.track;
+        return t.id === track.id;
+      })) {
         this._pendingAudioTracks.push({ track, sourceStream });
-    }
+      }
       return;
     }
 
     if (this._audioSourcesMap.has(track.id)) return;
 
     const destination = this._getOrCreateMixer();
-
-    const audioStream = new MediaStream([track]);
-
-    const source = this._audioContext.createMediaStreamSource(audioStream);
+    const source = this._audioContext.createMediaStreamSource(new MediaStream([track]));
     source.connect(destination);
     this._audioSourcesMap.set(track.id, source);
 
     const mixedTrack = destination.stream.getAudioTracks()[0];
-    this.stream.getAudioTracks().forEach(t => this.stream.removeTrack(t));
-    if (mixedTrack) this.stream.addTrack(mixedTrack);
+    const alreadyInStream = this.stream.getAudioTracks().some(t => t.id === mixedTrack.id);
+    if (!alreadyInStream) {
+      this.stream.getAudioTracks().forEach(t => this.stream.removeTrack(t));
+      this.stream.addTrack(mixedTrack);
+    }
 
     this.emit('stream.mute');
   }
