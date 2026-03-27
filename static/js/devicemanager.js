@@ -82,9 +82,8 @@ class DeviceManager extends EventEmitter {
       ['audio', 'video'].forEach(deviceType => {
         this[deviceType] = devices.filter(device => device.kind === `${deviceType}input` && device.deviceId !== `communications`)
             .reduce((result, info) => {
-              result[info.deviceId] = new Device(info);
+              result[info.deviceId] = new Device(info, this._deviceLabels);
 
-              // console.log(info.deviceId);
               if (info.deviceId === '') {
                 this.emit('hasNotAlreadyAllowShare', true);
               }
@@ -198,13 +197,14 @@ class DeviceManager extends EventEmitter {
 
 class Device extends EventEmitter {
 
-  constructor(device) {
+  constructor(device, deviceLabels = null) {
     super();
 
     let _stream = null;
     this.recorder = null;
     this.cachedAudioTracks = [];
     this.captureSystemAudio = false;
+    this._deviceLabels = deviceLabels;
 
     let _candidates = [
       {
@@ -436,8 +436,9 @@ class Device extends EventEmitter {
 
                   tracks = stream.getTracks();
                   for(i = 0; i < tracks.length; i++){
-                    if(tracks[i].kind === 'audio')
+                    if(tracks[i].kind === 'audio') {
                       this.getDevice(tracks[i].getSettings().deviceId)
+                    }
                   }
                 }
                 else
@@ -634,8 +635,9 @@ class Device extends EventEmitter {
               this.stream = stream;
 
               const tracks = stream.getTracks();
-              for(let i = 0; i < tracks.length; i++)
+              for(let i = 0; i < tracks.length; i++) {
                 this.getDevice(tracks[i].getSettings().deviceId)
+              }
 
               resolve(stream);
 
@@ -839,10 +841,12 @@ class Device extends EventEmitter {
 
       const existing = this.stream.getAudioTracks();
 
+      // ✅ Construire la piste finale mixée
       const mixed = existing.length > 0
           ? this._mixAudioTracks([...existing, audioTrack])
           : audioTrack;
 
+      // ✅ Modifier le stream EN PLACE → pas d'émission 'stream', pas de cascade
       existing.forEach(t => this.stream.removeTrack(t));
       if (mixed) {
         this.stream.addTrack(mixed);
@@ -866,7 +870,7 @@ class Device extends EventEmitter {
       };
 
       if (cmpt == 1) {
-          //durant le check de reso, on desactive la possiblite de lancer un rec
+          //durant le check de reso, on désactive la possibilité de lancer un rec
           $('#startRecord').addClass('cantRecord');
           document.getElementById("startRecord").disabled = true;
           if($('#startStopTitle').is(':visible'))
@@ -953,7 +957,7 @@ class Device extends EventEmitter {
       }
 
       if(this.stream.active != false) {
-        this.recorder = new Recorder(this.stream, this.deviceType === 'video' ? 'webcam' : this.deviceType);
+        this.recorder = new Recorder(this.stream, this.deviceType);
         this.recorder.on('record.complete', media => {
           this.emit('record.complete', media);
           this.recorder = null;
@@ -984,6 +988,8 @@ class Device extends EventEmitter {
   }
 
   getDevice(id)  {
+      if (!this._deviceLabels) return;
+
       const device = this._deviceLabels.get(id);
       if (!device) return;
 

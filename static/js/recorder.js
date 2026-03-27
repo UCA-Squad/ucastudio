@@ -108,7 +108,7 @@ function getRate(type)
 {
   let rateValue;
   let reso;
-  if(type === 'webcam') {
+  if(type === 'webcam' || type === 'video') {
     reso = $("#resoWebCamChoose").val();
     switch (reso) {
       case 'nhd':
