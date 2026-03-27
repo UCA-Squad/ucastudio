@@ -187,11 +187,11 @@ io.on('connection', function(socket){
 				ffmpeg_process2.on('exit', function (e) {
 					console.log('child process desktop exit - '+ uid +' - '+ socketissued +' - status '+e);
 					if(m === 'onlyaudio' || m === 'onlydesktop' || m === 'audio-and-desktop') {
-                        if(m === 'onlyaudio')
+						if(m === 'onlyaudio')
 							uploadFile(socket, false, true, true);
 						else
-                            uploadFile(socket, false, true, false, true);
-                    }
+							uploadFile(socket, false, true, false, true);
+					}
 				});
 			}
 
@@ -240,7 +240,6 @@ io.on('connection', function(socket){
 					socket.emit('fatal', 'ffmpep not processing video.');
 					ffmpeg_process.stdin.end();
 					ffmpeg_process.kill('SIGINT');
-					return;
 				} catch (e) {
 					console.warn('End ffmpeg not processing failed video...');
 				}
@@ -263,7 +262,6 @@ io.on('connection', function(socket){
 					socket.emit('fatal', 'ffmpep not processing desktop.');
 					ffmpeg_process2.stdin.end();
 					ffmpeg_process2.kill('SIGINT');
-					return;
 				} catch (e) {
 					console.warn('End ffmpeg2 not processing failed desktop...');
 				}
@@ -314,7 +312,8 @@ io.on('connection', function(socket){
 			}
 		});
 		socket.on('disconnect', function () {
-			feedStream = false, feedStream2 = false;
+			feedStream = false;
+			feedStream2 = false;
 			if (ffmpeg_process)
 				try {
 					ffmpeg_process.stdin.end();
@@ -378,9 +377,9 @@ io.on('connection', function(socket){
 
 				const width = 1920;
 				const height = 1080;
-				const videowidth = 640; //480;
+				const videowidth = 640;
 				const slidewidth = 1280;
-				const leftmargin = 0; //10;
+				const leftmargin = 0;
 
 				fluentFFMPEG()
 					.input(screenMedia)
@@ -429,7 +428,7 @@ io.on('connection', function(socket){
 				socket.emit('isEtudiant', session.isEtudiant);
 
 				async function getDisplayNameIfUid(titleSerie) {
-					return new Promise((resolve, reject) => {
+					return new Promise((resolve) => {
 						getLdapInfos(titleSerie, function (displayName) {
 							resolve(displayName);
 						});
@@ -437,13 +436,13 @@ io.on('connection', function(socket){
 				}
 
 				getListSeries(socket, function (listSeries) {
-					const tranlateSeries = new Promise((resolve, reject) => {
+					const tranlateSeries = new Promise((resolve) => {
 						async function seriesIteration() {
 							for (const serie of listSeries) {
-								if (serie['title'][0].match('^[a-zA-Z0-9_]+$') != null && serie['title'][0] != uid) {
+								if (serie['title'][0].match('^[a-zA-Z0-9_]+$') != null && serie['title'][0] !== uid) {
 									let result = await getDisplayNameIfUid(serie["title"][0]);
-									if (result != '')
-										serie['title'][0] = 'Biblothèque de : ' + result;
+									if (result !== '')
+										serie['title'][0] = 'Bibliothèque de : ' + result;
 								}
 							}
 							resolve(listSeries);
@@ -471,14 +470,14 @@ io.on('error',function(e){
 });
 
 server.listen(80, function(){
-  console.log('http and websocket listening on *:80');
+	console.log('http and websocket listening on *:80');
 });
 
 
 process.on('uncaughtException', function(err) {
-    // handle the error safely
-    console.log(err)
-    // Note: after client disconnect, the subprocess will cause an Error EPIPE, which can only be caught this way.
+	// handle the error safely
+	console.log(err)
+	// Note: after client disconnect, the subprocess will cause an Error EPIPE, which can only be caught this way.
 });
 
 /**
@@ -489,9 +488,9 @@ function parseUserAgent(socket) {
 	const userAgentString = socket.request.headers['user-agent'] || '';
 	const parser = new useragent(userAgentString);
 	const infoAgent = parser.getResult();
-    return `${infoAgent.browser.name || ''} ${infoAgent.browser.version || ''} / ` +
-        `${infoAgent.os.name || ''} ${infoAgent.os.version || ''} / ` +
-        `${infoAgent.device.type || 'desktop'}`;
+	return `${infoAgent.browser.name || ''} ${infoAgent.browser.version || ''} / ` +
+		`${infoAgent.os.name || ''} ${infoAgent.os.version || ''} / ` +
+		`${infoAgent.device.type || 'desktop'}`;
 }
 
 /**
@@ -811,7 +810,7 @@ function getListSeries(socket, callback)
 		});
 
 		let httpsAgent = null;
-		if (config.opencast_series_ES_url_CERT != '') {
+		if (config.opencast_series_ES_url_CERT !== '') {
 			httpsAgent = require('https').Agent({
 				ca: fs.readFileSync(config.opencast_series_ES_url_CERT)
 			});
@@ -852,7 +851,7 @@ async function getListSeriresWritable (uid, listSeries)
 	let result = [];
 	for (var i = 0, len = listSeries.length; i < len; i++) {
 		rst = await checkSerieAcl(uid, listSeries[i]);
-		if(typeof rst !== 'undefined' && rst.title != uid.toLowerCase()+'_inwicast_medias')
+		if(typeof rst !== 'undefined' && rst.title !== uid.toLowerCase()+'_inwicast_medias')
 			result.push(rst);
 	}
 
@@ -1080,30 +1079,30 @@ function getDateNow() {
  * @param user
  */
 async function sendEmailError(err, user) {
-    if (!hasSendMailError) {
-        const nodemailer = require("nodemailer");
-        let transporter = nodemailer.createTransport({
-            host: config.mail_host,
-            port: config.mail_port,
-            secure: false,
-            tls: { rejectUnauthorized: false }
-        });
+	if (!hasSendMailError) {
+		const nodemailer = require("nodemailer");
+		let transporter = nodemailer.createTransport({
+			host: config.mail_host,
+			port: config.mail_port,
+			secure: false,
+			tls: { rejectUnauthorized: false }
+		});
 
-        let mailOptions = {
-            from: config.mail_from,
-            to: config.mail_to,
-            subject: '[Warn] UCAStudio Error',
-            text: 'Une erreur a été détectée \nDate : ' + getDateNow() + '\nUser : ' + user + '\nErreur : \n' + err
-        };
+		let mailOptions = {
+			from: config.mail_from,
+			to: config.mail_to,
+			subject: '[Warn] UCAStudio Error',
+			text: 'Une erreur a été détectée \nDate : ' + getDateNow() + '\nUser : ' + user + '\nErreur : \n' + err
+		};
 
-        try {
-            await transporter.sendMail(mailOptions);
-        } catch (error) {
-            console.log(error);
-        }
+		try {
+			await transporter.sendMail(mailOptions);
+		} catch (error) {
+			console.log(error);
+		}
 
-        hasSendMailError = true;
-    }
+		hasSendMailError = true;
+	}
 }
 
 /**
