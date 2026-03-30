@@ -1,13 +1,23 @@
+const nodemailer    = require('nodemailer')
+const { Client }    = require('ldapts');
+const js2xmlparser  = require('js2xmlparser');
+const FormData      = require('form-data')
+
 const config = require('./config.json');
 const express = require('express');
 const app = express();
 const spawn = require('child_process').spawn;
-const fluentFFMPEG = require('fluent-ffmpeg');
 const CASAuthentication = require('connect-cas-uca');
 const useragent = require('ua-parser-js');
 const logFileEvents = config.path_log_file_events;
 const axios = require('axios');
 const fs = require('fs');
+const transporter = nodemailer.createTransport({
+	host:   config.mail_host,
+	port:   config.mail_port,
+	secure: false,
+	tls:    { rejectUnauthorized: false }
+});
 let debitValue = null;
 global.hasSendMailError = false;
 
@@ -50,8 +60,9 @@ app.get( '/logout', cas.logout );
 app.use(express.static(__dirname + "/static/"));
 
 
-io.on('connection', function(socket){
+io.on('connection', async function (socket) {
 	const session = socket.request.session;
+
 	socket.on('debitValue', function (debit) {
 		debitValue = debit;
 	});
@@ -64,7 +75,7 @@ io.on('connection', function(socket){
 	socket.emit('clientConfig', config.client_config);
 	socket.emit('moodle', config.moodle_url);
 
-	if(config.enable_maintenance_mod === "true")
+	if (config.enable_maintenance_mod === "true")
 		socket.emit('info_maintenance_mod', config.info_maintenance_mod);
 
 	let ffmpeg_process, feedStream = false;
@@ -72,23 +83,23 @@ io.on('connection', function(socket){
 	let hasCheckFileIsWrite = false, hasCheckFileIsWrite2 = false;
 
 	// if(typeof socket.handshake.session.cas_user !== 'undefined' ) {
-	if(session && session.cas_user !== 'undefined') {
+	if (session && session.cas_user !== 'undefined') {
 		const agent = parseUserAgent(socket);
 		const uid = session.cas_user;
 		const socketissued = socket.handshake.issued;
+		const basePath = config.path_folder_record + uid + '/' + socketissued + '/' + socketissued;
 
 		try {
 			//on check si l'user est co via cas, et on créer un folder si existe pas
 			fs.existsSync(config.path_folder_record + uid) || fs.mkdirSync(config.path_folder_record + uid);
-		} catch(err) {
-			sendEmailError('error create new folder user' + err, uid+' / '+agent);
-			console.error(getDateNow()+' : '+err);
+		} catch (err) {
+			await sendEmailError('error create new folder user' + err, uid + ' / ' + agent);
+			console.error(getDateNow() + ' : ' + err);
 		}
 
-		socket.on('start', function (m, resDesktop = null, resWebCam = null) {
+		socket.on('start', async function (m, resDesktop = null, resWebCam = null) {
 
-			fs.mkdirSync(config.path_folder_record + uid + '/'+socketissued+'/');
-
+			fs.mkdirSync(config.path_folder_record + uid + '/' + socketissued + '/');
 
 			socket.emit('socketissuedValue', socketissued);
 
@@ -96,61 +107,37 @@ io.on('connection', function(socket){
 				socket.emit('fatal', 'stream already started.');
 				return;
 			}
-			const ops = [
-				'-loglevel', 'quiet',
+			const BASE_OPS = [
+				'-loglevel', 'error',
 				'-i', '-',
-				'-c:v', 'copy', '-preset', 'fast',
+				'-c:v', 'copy',
 				'-use_wallclock_as_timestamps', '1',
-				'-async', '1',
-				'-b:a', '96k', '-strict', '-2',
 				'-threads', '0',
 				'-f', 'webm',
-				config.path_folder_record + uid + '/' + socketissued + '/' + socketissued + '.webm'
 			];
 
-			let ops2;
-			if(m === 'video-and-desktop') {
-				ops2 = [
-					'-loglevel', 'quiet',
-					'-i', '-',
-					'-c:v', 'copy', '-preset', 'fast',
-					'-c:a', 'copy', //attention !!
-					'-use_wallclock_as_timestamps', '1',
-					'-threads', '0',
-					'-f', 'webm',
-					config.path_folder_record + uid + '/' + socketissued + '/' + socketissued + 'screen.webm'
-				];
-			}
-			else
-			{
-				if(m === "onlydesktop") {
-					ops2 = [
-						'-loglevel', 'quiet',
-						'-i', '-',
-						'-c:v', 'copy', '-preset', 'fast',
-						'-use_wallclock_as_timestamps', '1',
-						'-async', '1',
-						'-threads', '0',
-						'-f', 'webm',
-						config.path_folder_record + uid + '/' + socketissued + '/' + socketissued + 'screen.webm'
-					];
-				}
-				else {
-					ops2 = [
-						'-loglevel', 'quiet',
-						'-i', '-',
-						'-c:v', 'copy', '-preset', 'fast',
-						'-use_wallclock_as_timestamps', '1',
-						'-async', '1',
-						'-b:a', '96k', '-strict', '-2',
-						'-threads', '0',
-						'-f', 'webm',
-						config.path_folder_record + uid + '/' + socketissued + '/' + socketissued + 'screen.webm'
-					];
-				}
+			const ops = [
+				...BASE_OPS,
+				'-b:a', '96k',
+				basePath + '.webm'
+			];
+
+			let screenAudioFlags;
+			if (m === 'video-and-desktop') {
+				screenAudioFlags = ['-c:a', 'copy'];
+			} else if (m === 'onlydesktop') {
+				screenAudioFlags = ['-an'];
+			} else {
+				screenAudioFlags = ['-b:a', '96k'];
 			}
 
-			if(m !== "onlyaudio") {
+			const ops2 = [
+				...BASE_OPS,
+				...screenAudioFlags,
+				basePath + 'screen.webm'
+			];
+
+			if (m !== 'onlyaudio') {
 				let iWebCam = 6;
 				getRate('webcam', resWebCam).forEach(function (element) {
 					ops.splice(iWebCam, 0, element);
@@ -163,31 +150,30 @@ io.on('connection', function(socket){
 				});
 			}
 
-			if(m === 'video-and-desktop' || m === 'audio-and-desktop' || m === 'onlyaudio' || m === 'onlydesktop') {
+			if (m === 'video-and-desktop' || m === 'audio-and-desktop' || m === 'onlyaudio' || m === 'onlydesktop') {
 				ffmpeg_process2 = spawn('ffmpeg', ops2);
 				feedStream2 = function (data) {
 					ffmpeg_process2.stdin.write(data);
-					//write exception cannot be caught here.
-				}
+				};
 				ffmpeg_process2.stderr.on('data', function (d) {
 					socket.emit('ffmpeg_stderr', '' + d);
-					if(!hasCheckFileIsWrite2)
-						setTimeout(function(){
+					if (!hasCheckFileIsWrite2)
+						setTimeout(function () {
 							hasCheckFileIsWrite2 = true;
 							checkIsFileIsWrite(socket, config.path_folder_record + uid + '/' + socketissued + '/', m, agent);
 						}, 180000);
 				});
 				ffmpeg_process2.on('error', function (e) {
 					console.log('child process error' + e);
-					sendEmailError('ffmpeg child process error' + e, uid+' / '+agent);
+					sendEmailError('ffmpeg child process error' + e, uid + ' / ' + agent);
 					socket.emit('fatal', 'ffmpeg error!' + e);
-					feedStream = false;
+					feedStream2 = false;  // ← corrigé : était feedStream au lieu de feedStream2
 					socket.disconnect();
 				});
 				ffmpeg_process2.on('exit', function (e) {
-					console.log('child process desktop exit - '+ uid +' - '+ socketissued +' - status '+e);
-					if(m === 'onlyaudio' || m === 'onlydesktop' || m === 'audio-and-desktop') {
-						if(m === 'onlyaudio')
+					console.log('child process desktop exit - ' + uid + ' - ' + socketissued + ' - status ' + e);
+					if (m === 'onlyaudio' || m === 'onlydesktop' || m === 'audio-and-desktop') {
+						if (m === 'onlyaudio')
 							uploadFile(socket, false, true, true);
 						else
 							uploadFile(socket, false, true, false, true);
@@ -195,30 +181,29 @@ io.on('connection', function(socket){
 				});
 			}
 
-			if(m === 'video-and-desktop' || m === 'onlyvideo') {
+			if (m === 'video-and-desktop' || m === 'onlyvideo') {
 				ffmpeg_process = spawn('ffmpeg', ops);
 				feedStream = function (data) {
 					ffmpeg_process.stdin.write(data);
-					//write exception cannot be caught here.
-				}
+				};
 				ffmpeg_process.stderr.on('data', function (d) {
 					socket.emit('ffmpeg_stderr', '' + d);
-					if(!hasCheckFileIsWrite)
-						setTimeout(function(){
+					if (!hasCheckFileIsWrite)
+						setTimeout(function () {
 							hasCheckFileIsWrite = true;
 							checkIsFileIsWrite(socket, config.path_folder_record + uid + '/' + socketissued + '/', m, agent);
 						}, 180000);
 				});
 				ffmpeg_process.on('error', function (e) {
 					console.log('child process error' + e);
-					sendEmailError('ffmpeg child process error' + e, uid+' / '+agent);
+					sendEmailError('ffmpeg child process error' + e, uid + ' / ' + agent);
 					socket.emit('fatal', 'ffmpeg error!' + e);
 					feedStream = false;
 					socket.disconnect();
 				});
 				ffmpeg_process.on('exit', function (e) {
-					console.log('child process video exit - '+ uid +' - '+ socketissued +' - status '+e);
-					if(m === 'video-and-desktop')
+					console.log('child process video exit - ' + uid + ' - ' + socketissued + ' - status ' + e);
+					if (m === 'video-and-desktop')
 						uploadFile(socket, true);
 					else
 						uploadFile(socket, false);
@@ -226,12 +211,11 @@ io.on('connection', function(socket){
 			}
 
 			try {
-				fs.writeFileSync(logFileEvents, 'startrec;'+uid+';'+getDateNow()+';'+socketissued+';'+m+';ismonitor=>'+isMonitor+';'+debitValue+'Mbps'+';"'+agent+'"'+"\n", {flag: 'a'});
+				fs.writeFileSync(logFileEvents, 'startrec;' + uid + ';' + getDateNow() + ';' + socketissued + ';' + m + ';ismonitor=>' + isMonitor + ';' + debitValue + 'Mbps' + ';"' + agent + '"' + "\n", {flag: 'a'});
 			} catch (err) {
-				sendEmailError('error write logFileEvents' + err, uid+' / '+agent);
-				console.error(getDateNow()+' : '+err)
+				await sendEmailError('error write logFileEvents' + err, uid + ' / ' + agent);
+				console.error(getDateNow() + ' : ' + err);
 			}
-
 		});
 
 		socket.on('binarystreamvideo', function (m) {
@@ -243,13 +227,14 @@ io.on('connection', function(socket){
 				} catch (e) {
 					console.warn('End ffmpeg not processing failed video...');
 				}
-			}
-			else {
+			} else {
 				if (typeof feedStream === "function") {
-					try { feedStream(m); }
-					catch (e) { sendEmailError('feedStream error:' + e, uid+' / '+agent); }
-				}
-				else {
+					try {
+						feedStream(m);
+					} catch (e) {
+						sendEmailError('feedStream error:' + e, uid + ' / ' + agent);
+					}
+				} else {
 					socket.emit('errorffmpeg');
 					socket.disconnect();
 				}
@@ -265,13 +250,14 @@ io.on('connection', function(socket){
 				} catch (e) {
 					console.warn('End ffmpeg2 not processing failed desktop...');
 				}
-			}
-			else {
+			} else {
 				if (typeof feedStream2 === "function") {
-					try { feedStream2(m); }
-					catch (e) { sendEmailError('feedStream2 error:' + e, uid+' / '+agent); }
-				}
-				else {
+					try {
+						feedStream2(m);
+					} catch (e) {
+						sendEmailError('feedStream2 error:' + e, uid + ' / ' + agent);
+					}
+				} else {
 					socket.emit('errorffmpeg');
 					socket.disconnect();
 				}
@@ -281,18 +267,18 @@ io.on('connection', function(socket){
 			session.usermediadatas = m;
 		});
 		socket.on('stop', function (m) {
-			if(m === 'video-and-desktop' || m === 'onlyvideo') {
+			if (m === 'video-and-desktop' || m === 'onlyvideo') {
 				feedStream = false;
 				if (ffmpeg_process) {
 					try {
 						ffmpeg_process.stdin.end();
 					} catch (e) {
-						sendEmailError('End ffmpeg process attempt failed ' + e, uid+' / '+agent);
+						sendEmailError('End ffmpeg process attempt failed ' + e, uid + ' / ' + agent);
 						console.warn('End ffmpeg process attempt failed...');
 					}
 				}
 			}
-			if(m === 'video-and-desktop' || m === 'audio-and-desktop' || m === 'onlyaudio' || m === 'onlydesktop') {
+			if (m === 'video-and-desktop' || m === 'audio-and-desktop' || m === 'onlyaudio' || m === 'onlydesktop') {
 				feedStream2 = false;
 				if (ffmpeg_process2) {
 					try {
@@ -305,10 +291,10 @@ io.on('connection', function(socket){
 
 			// socket.emit('idRecord', socketissued, uid);
 			try {
-				fs.writeFileSync(logFileEvents, 'stoprec;'+uid+';'+getDateNow()+';'+socketissued+';'+m+';ismonitor=>'+isMonitor+';'+agent+'"'+"\n", {flag: 'a'});
+				fs.writeFileSync(logFileEvents, 'stoprec;' + uid + ';' + getDateNow() + ';' + socketissued + ';' + m + ';ismonitor=>' + isMonitor + ';' + agent + '"' + "\n", {flag: 'a'});
 			} catch (err) {
-				sendEmailError('error write logFileEvents' + err, uid+' / '+agent);
-				console.error(getDateNow()+' : '+err)
+				sendEmailError('error write logFileEvents' + err, uid + ' / ' + agent);
+				console.error(getDateNow() + ' : ' + err)
 			}
 		});
 		socket.on('disconnect', function () {
@@ -332,16 +318,16 @@ io.on('connection', function(socket){
 		});
 		socket.on('error', function (e) {
 			console.log('socket.io error:' + e);
-			sendEmailError('socket.io error:' + e, uid+' / '+agent)
+			sendEmailError('socket.io error:' + e, uid + ' / ' + agent)
 		});
 
-		socket.on('zipfiles', function (fusion, idSocket = null) {
+		socket.on('zipfiles', async function (fusion, idSocket = null) {
 			const JSZip = require("jszip");
 			const zip = new JSZip();
 
 			let socketTmp = socketissued;
 
-			if(idSocket != null)
+			if (idSocket != null)
 				socketTmp = idSocket;
 
 			const webcamMedia = config.path_folder_record + uid + '/' + socketTmp + '/' + socketTmp + '.webm';
@@ -351,28 +337,28 @@ io.on('connection', function(socket){
 			try {
 				if (fs.existsSync(webcamMedia))
 					zip.file(socketTmp + '.webm', fs.createReadStream(webcamMedia));
-			} catch(err) {
-				sendEmailError('zip file' + err, uid+' / '+agent);
-				console.error(getDateNow()+' : '+err);
+			} catch (err) {
+				await sendEmailError('zip file' + err, uid + ' / ' + agent);
+				console.error(getDateNow() + ' : ' + err);
 			}
 
 			try {
 				if (fs.existsSync(screenMedia))
 					zip.file(socketTmp + 'screen.webm', fs.createReadStream(screenMedia));
-			} catch(err) {
-				sendEmailError('zip file' + err, uid+' / '+agent);
-				console.error(getDateNow()+' : '+err);
+			} catch (err) {
+				await sendEmailError('zip file' + err, uid + ' / ' + agent);
+				console.error(getDateNow() + ' : ' + err);
 			}
 
 			try {
 				if (fs.existsSync(metadataXML))
 					zip.file('metadata.xml', fs.createReadStream(metadataXML));
-			} catch(err) {
-				sendEmailError('zip file' + err, uid+' / '+agent);
-				console.error(getDateNow()+' : '+err);
+			} catch (err) {
+				await sendEmailError('zip file' + err, uid + ' / ' + agent);
+				console.error(getDateNow() + ' : ' + err);
 			}
 
-			if(fusion && (fs.existsSync(webcamMedia) && fs.existsSync(screenMedia))) //si deux flux alors on merge
+			if (fusion && (fs.existsSync(webcamMedia) && fs.existsSync(screenMedia))) //si deux flux alors on merge
 			{
 
 				const width = 1920;
@@ -381,86 +367,89 @@ io.on('connection', function(socket){
 				const slidewidth = 1280;
 				const leftmargin = 0;
 
-				fluentFFMPEG()
-					.input(screenMedia)
-					.input(webcamMedia)
-					.complexFilter([
-						'[0]scale='+slidewidth+':-1:force_original_aspect_ratio=decrease, pad='+width+':'+height+':'+leftmargin+':('+height+'-ih)/2 [LEFT]',
-						'[1] scale='+videowidth+':-1:force_original_aspect_ratio=decrease [RIGHT]',
-						'[LEFT][RIGHT] overlay='+slidewidth+':(main_h/2)-(overlay_h/2)',
-					])
-					.outputOption('-r', '25')
-					.outputOption('-ac', '1')
-					.outputOption('-crf', '23')
-					.outputOption('-preset', 'fast')
-					.outputOption('-threads', '0')
-					.outputOption('-s', width + "x" + height)
-					.output(config.path_folder_record + uid + '/' + socketTmp + '/' + socketTmp + 'merged.mp4')
-					.on("error",function(er){
-						console.log("error occured: "+er.message);
-					})
-					.on("end",function(){
-						zip.file(socketTmp + 'merged.mp4', fs.createReadStream(config.path_folder_record + uid + '/' + socketTmp + '/' + socketTmp + 'merged.mp4'));
-						zip.generateNodeStream({type:'nodebuffer',streamFiles:true})
-							.pipe(fs.createWriteStream(config.path_folder_record + uid + '/' + socketTmp + '/' + socketTmp+'.zip'))
-							.on('finish', function () {
-								socket.emit('endzip', fs.readFileSync(config.path_folder_record + uid + '/' + socketTmp + '/' + socketTmp+'.zip'), socketTmp);
-							});
-					})
-					.run();
-			}
-			else
-			{
-				zip.generateNodeStream({type:'nodebuffer',streamFiles:true})
-					.pipe(fs.createWriteStream(config.path_folder_record + uid + '/' + socketTmp + '/' + socketTmp+'.zip'))
+				try {
+					await runFFmpeg([
+						'-loglevel', 'error',
+						'-i', screenMedia,
+						'-i', webcamMedia,
+						'-filter_complex',
+						`[0]scale=${slidewidth}:-1:force_original_aspect_ratio=decrease,` +
+						`pad=${width}:${height}:${leftmargin}:(${height}-ih)/2 [LEFT];` +
+						`[1]scale=${videowidth}:-1:force_original_aspect_ratio=decrease [RIGHT];` +
+						`[LEFT][RIGHT]overlay=${slidewidth}:(main_h/2)-(overlay_h/2)`,
+						'-c:v', 'libx264',
+						'-c:a', 'aac',
+						'-r', '25',
+						'-ac', '1',
+						'-crf', '23',
+						'-preset', 'fast',
+						'-threads', '0',
+						'-s', `${width}x${height}`,
+						basePath + 'merged.mp4'
+					], null, 'merge');
+
+					// Code du .on("end") — exécuté séquentiellement après le await
+					const mergedPath = `${config.path_folder_record}${uid}/${socketTmp}/${socketTmp}merged.mp4`;
+					const zipPath = `${config.path_folder_record}${uid}/${socketTmp}/${socketTmp}.zip`;
+
+					zip.file(`${socketTmp}merged.mp4`, fs.createReadStream(mergedPath));
+
+					await new Promise((resolve, reject) => {
+						zip.generateNodeStream({type: 'nodebuffer', streamFiles: true})
+							.pipe(fs.createWriteStream(zipPath))
+							.on('finish', resolve)
+							.on('error', reject);
+					});
+
+					socket.emit('endzip', fs.readFileSync(zipPath), socketTmp);
+
+				} catch (er) {
+					console.log("error occured: " + er.message);
+				}
+			} else {
+				zip.generateNodeStream({type: 'nodebuffer', streamFiles: true})
+					.pipe(fs.createWriteStream(config.path_folder_record + uid + '/' + socketTmp + '/' + socketTmp + '.zip'))
 					.on('finish', function () {
-						socket.emit('endzip', fs.readFileSync(config.path_folder_record + uid + '/' + socketTmp + '/' + socketTmp+'.zip'), socketTmp);
+						socket.emit('endzip', fs.readFileSync(config.path_folder_record + uid + '/' + socketTmp + '/' + socketTmp + '.zip'), socketTmp);
 					});
 			}
 		});
 
 		if (session && session.cas_user) {
-			getLdapInfos(session.cas_user, function (displayName, mail, clfdstatus) {
+			try {
+				// getLdapInfos retourne maintenant un objet { displayName, mail, clfdstatus }
+				const {displayName, mail, clfdstatus} = await getLdapInfos(session.cas_user);
+
 				session.cn = displayName;
 				session.mail = mail;
 				session.isEtudiant = clfdstatus === '0' || clfdstatus === '1';
 				socket.emit('displayName', displayName);
 				socket.emit('isEtudiant', session.isEtudiant);
 
-				async function getDisplayNameIfUid(titleSerie) {
-					return new Promise((resolve) => {
-						getLdapInfos(titleSerie, function (displayName) {
-							resolve(displayName);
-						});
-					})
+				// Promisification de getListSeries (callback → await)
+				const listSeries = await new Promise(resolve => getListSeries(socket, resolve));
+
+				// Le for...of avec await remplace le new Promise(async function) imbriqué
+				for (const serie of listSeries) {
+					if (serie['title'][0].match('^[a-zA-Z0-9_]+$') !== null && serie['title'][0] !== uid) {
+						const {displayName: serieDisplayName} = await getLdapInfos(serie['title'][0]);
+						if (serieDisplayName !== '')
+							serie['title'][0] = 'Bibliothèque de : ' + serieDisplayName;
+					}
 				}
 
-				getListSeries(socket, function (listSeries) {
-					const tranlateSeries = new Promise((resolve) => {
-						async function seriesIteration() {
-							for (const serie of listSeries) {
-								if (serie['title'][0].match('^[a-zA-Z0-9_]+$') != null && serie['title'][0] !== uid) {
-									let result = await getDisplayNameIfUid(serie["title"][0]);
-									if (result !== '')
-										serie['title'][0] = 'Bibliothèque de : ' + result;
-								}
-							}
-							resolve(listSeries);
-						}
+				socket.emit('listseries', listSeries, uid, session.mail);
 
-						resolve(seriesIteration());
-					});
+				if (typeof socket.handshake.headers.referer !== 'undefined' &&
+					socket.handshake.headers.referer.indexOf('serieid') > -1) {
+					const infos = socket.handshake.headers.referer.split('?');
+					if (infos[1])
+						socket.emit('insidemoodle', infos[1]);
+				}
 
-					tranlateSeries.then(function (value) {
-						socket.emit('listseries', listSeries, uid, session.mail);
-						if (typeof socket.handshake.headers.referer !== 'undefined' && socket.handshake.headers.referer.indexOf('serieid') > -1) {
-							let infos = socket.handshake.headers.referer.split('?');
-							if (infos[1])
-								socket.emit('insidemoodle', infos[1]);
-						}
-					})
-				});
-			});
+			} catch (err) {
+				console.error('getLdapInfos error:', err.message);
+			}
 		}
 	}
 });
@@ -479,6 +468,65 @@ process.on('uncaughtException', function(err) {
 	console.log(err)
 	// Note: after client disconnect, the subprocess will cause an Error EPIPE, which can only be caught this way.
 });
+
+
+function runFFmpeg(args, inputStream, label) {
+	return new Promise((resolve, reject) => {
+		const proc = spawn('ffmpeg', args);
+
+		if (inputStream) {
+			inputStream.pipe(proc.stdin);
+			proc.stdin.on('error', () => {}); // évite crash si ffmpeg ferme stdin tôt
+		}
+
+		let stderr = '';
+		proc.stderr.on('data', d => { stderr += d.toString(); });
+
+		proc.on('close', (code) => {
+			if (code === 0) {
+				console.log(`End ffmpeg ${label} success`);
+				resolve();
+			} else {
+				console.error(`End ffmpeg ${label} failed (code ${code}):`, stderr.slice(-300));
+				reject(new Error(`ffmpeg ${label} exited with code ${code}`));
+			}
+		});
+
+		proc.on('error', reject);
+	});
+}
+
+
+function ffprobe(filePath) {
+	return new Promise((resolve, reject) => {
+		const proc = spawn('ffprobe', [
+			'-v', 'quiet',
+			'-print_format', 'json',
+			'-show_streams',
+			'-show_format',
+			filePath
+		]);
+
+		let stdout = '';
+		let stderr = '';
+		proc.stdout.on('data', d => { stdout += d.toString(); });
+		proc.stderr.on('data', d => { stderr += d.toString(); });
+
+		proc.on('close', (code) => {
+			if (code !== 0) {
+				reject(new Error(`ffprobe failed (code ${code}): ${stderr}`));
+				return;
+			}
+			try {
+				resolve(JSON.parse(stdout));
+			} catch (e) {
+				reject(new Error('ffprobe: JSON parse error: ' + e.message));
+			}
+		});
+
+		proc.on('error', reject);
+	});
+}
 
 /**
  * @param socket
@@ -507,134 +555,115 @@ function uploadFile(socket, hasSecondStream, onlySecondStream = false, isAudioFi
 
 	if(session &&  session.usermediadatas !== 'undefined') {
 		//on test si c'est pas undefined  ?
-		var usermediainfosToUpload = JSON.parse(session.usermediadatas);
+		const usermediainfosToUpload = JSON.parse(session.usermediadatas);
 		const agent = parseUserAgent(socket);
 
-		var d = new Date();
-		var startDate = d.getFullYear() + '-' + ("0" + (d.getMonth() + 1)).slice(-2) + '-' + ("0" + d.getDate()).slice(-2);
-		var startTime = d.getUTCHours() + ':' + (d.getMinutes()<10?'0':'') + d.getMinutes();
+		const d = new Date();
+		const startDate = d.getFullYear() + '-' + ("0" + (d.getMonth() + 1)).slice(-2) + '-' + ("0" + d.getDate()).slice(-2);
+		const startTime = d.getUTCHours() + ':' + (d.getMinutes() < 10 ? '0' : '') + d.getMinutes();
 
-		var idFileUpload = socket.handshake.issued;
-		var uid = session.cas_user;
-		var mustBeUpload = usermediainfosToUpload.mustBeUpload;
-		var desc = 'N/R';
-		var typeOfFlavor = "presenter";
+		const idFileUpload = socket.handshake.issued;
+		const uid = session.cas_user;
+		const mustBeUpload = usermediainfosToUpload.mustBeUpload;
+		let desc = 'N/R';
+		let typeOfFlavor = "presenter";
 		if(usermediainfosToUpload.descUpload !== '')
 			desc = usermediainfosToUpload.descUpload;
-		var location = 'N/R';
+		let location = 'N/R';
 		if(usermediainfosToUpload.locationUpload !== '')
 			location = usermediainfosToUpload.locationUpload;
 
-		var nameFile = uid + '/' + idFileUpload + '/' + idFileUpload + ".webm";
+		let nameFile = uid + '/' + idFileUpload + '/' + idFileUpload + ".webm";
 
 		if(onlySecondStream)
 			nameFile = uid + '/' + idFileUpload + '/' + idFileUpload + "screen.webm";
 
 		//on check si l'user à select une serie ou son dossier, si son dossier et exist pas alors on le créer
-		createSerie(uid, socket, usermediainfosToUpload.idSerie, mustBeUpload).then( function (idSerie) {
+		createSerie(uid, socket, usermediainfosToUpload.idSerie, mustBeUpload).then( async function (idSerie) {
 
 			usermediainfosToUpload.idSerie = idSerie;
 
-			var pathMediaToFFprobe;
-			if(hasSecondStream || onlySecondStream)
+			let pathMediaToFFprobe;
+			if (hasSecondStream || onlySecondStream)
 				pathMediaToFFprobe = config.path_folder_record + uid + '/' + idFileUpload + '/' + idFileUpload + "screen.webm";
 			else
 				pathMediaToFFprobe = config.path_folder_record + nameFile;
 
 			//on récup la duration du média
-			var duration = '00:00:00';
-			fluentFFMPEG.ffprobe(pathMediaToFFprobe, function(err, metadataFFprobe) {
+			let duration = '00:00:00';
+			try {
+				const metadataFFprobe = await ffprobe(pathMediaToFFprobe);
+
+				let typeEncode = '';
+				metadataFFprobe.streams.forEach(obj => {
+					if (obj.codec_type === 'video') typeEncode = obj.codec_name;
+				});
+
+
+				duration = new Date(metadataFFprobe.format.duration * 1000)
+					.toISOString()
+					.substr(11, 8);
+
+				let metadata = getMetadatasNewEvent(usermediainfosToUpload, desc, startDate, startTime, duration, location);
+				const metadataXML = js2xmlparser.parse("media", JSON.parse(metadata)[0]);
 
 				try {
+					fs.writeFileSync(`${config.path_folder_record}${uid}/${idFileUpload}/metadata.xml`, metadataXML);
+				} catch (err) {
+					await sendEmailError('write file metadata' + err, `${uid} / ${agent}`);
+					console.error(getDateNow() + ' : ' + err);
+				}
 
-					var typeEncode = '';
+				if (mustBeUpload) {
+					let processing;
+					if (isAudioFile) {
+						processing = `{\n  "workflow": "${config.opencast_workflow_audio}"\n}`;
+					} else {
+						processing = `{\n  "workflow": "${config.opencast_workflow}",\n  "configuration": {\n    "typeEncode": "${typeEncode}"\n  }\n}`;
+					}
 
-					metadataFFprobe.streams.forEach(function(obj) {
-						if(obj.codec_type === 'video')
-							typeEncode = obj.codec_name;
+					if (onlydesktop) typeOfFlavor = "presentation";
+
+					const data = new FormData();
+
+					if (hasSecondStream) {
+						data.append('presenter', fs.createReadStream(`${config.path_folder_record}${uid}/${idFileUpload}/${idFileUpload}.webm`), {filename: `metadata/${idFileUpload}.webm`});
+						data.append('presentation', fs.createReadStream(`${config.path_folder_record}${uid}/${idFileUpload}/${idFileUpload}screen.webm`), {filename: `metadata/${idFileUpload}screen.webm`});
+					} else if (!hasSecondStream && typeOfFlavor === "presenter" && !isAudioFile) {
+						data.append('presenter', fs.createReadStream(`${config.path_folder_record}${uid}/${idFileUpload}/${idFileUpload}.webm`), {filename: `metadata/${idFileUpload}.webm`});
+					} else if (isAudioFile) {
+						data.append('presenter', fs.createReadStream(`${config.path_folder_record}${uid}/${idFileUpload}/${idFileUpload}screen.webm`), {filename: `metadata/${idFileUpload}screen.webm`});
+					} else {
+						data.append('presentation', fs.createReadStream(`${config.path_folder_record}${uid}/${idFileUpload}/${idFileUpload}screen.webm`), {filename: `metadata/${idFileUpload}screen.webm`});
+					}
+
+					data.append('acl', getAclNewEvent(uid));
+					data.append('metadata', metadata);
+					data.append('processing', processing);
+
+					await axios({
+						method: 'POST',
+						url: config.opencast_events_url,
+						headers: {
+							'cache-control': 'no-cache',
+							'Authorization': 'Basic ' + config.opencast_authentication,
+							'content-type': 'multipart/form-data;',
+							...data.getHeaders()
+						},
+						data,
+						maxContentLength: Infinity,
+						maxBodyLength: Infinity
 					});
 
-					duration = new Date(metadataFFprobe.format.duration * 1000).toISOString().substr(11, 8);
+					socket.emit('endupload', 1);
 
-					let metadata = getMetadatasNewEvent(usermediainfosToUpload, desc, startDate, startTime, duration, location)
-
-					var js2xmlparser = require("js2xmlparser");
-					var metadataXML  = js2xmlparser.parse("media", JSON.parse(metadata)[0]);
-					try {
-						fs.writeFileSync(config.path_folder_record + uid + '/' + idFileUpload + '/metadata.xml', metadataXML);
-					} catch (err) {
-						sendEmailError('write file metadata' + err, uid+' / '+agent);
-						console.error(getDateNow()+' : '+err)
-					}
-
-					if(mustBeUpload)
-					{
-						var processing;
-						if (isAudioFile) {
-							processing = '{\n' +
-								'  "workflow": "' + config.opencast_workflow_audio + '"\n' +
-								'}';
-						}
-						else {
-							processing = '{\n' +
-								'  "workflow": "' + config.opencast_workflow + '",\n' +
-								'  "configuration": {\n' +
-								'    "typeEncode": "'+ typeEncode + '"\n' +
-								'  }\n' +
-								'}'
-						}
-
-						if(onlydesktop)
-							typeOfFlavor = "presentation";
-
-						let FormData = require('form-data');
-						var data = new FormData();
-
-						if (hasSecondStream) {
-							data.append('presenter', fs.createReadStream(config.path_folder_record + uid + '/' + idFileUpload + '/' + idFileUpload + ".webm"), { filename: 'metadata/' + idFileUpload + '.webm'});
-							data.append('presentation', fs.createReadStream(config.path_folder_record + uid + '/' + idFileUpload + '/' + idFileUpload + "screen.webm"), { filename: 'metadata/' + idFileUpload + 'screen.webm'});
-						} else if(!hasSecondStream && typeOfFlavor === "presenter" && !isAudioFile) {
-							data.append('presenter', fs.createReadStream(config.path_folder_record + uid + '/' + idFileUpload + '/' + idFileUpload + ".webm"), { filename: 'metadata/' + idFileUpload + '.webm'});
-						} else if (isAudioFile){
-							data.append('presenter', fs.createReadStream(config.path_folder_record + uid + '/' + idFileUpload + '/' + idFileUpload + "screen.webm"), { filename: 'metadata/' + idFileUpload + 'screen.webm'});
-						} else {
-							data.append('presentation', fs.createReadStream(config.path_folder_record + uid + '/' + idFileUpload + '/' + idFileUpload + "screen.webm"), { filename: 'metadata/' + idFileUpload + 'screen.webm'});
-						}
-
-						data.append('acl', getAclNewEvent(uid));
-						data.append('metadata', metadata);
-						data.append('processing', processing);
-
-						var options = {
-							method: 'POST',
-							url:  config.opencast_events_url,
-							headers: {
-								'cache-control': 'no-cache',
-								'Authorization': 'Basic ' + config.opencast_authentication,
-								'content-type': 'multipart/form-data;',
-								...data.getHeaders()
-							},
-							data : data,
-							maxContentLength: Infinity,
-							maxBodyLength: Infinity
-						};
-
-						axios(options)
-							.then(function () {
-								socket.emit('endupload', 1)
-							})
-							.catch(function (error) {
-								console.log(error);
-							});
-					}
-					else {
-						socket.emit('endupload', 0); // pas nécessaire si on force l'upload
-					}
+				} else {
+					socket.emit('endupload', 0);
 				}
-				catch (e) {
-					sendEmailError(' errorrec ' + e, uid + ' / ' + agent);
-				}
-			});
+
+			} catch (e) {
+				await sendEmailError(' errorrec ' + e, `${uid} / ${agent}`);
+			}
 		});
 		socket.emit('idRecord', session.cas_user, socket.handshake.issued);
 	}
@@ -747,47 +776,31 @@ function getMetadatasNewEvent(usermediainfosToUpload, desc, startDate, startTime
 /**
  * Permet de récupérer des infos ldap en fonction d'un uid
  * @param uid
- * @param callback
  */
-function getLdapInfos(uid, callback)
-{
-	var ldap = require('ldapjs');
-	var client = ldap.createClient({
+async function getLdapInfos(uid) {
+	const client = new Client({
 		url: config.path_ldap_uca
 	});
-	var opts = {
-		filter: '(uid='+uid+')',
-		scope: 'sub',
-		attributes: ['sn', 'cn', 'displayName', 'mail', 'CLFDstatus']
-	};
 
-	let displayName = '';
-	let mail = '';
-	let clfdstatus = '';
-	client.search('ou=people, dc=uca,dc=fr', opts, function(err, res) {
-		res.on('searchEntry', function(entry) {
-			displayName = entry.object.displayName;
-			mail = entry.object.mail;
-			clfdstatus = entry.object.CLFDstatus;
+	try {
+		await client.bind('', ''); // bind anonyme — retire si ton LDAP n'en a pas besoin
+
+		const { searchEntries } = await client.search('ou=people,dc=uca,dc=fr', {
+			scope: 'sub',
+			filter: `(uid=${uid})`,
+			attributes: ['sn', 'cn', 'displayName', 'mail', 'CLFDstatus'],
 		});
-		res.on('searchReference', function(referral) {
-			console.log('referral: ' + referral.uris.join());
-		});
-		res.on('error', function(err) {
-			console.error('error: ' + err.message);
-			client.unbind(function (error) {
-				if (error)
-					console.log(error.message);
-			});
-		});
-		res.on('end', function() {
-			callback(displayName, mail, clfdstatus);
-			client.unbind(function (error) {
-				if (error)
-					console.log(error.message);
-			});
-		});
-	});
+
+		const entry = searchEntries[0] ?? {};
+		return {
+			displayName: entry.displayName ?? '',
+			mail:        entry.mail        ?? '',
+			clfdstatus:  entry.CLFDstatus  ?? '',
+		};
+
+	} finally {
+		await client.unbind(); // toujours exécuté, même en cas d'erreur
+	}
 }
 
 /**
@@ -798,8 +811,8 @@ function getListSeries(socket, callback)
 {
 	const session = socket.request.session;
 	if (session && session.cas_user) {
-		var uid = session.cas_user.toUpperCase();
-		var data = JSON.stringify({
+		const uid = session.cas_user.toUpperCase();
+		const data = JSON.stringify({
 			"query": {
 				"bool": {
 					"must": [
@@ -816,7 +829,7 @@ function getListSeries(socket, callback)
 			});
 		}
 
-		var configES = {
+		const configES = {
 			method: 'get',
 			url: config.opencast_series_ES_url,
 			headers: {'Content-Type': 'application/json'},
@@ -829,8 +842,8 @@ function getListSeries(socket, callback)
 				callback(response.data.hits.hits.map(function (hit) {
 					return hit._source
 				}).sort(function (a, b) {
-					var titleA = a.title[0].toUpperCase();
-					var titleB = b.title[0].toUpperCase();
+					const titleA = a.title[0].toUpperCase();
+					const titleB = b.title[0].toUpperCase();
 					return (titleA < titleB) ? -1 : (titleA > titleB) ? 1 : 0;
 				}));
 			})
@@ -849,15 +862,17 @@ function getListSeries(socket, callback)
 async function getListSeriresWritable (uid, listSeries)
 {
 	let result = [];
-	for (var i = 0, len = listSeries.length; i < len; i++) {
+	let i = 0, len = listSeries.length;
+	for (; i < len; i++) {
+		let rst;
 		rst = await checkSerieAcl(uid, listSeries[i]);
 		if(typeof rst !== 'undefined' && rst.title !== uid.toLowerCase()+'_inwicast_medias')
 			result.push(rst);
 	}
 
 	result.sort(function (a, b) {
-		var titleA = a.title.toUpperCase();
-		var titleB = b.title.toUpperCase();
+		const titleA = a.title.toUpperCase();
+		const titleB = b.title.toUpperCase();
 		return (titleA < titleB) ? -1 : (titleA > titleB) ? 1 : 0;
 	});
 
@@ -873,7 +888,7 @@ async function getListSeriresWritable (uid, listSeries)
 function checkSerieAcl(uid, serieinfo)
 {
 	return new Promise(function (resolve) {
-		var options = {
+		const options = {
 			method: 'GET',
 			url: config.opencast_series_url + '/' + serieinfo.identifier + '/acl',
 			rejectUnauthorized: false,
@@ -885,8 +900,10 @@ function checkSerieAcl(uid, serieinfo)
 
 		axios.request(options)
 			.then(function (listSeries2) {
+				let serieInfo;
 				serieInfo =listSeries2.data;
-				for (var j = 0, len = serieInfo.length; j < len; j++)
+				let j = 0, len = serieInfo.length;
+				for (; j < len; j++)
 					if (serieInfo[j].action === 'write' && serieInfo[j].allow === true && serieInfo[j].role.indexOf(uid) > -1)
 						resolve(serieinfo);
 				resolve();
@@ -915,7 +932,7 @@ function createSerie(uid, socket, idSerieSelect, mustBeUpload)
 			if(session.isEtudiant)
 				uid = 'etd_'+uid;
 
-			var idSerieMyFolder = null;
+			let idSerieMyFolder = null;
 			getListSeries(socket, function (listSeries) {
 				listSeries.forEach(function (serie) {
 					if(serie.title === uid ||  serie.title === realUserName)
@@ -926,12 +943,12 @@ function createSerie(uid, socket, idSerieSelect, mustBeUpload)
 					resolve(idSerieMyFolder);
 				else
 				{
-					var FormData = require('form-data');
-					var data = new FormData();
+					const FormData = require('form-data');
+					const data = new FormData();
 					data.append('acl', getAclSerie(realUserName));
 					data.append('metadata', getMetadatasSerie(uid, socket));
 
-					var options = {
+					const options = {
 						method: "POST",
 						url: config.opencast_series_url,
 						ca: fs.readFileSync(config.opencast_cert),
@@ -1029,48 +1046,52 @@ function getMetadatasSerie(uid, socket)
  * @param typeOfRec
  * @param agent
  */
-function checkIsFileIsWrite(socket, path, typeOfRec, agent)
-{
-	const session = socket.request.session;
-	var uid = session.cas_user;
-	var socketissued = socket.handshake.issued;
+async function checkIsFileIsWrite(socket, path, typeOfRec, agent) {
+	const uid = socket.request.session.cas_user;
+	const socketissued = socket.handshake.issued;
+	const recordDir = config.path_folder_record + uid + '/' + socketissued + '/';
+	const basePath  = recordDir + socketissued;
 
-	fs.readdir(config.path_folder_record + uid + '/' + socketissued + '/', function (err, files) {
+	async function failRecording(reason) {
 		try {
-			if (!files.length) {
-				try {
-					fs.writeFileSync(logFileEvents, 'errorrec;' + uid + ';' + getDateNow() + ';' + socketissued + ';' + typeOfRec + ';"' + agent + '"' + "\n", {flag: 'a'});
-				} catch (err) {
-					sendEmailError('ffmpeg errorrec' + err, uid + ' / ' + agent);
-					console.error(getDateNow()+' : '+err)
-				}
-				socket.emit('errorffmpeg');
-				socket.disconnect();
-			} else if (typeOfRec === 'video-and-desktop') {
-				if (!fs.existsSync(config.path_folder_record + uid + '/' + socketissued + '/' + socketissued + 'screen.webm') || !fs.existsSync(config.path_folder_record + uid + '/' + socketissued + '/' + socketissued + '.webm')) {
-					try {
-						fs.writeFileSync(logFileEvents, 'errorrec;' + uid + ';' + getDateNow() + ';' + socketissued + ';' + typeOfRec + ';"' + agent + '"' + "\n", {flag: 'a'});
-					} catch (err) {
-						sendEmailError('ffmpeg errorrec' + err, uid + ' / ' + agent);
-						console.error(getDateNow()+' : '+err)
-					}
-					socket.emit('errorffmpeg');
-					socket.disconnect();
-				}
+			fs.writeFileSync(logFileEvents,
+				`errorrec;${uid};${getDateNow()};${socketissued};${typeOfRec};"${agent}"\n`,
+				{ flag: 'a' }
+			);
+		} catch (err) {
+			await sendEmailError('ffmpeg errorrec ' + err, uid + ' / ' + agent);
+			console.error(getDateNow() + ' : ' + err);
+		}
+		socket.emit('errorffmpeg');
+		socket.disconnect();
+	}
+
+	try {
+		const files = await fs.promises.readdir(recordDir);
+
+		if (!files.length) {
+			return failRecording('empty dir');
+		}
+
+		if (typeOfRec === 'video-and-desktop') {
+			const screenExists = fs.existsSync(basePath + 'screen.webm');
+			const videoExists  = fs.existsSync(basePath + '.webm');
+			if (!screenExists || !videoExists) {
+				return failRecording('missing webm files');
 			}
 		}
-		catch (err) {
-			sendEmailError('file length error' + err, uid+' / '+agent);
-			console.error(getDateNow()+' : '+err)
-		}
-	});
+
+	} catch (err) {
+		await sendEmailError('file length error ' + err, uid + ' / ' + agent);
+		console.error(getDateNow() + ' : ' + err);
+	}
 }
 
 /**
  * @returns {string}
  */
 function getDateNow() {
-	var dateNowTmp = new Date();
+	const dateNowTmp = new Date();
 	return dateNowTmp.getDate() + '-' + (dateNowTmp.getMonth() + 1) + '-' + dateNowTmp.getFullYear() + ';' + dateNowTmp.getHours() + ':' + dateNowTmp.getMinutes() + ':' + dateNowTmp.getSeconds();
 }
 
@@ -1080,23 +1101,13 @@ function getDateNow() {
  */
 async function sendEmailError(err, user) {
 	if (!hasSendMailError) {
-		const nodemailer = require("nodemailer");
-		let transporter = nodemailer.createTransport({
-			host: config.mail_host,
-			port: config.mail_port,
-			secure: false,
-			tls: { rejectUnauthorized: false }
-		});
-
-		let mailOptions = {
-			from: config.mail_from,
-			to: config.mail_to,
-			subject: '[Warn] UCAStudio Error',
-			text: 'Une erreur a été détectée \nDate : ' + getDateNow() + '\nUser : ' + user + '\nErreur : \n' + err
-		};
-
 		try {
-			await transporter.sendMail(mailOptions);
+			await transporter.sendMail({
+				from:    config.mail_from,
+				to:      config.mail_to,
+				subject: '[Warn] UCAStudio Error',
+				text:    `Une erreur a été détectée\nDate : ${getDateNow()}\nUser : ${user}\nErreur : \n${err}`
+			});
 		} catch (error) {
 			console.log(error);
 		}
@@ -1113,7 +1124,7 @@ async function sendEmailError(err, user) {
  */
 function getRate(type, reso)
 {
-	var rateValue;
+	let rateValue;
 
 	if(type === 'webcam') {
 		switch (reso) {
@@ -1128,10 +1139,10 @@ function getRate(type, reso)
 			case 'hd':
 				rateValue = ['-maxrate', '2500k', '-bufsize', '3000k'];
 				break;
-			case 'xga':  //à tester
+			case 'xga':
 				rateValue = ['-maxrate', '2060k', '-bufsize', '2560k'];
 				break;
-			case 'hdplus': //à tester
+			case 'hdplus':
 				rateValue = ['-maxrate', '3500k', '-bufsize', '4000k'];
 				break;
 			default:
