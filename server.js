@@ -125,9 +125,11 @@ io.on('connection', async function (socket) {
 			let screenAudioFlags;
 			if (m === 'video-and-desktop') {
 				screenAudioFlags = ['-c:a', 'copy'];
-			} else if (m === 'onlydesktop') {
+			}
+			/* else if (m === 'onlydesktop') {
 				screenAudioFlags = ['-an'];
-			} else {
+			} */
+			else {
 				screenAudioFlags = ['-b:a', '96k'];
 			}
 
