@@ -2,284 +2,414 @@
 <html lang="fr">
 <head>
     <meta charset="utf8">
-    <meta name="viewport" content="width=device-width">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>UCAStudio</title>
     <link rel="icon" type="image/x-icon" href="img/media_logo.png">
-    <link rel="stylesheet"  href="css/circle.css">
-    <link rel="stylesheet" type="text/css" href="css/cdn.uca.fr.css">
+
+    <link rel="stylesheet" href="css/circle.css">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/streams-section.css">
     <link rel="stylesheet" media="screen and (max-width: 1300px)" href="css/screen.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css"
-          integrity="sha512-5Hs3dF2AEPkpNAR7UiOHba+lRSJNeM2ECkwxUIxC1Q/FLycGTbNapWXB4tP889k5T5Ju8fs4b1P5z/iB4nMfSQ=="
-          crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="stylesheet" href="css/video-js.min.css" >
-    <link rel="stylesheet" href="css/videojs-vjsdownload.css" >
+    <link rel="stylesheet" href="https://cdn.uca.fr/v2/css/uca.min.css">
+    <link rel="stylesheet" href="css/video-js.min.css">
+    <link rel="stylesheet" href="css/videojs-vjsdownload.css">
     <link rel="stylesheet" href="css/select2.min.css" />
-    <link rel="stylesheet" href="css/select2-bootstrap4.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
 </head>
 <body class="loading translating">
 <header>
-    <a href="index.html" id="UCAStudio">
-        <span>
-            <img src="img/logo_uca_mini_light.png" alt="UCA" height="30px"  style="margin-top: 0.25em">
-            <span style="position:absolute;padding-left: 5px">Studio</span>
-        </span>
-    </a>
-    <div id="language" style="display:none;">
-        <input type="checkbox" class="hiddenCheck" id="chooseLanguage" />
-        <label id="chosenLanguage" for="chooseLanguage">
-            <span>FR</span>
-            <img alt="Français" src="res/flags/fra.png" />
-        </label>
-        <ul></ul>
-        <a><iframe src="" class="checkWifi"></iframe></a>
-        <div id="help" style="display: none" onclick="document.getElementById('helpList').style.visibility='visible';">
-            <i class="fas fa-question-circle fa-2x"></i>
-            <ul id="helpList">
-                <li><a class="docLinkUcaStudio" style="display: none" href="" target="_blank" title="Accéder au tutoriel UCAStudio">Accéder au tutoriel UCAStudio</a></li>
-                <li><a class="docLinkUcaMedia" style="display: none" href="" target="_blank" title="Accéder à la documentation UCAMedia">Accéder à la documentation UCAMedia</a></li>
-            </ul>
-        </div>
-        <a href="/logout" class="logout" title="Se déconnecter">
-            <i class="fas fa-sign-out-alt fa-2x"></i>
+    <div class="container-fluid d-flex align-items-center justify-content-between">
+        <a href="index.html" id="UCAStudio" class="d-flex align-items-center gap-2 text-white text-decoration-none">
+            <img src="img/logo_uca_mini_light.png" alt="UCA" style="max-height:32px">
+            <span class="fw-semibold" style="font-size:1.1rem;letter-spacing:.02em">Studio</span>
         </a>
+        <div id="language" style="display:none;">
+            <input type="checkbox" class="hiddenCheck" id="chooseLanguage" />
+            <label id="chosenLanguage" for="chooseLanguage">
+                <span>FR</span>
+                <img alt="Français" src="res/flags/fra.png" />
+            </label>
+            <ul></ul>
+        </div>
+        <a><iframe src="" class="checkWifi"></iframe></a>
+        <div class="d-flex justify-content-end">
+            <div class="dropdown me-4">
+                <i class="mdi mdi-36px mdi-help-circle"
+                   data-bs-toggle="dropdown" style="color: white; cursor:pointer;"></i>
+                <div id="helpIcon" class="navbar-nav mx-auto mb-2 mb-lg-0">
+                    <ul class="dropdown-menu">
+                        <li><a href="" class="docLinkUcaStudio dropdown-item" style="color: var(--bs-dropdown-link-color)" target="_blank">Accéder au tutoriel UCAstudio</a></li>
+                        <li><a href="" class="docLinkUcaMedia dropdown-item" style="color: var(--bs-dropdown-link-color)" target="_blank">Accéder à la documentation UCAmedia</a></li>
+                    </ul>
+                </div>
+            </div>
+            <a href="/logout" class="text-decoration-none">
+                <i class="mdi mdi-logout mdi-36px"></i>
+            </a>
+        </div>
     </div>
 </header>
-<input type="checkbox" class="toggleCover hiddenCheck" id="toggleSaveCreationModal" autocomplete="off" style="display: none"/>
+
+<input type="checkbox" class="toggleCover hiddenCheck" id="toggleSaveCreationModal" autocomplete="off" style="display:none"/>
+
 <div id="introCover">
-    <div class="loader" style="display: none">
-        <div class="statutLoading" style="display: none">
+    <div class="loader" >
+        <div class="statutLoading" style="display:none">
             <svg width="240" height="240">
                 <circle r="82" cx="120" cy="120" fill="none" stroke="#00bdc4" stroke-width="8" stroke-dashoffset="0" stroke-dasharray="515"></circle>
                 <circle r="82" cx="120" cy="120" fill="none" stroke="white" stroke-width="14" stroke-dashoffset="20" stroke-dasharray="515"></circle>
             </svg>
-            <span class="loaderText" data-translate="LOADING">Chargement...</span>
+            <span class="loaderText text-white small mt-3 d-block text-center" data-translate="LOADING">Chargement...</span>
         </div>
-        <div class="debitCircle" style="display: none">
-            <div id="debitBar" class="c100 p0 big" style="margin-bottom: 20px;">
+        <div class="debitCircle" >
+            <div id="debitBar" class="c100 p0 big" style="margin-bottom:20px;">
                 <span id="debitPercent">0%</span>
-                <div class="slice">
-                    <div class="bar"></div>
-                    <div class="fill"></div>
-                </div>
+                <div class="slice"><div class="bar"></div><div class="fill"></div></div>
             </div>
-            <span style="text-align: center">Test de votre débit en cours... <br>Merci de patienter</span>
+            <span style="text-align:center;color:white;display: block">Test de votre débit en cours…<br>Merci de patienter</span>
         </div>
     </div>
 </div>
-<div id="uploadProgress" style="display: none"></div>
+
+<div id="uploadProgress" style="display:none"></div>
 <div id="cover"></div>
-<main style="visibility: hidden">
-    <h2 id="infoMaintenanceMod" class="alert alert-danger-uca card"></h2>
-    <div id="infoNotAlreadyAllowShare" class="alert alert-orange">
-        <p>Afin d'assurer le bon fonctionnement de l'application, vous devez autoriser une première fois l'accès à vos périphériques.</p>
-        <p>Merci de bien vouloir cliquer sur le bouton ci-dessous.</p>
-        <p>Une fois le partage effectué, la page sera automatiquement rechargée.</p>
-        <button class="button button-uca-blue" onclick="shareAndReload()">Partager ma webcam/mon micro</button>
+
+<main style="visibility:hidden">
+    <h2 id="infoMaintenanceMod" class="alert alert-danger"></h2>
+
+    <div id="infoNotAlreadyAllowShare" class="alert alert-danger" style="margin:.75rem auto;padding:1rem 1.25rem">
+        <p class="mb-1">Afin d'assurer le bon fonctionnement de l'application, vous devez autoriser une première fois l'accès à vos périphériques.</p>
+        <p class="mb-1">Merci de bien vouloir cliquer sur le bouton ci-dessous.</p>
+        <p class="mb-2">Une fois le partage effectué, la page sera automatiquement rechargée.</p>
+        <div class="d-flex justify-content-center">
+            <button class="btn btn-primary" onclick="shareAndReload()">
+                <i class="mdi mdi-video mdi-24px me-1"></i>Partager ma webcam / mon micro
+            </button>
+        </div>
     </div>
+
     <div class="content">
+
         <input type="radio" id="main" class="hiddenCheck" name="view" checked autocomplete="off" />
-        <section>
-            <label class="bigButton action card card-hover" for="create"></label>
-            <label class="bigButton action card card-hover" for="edit" id="live"></label>
+        <section id="welcomeSection">
+            <div class="welcome-hero">
+                <span class="welcome-badge">Navigateur compatible</span>
+                <h1>Bienvenue sur UCA Studio</h1>
+                <p>Créez et partagez vos enregistrements en quelques clics.</p>
+            </div>
+            <label class="bigButton d-flex flex-column align-items-center justify-content-center text-center bg-white gap-2 shadow " for="create" role="button">
+                <span class="bigBtn-icon"><i class="mdi mdi-video mdi-48px"></i></span>
+                <span class="bigBtn-title">Créer un média</span>
+                <span class="bigBtn-desc">Enregistrez votre écran, webcam et microphone depuis votre navigateur</span>
+                <span class="bigBtn-cta"> Commencer <i class="mdi mdi-arrow-right mdi-24px "></i></span>
+            </label>
         </section>
         <input type="radio" id="create" class="hiddenCheck" name="view" autocomplete="off" />
         <section id="mainSection">
-            <label class="backBtn" for="main" title="Retour" data-translatetitle="BACK_TO_MAIN"></label>
-            <div id="alertBrowser" class="alert alert-orange">
-                <a href="#" class="close"></a>
-                Le support de votre navigateur est actuellement en cours d'amélioration.
-                <br>
-                Veuillez utiliser le navigateur Firefox ou Google Chrome qui offrent actuellement les meilleurs résultats en matière d'enregistrement.
-            </div>
-            <div id="alertBrowserVersion" class="alert alert-orange">
-                <a href="#" class="close"></a>
-                Le support de votre navigateur n'est pas disponible dans cette version.
-                <br>
-                Veuillez mettre à jour votre navigateur.
-            </div>
-            <div class="production">
-                <h1 data-translate="PRODUCTION_HEADING" style="margin-top: 0;font-size: 1.8em">Détails de production</h1>
-                <div id="alert" class="alert alert-orange card-60 hiddenCheck" style="text-align: center;">
-                        Merci de bien vouloir renseigner les informations demandées.
+
+            <!-- ── Stepper ── -->
+            <div class="stepper">
+                <div class="step active">
+                    <div class="step-circle">1</div>
+                    <div class="step-label">Détails</div>
                 </div>
-                <div class="card card-60">
-                    <div class="form-input card-80" id="dropdownlistserie">
-                        <label for="listseries" class="required-field">Bibliothèque</label>
-                        <select id="listseries"></select>
+                <div class="step-line"></div>
+                <div class="step">
+                    <div class="step-circle">2</div>
+                    <div class="step-label">Enregistrement</div>
+                </div>
+            </div>
+
+            <div class="container">
+                <label class="backBtn" for="main" title="Retour" data-translatetitle="BACK_TO_MAIN">
+                    <i class="mdi mdi-arrow-left mdi-36px"></i> Retour
+                </label>
+
+                <div id="alertBrowser" class="alert alert-danger" style="max-width:700px;margin:.5rem auto">
+                    <button type="button" class="btn-close btn-close-sm"></button>
+                    Le support de votre navigateur est actuellement en cours d'amélioration.<br>
+                    Veuillez utiliser <strong>Firefox</strong> ou <strong>Google Chrome</strong> pour de meilleurs résultats.
+                </div>
+                <div id="alertBrowserVersion" class="alert alert-danger" style="max-width:700px;margin:.5rem auto">
+                    <button type="button" class="btn-close btn-close-sm"></button>
+                    Le support de votre navigateur n'est pas disponible dans cette version.<br>
+                    Veuillez mettre à jour votre navigateur.
+                </div>
+
+                <div class="d-flex flex-column align-items-center h-100 p-3">
+                    <h1 class="fw-bold fs-4 text-dark mb-1" data-translate="PRODUCTION_HEADING">Détails de production</h1>
+                    <p class="text-muted small text-center mb-4">Ces informations seront associées à votre enregistrement.</p>
+
+                    <div id="alert" class="alert alert-danger hiddenCheck" style="text-align:center">
+                        Merci de bien vouloir renseigner les informations demandées.
                     </div>
-                    <div class="form-input card-80">
-                        <label for="titleUpload" class="required-field">Titre</label>
-                        <input type="text" id="titleUpload" name="title" placeholder="Titre de votre média">
-                    </div>
-                    <div class="form-input card-80">
-                        <label for="presenterUpload" class="required-field">Auteur</label>
-                        <input type="text" id="presenterUpload" name="presenter" placeholder="Nom/Prénom">
-                    </div>
-                    <div class="form-input card-80">
-                        <label for="descUpload">Description</label>
-                        <textarea id="descUpload" name="desc"></textarea>
-                    </div>
-                    <div class="form-input card-80">
-                        <label for="locationUpload">Localisation</label>
-                        <input type="text" id="locationUpload" name="location" placeholder="Lieu de l'enregistrement">
-                    </div>
-                    <div id="uploadAtEnd" class="form-input card-80">
-                        <div class="checkbox">
-                            <input type="checkbox" id="uploadMedia" name="uploadMedia" checked>
-                            <label for="uploadMedia">
-                                <span class="check"></span>
-                                <span class="box"></span>
-                                Transférer automatiquement le média dans la bibliothèque sélectionnée à la fin de l’enregistrement
+                    <div class="card mx-auto p-4" style="width:min(760px,92%)">
+                        <!-- Bibliothèque -->
+                        <div class="mb-3 " id="dropdownlistserie">
+                            <label for="listseries" class="form-label required-field">Bibliothèque</label>
+                            <select id="listseries" class="form-select"></select>
+                        </div>
+
+                        <!-- Titre + Auteur côte à côte -->
+                        <div class="form-row">
+                            <div class="mb-3">
+                                <label for="titleUpload" class="form-label required-field">Titre</label>
+                                <input type="text" id="titleUpload" name="title"
+                                       class="form-control"
+                                       placeholder="Titre de votre média">
+                            </div>
+                            <div class="mb-3">
+                                <label for="presenterUpload" class="form-label required-field">Auteur</label>
+                                <input type="text" id="presenterUpload" name="presenter"
+                                       class="form-control"
+                                       placeholder="Nom / Prénom">
+                            </div>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="mb-3">
+                            <label for="descUpload" class="form-label">Description</label>
+                            <textarea id="descUpload" name="desc"
+                                      class="form-control"
+                                      rows="3" style="resize:vertical"
+                                      placeholder="Description (optionnel)"></textarea>
+                        </div>
+
+                        <!-- Localisation -->
+                        <div class="mb-3">
+                            <label for="locationUpload" class="form-label">Localisation</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="mdi mdi-map-marker text-muted"></i>
+                                </span>
+                                <input type="text" id="locationUpload" name="location"
+                                       class="form-control border-start-0"
+                                       placeholder="Lieu de l'enregistrement (optionnel)">
+                            </div>
+                        </div>
+
+                        <!-- Transfert automatique -->
+                        <div id="uploadAtEnd" class="mb-3">
+                            <div class="checkbox">
+                                <input class="form-check-input mt-0 flex-shrink-0" type="checkbox" id="uploadMedia" name="uploadMedia" checked>
+                                <label class="form-check-label small" for="uploadMedia" style="cursor:pointer;line-height:1.4">
+                                    Transfert automatique, le média sera envoyé dans la bibliothèque sélectionnée à la fin de l'enregistrement
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Bouton Suivant -->
+                        <div class="d-flex justify-content-end mt-3">
+                            <label class="btn btn-primary px-4" id="nextBtn" for="createTmp">
+                                Suivant <i class="mdi mdi-arrow-right ms-1"></i>
                             </label>
                         </div>
-                    </div>
 
+                    </div>
                 </div>
-                <label class="nextBtn" id="nextBtn" for="createTmp" title="Suivant" data-translatetitle="NEXT" ></label>
             </div>
         </section>
+
         <input type="radio" id="createTmp" class="hiddenCheck" name="view" autocomplete="off" />
-        <section>
-            <label class="backBtn backToInfo" for="create" title="Retour" data-translatetitle="BACK_TO_MAIN"></label>
-            <input type="checkbox" id="minimiseStreams" class="hiddenCheck" />
-            <input name="userView" type="radio" value="simple" class="hiddenCheck" id="simpleUserView" autocomplete="off" />
-            <input name="userView" type="radio" value="advanced" class="hiddenCheck" checked id="advancedUserView" autocomplete="off" />
-            <div id="alertLowDebit" class="alert alert-orange">
-                <a href="#" class="close"></a>
-                Attention, nous vous recommandons de n'enregistrer qu'un flux vidéo (écran ou webcam) avec ou sans microphone, car votre débit n'est pas suffisant.
+
+
+        <section id="streamsSection">
+            <div class="stepper">
+                <div class="step done">
+                    <div class="step-circle"><i class="mdi mdi-check"></i></div>
+                    <div class="step-label">Détails</div>
+                </div>
+                <div class="step-line done"></div>
+                <div class="step active">
+                    <div class="step-circle">2</div>
+                    <div class="step-label">Enregistrement</div>
+                </div>
             </div>
-            <div id="alertWrongReso" class="alert alert-orange">
-                <a href="#" class="close"></a>
-                Attention, la résolution sélectionnée n'est pas recommandée car votre débit est insuffisant.
-            </div>
-	        <div id="alertNoWebcam" class="alert alert-orange">
-                <a href="#" class="close"></a>
-                Impossible de trouver un périphérique multimédia. Il est très probable que votre navigateur n'autorise pas l'accès à ce périphérique ou qu'il n'est pas connecté.
-                <br>
-                Essayez de recharger cette page ou ouvrez-la à l'aide d'un autre navigateur. N'oubliez pas que pour démarrer votre webcam, vous devez autoriser notre site Web à l'utiliser.
-            </div>
-            <div id="alertMicNotEnable" class="alert alert-orange">
-                <a href="#" class="close"></a>
-                Attention, vous avez lancé votre enregistrement sans avoir activé votre micro.
-                <br>
-                Si cela est un choix délibéré, veuillez ne pas tenir compte de ce message.
-            </div>
-            <div id="alertTypeDesktopShare" class="alert alert-orange">
-                <a href="#" class="close"></a>
-                Attention, l'enregistrement d'une fenêtre n'est pas autorisé, merci de sélectionner l'intégralité de votre écran (cliquez sur "Écran <i class="fas fa-retweet switchDevice"></i>" pour changer).
-                <br>
-                Si vous avez bien sélectionné l'écran en entier, veuillez ne pas tenir compte de ce message.
-            </div>
-            <div id="alertNoOnlyAudio" class="alert alert-orange">
-                <a href="#" class="close"></a>
-                Attention, la version de votre navigateur ne supporte pas l'enregistrement audio seul, cette fonctionnalité a été désactivée.
-                <br>
-                Si vous souhaitez utiliser cette option, veuillez mettre à jour votre navigateur ou utiliser Google Chrome.
-            </div>
-            <div id="videoView">
-                <input type="radio" name="desktop" class="hiddenCheck streamToggle" id="desktopstream" autocomplete="off" />
-                <label for="desktopstream" class="mediadevice action desktopDevice card card-hover" data-title="Partager l'écran" data-pseudotext="SHARE_DESKTOP" data-target="desktop">
-                    <video id="desktop" autoplay muted></video>
-                    <span class="placeholder"></span>
-                    <div class="streamControls">
-                        <input type="checkbox" id="desktopResolution" class="hiddenCheck" />
-                        <label for="desktopResolution" class="labelDesktopResolution">
-                            <span></span>
-                            <ul id="listResoDesktop">
-                                <li class="vga"><button type="button" value="vga" class="desktopReso">VGA (480p,4:3)</button></li>
-                                <li class="qhd"><button type="button" value="qhd" class="desktopReso">qHD (540p,16:9)</button></li>
-                                <li class="svga"><button type="button" value="svga" class="desktopReso">SVGA (600p,4:3)</button></li>
-                                <li class="hd"><button type="button" value="hd" class="desktopReso">HD (720p,16:9)</button></li>
-                                <li class="hdplus"><button type="button" value="hdplus" class="desktopReso">HD+ (900p,16:9)</button></li>
-                                <li class="fullhd"><button type="button" value="fullhd" class="desktopReso">FHD (1080p,16:9)</button></li>
-                            </ul>
-                            <input type="hidden" id="resoDesktopChoose" value="qhd" />
-                            <i class="fas fa-retweet switchDevice"></i>
-                        </label>
-                        <input type="checkbox" id="inputSource1" class="hiddenCheck" />
-                        <label for="inputSource1" class="pull-left inputSource labelDesktop">
-                            <span>Écran <i class="fas fa-retweet switchDevice"></i> </span>
-                            <ul style="display: none"></ul>
-                            <span id="desktopAudioIndicator" title="Audio bureau capturé" >
-                                <i class="fas fa-volume-up"></i>
-                            </span>
-                        </label>
-                    </div>
+            <div class="container">
+                <label class="backBtn backToInfo" for="create" title="Retour" data-translatetitle="BACK_TO_MAIN">
+                    <i class="mdi mdi-arrow-left mdi-36px"></i> Retour
                 </label>
-                <input type="radio" name="audio" class="hiddenCheck streamToggle" id="audiostream" autocomplete="off"/>
-                <label for="audiostream" class="mediadevice action audioDevice card card-hover" data-title="Partager le microphone" data-pseudotext="SHARE_MICROPHONE" data-target="audio">
-                    <audio id="audio" autoplay muted></audio>
-                    <span class="placeholder"></span>
-                    <div class="streamControls">
-                        <input type="checkbox" id="inputSource3" class="hiddenCheck" />
-                        <label for="inputSource3" class="pull-left inputSourceAudio labelAudio">
-                            <span id="switchMic">Micro <i  class="fas fa-retweet audioDevice"></i> </span>
-                            <ul id="listMicAvailable"></ul>
-                        </label>
-                        <span class="labelMicSelect pull-Micleft"></span>
+
+                <input type="checkbox" id="minimiseStreams" class="hiddenCheck" />
+                <input name="userView" type="radio" value="simple" class="hiddenCheck" id="simpleUserView" autocomplete="off" />
+                <input name="userView" type="radio" value="advanced" class="hiddenCheck" checked id="advancedUserView" autocomplete="off" />
+
+                <!-- Alertes -->
+                <div id="alertLowDebit" class="alert alert-warning alert-dismissible text-center mx-auto mt-2" style="max-width:700px;display:none">
+                    <button type="button" class="btn-close float-end"></button>
+                    Attention, nous vous recommandons de n'enregistrer qu'un flux vidéo (écran ou webcam) avec ou sans microphone, car votre débit n'est pas suffisant.
+                </div>
+                <div id="alertWrongReso" class="alert alert-warning alert-dismissible text-center mx-auto mt-2" style="max-width:700px;display:none">
+                    <button type="button" class="btn-close float-end"></button>
+                    Attention, la résolution sélectionnée n'est pas recommandée car votre débit est insuffisant.
+                </div>
+                <div id="alertNoWebcam" class="alert alert-warning alert-dismissible text-center mx-auto mt-2" style="max-width:700px;display:none">
+                    <button type="button" class="btn-close float-end"></button>
+                    Impossible de trouver un périphérique multimédia. Il est très probable que votre navigateur n'autorise pas l'accès à ce périphérique ou qu'il n'est pas connecté.
+                    <br>
+                    Essayez de recharger cette page ou ouvrez-la à l'aide d'un autre navigateur.
+                </div>
+                <div id="alertMicNotEnable" class="alert alert-warning alert-dismissible text-center mx-auto mt-2" style="max-width:700px;display:none">
+                    <button type="button" class="btn-close float-end"></button>
+                    Attention, vous avez lancé votre enregistrement sans avoir activé votre micro.
+                    <br>
+                    Si cela est un choix délibéré, veuillez ne pas tenir compte de ce message.
+                </div>
+                <div id="alertTypeDesktopShare" class="alert alert-warning alert-dismissible text-center mx-auto mt-2" style="max-width:700px;display:none">
+                    <button type="button" class="btn-close float-end"></button>
+                    Attention, l'enregistrement d'une fenêtre n'est pas autorisé, merci de sélectionner l'intégralité de votre écran
+                    (cliquez sur "Écran <i class="mdi mdi-swap-horizontal switchDevice"></i>" pour changer).<br>
+                    Si vous avez bien sélectionné l'écran en entier, veuillez ne pas tenir compte de ce message.
+                </div>
+                <div id="alertNoOnlyAudio" class="alert alert-warning alert-dismissible text-center mx-auto mt-2" style="max-width:700px;display:none">
+                    <button type="button" class="btn-close float-end"></button>
+                    Attention, la version de votre navigateur ne supporte pas l'enregistrement audio seul, cette fonctionnalité a été désactivée.
+                    <br>
+                    Si vous souhaitez utiliser cette option, veuillez mettre à jour votre navigateur ou utiliser Google Chrome.
+                </div>
+
+                <div id="videoView" class="d-flex flex-column align-items-center h-100 p-3">
+                    <h2 class="fw-bold fs-4 text-dark mb-1">Sélectionner les sources</h2>
+                    <p class="text-muted small text-center mb-4">Cliquez pour activer ou désactiver chaque source</p>
+                    <div class="row">
+                        <!-- Screen -->
+                        <div class="col-12 col-lg-5">
+                            <input type="radio" name="desktop" class="hiddenCheck streamToggle" id="desktopstream" autocomplete="off" />
+                            <label for="desktopstream" class="mediadevice action desktopDevice card card-hover" data-title="Partager l'écran" data-pseudotext="SHARE_DESKTOP" data-target="desktop">
+                                <video id="desktop" autoplay muted></video>
+                                <span class="placeholder">
+                                    <i class="mdi mdi-monitor"></i>
+                                </span>
+                                <div class="streamControls">
+                                    <input type="checkbox" id="desktopResolution" class="hiddenCheck" />
+                                    <label for="desktopResolution" class="labelDesktopResolution">
+                                        <span></span>
+                                        <i class="mdi mdi-swap-horizontal switchDevice"></i>
+                                        <ul id="listResoDesktop">
+                                            <li class="vga"><button type="button" value="vga" class="desktopReso">VGA (480p,4:3)</button></li>
+                                            <li class="qhd"><button type="button" value="qhd" class="desktopReso">qHD (540p,16:9)</button></li>
+                                            <li class="svga"><button type="button" value="svga" class="desktopReso">SVGA (600p,4:3)</button></li>
+                                            <li class="hd"><button type="button" value="hd" class="desktopReso">HD (720p,16:9)</button></li>
+                                            <li class="hdplus"><button type="button" value="hdplus" class="desktopReso">HD+ (900p,16:9)</button></li>
+                                            <li class="fullhd"><button type="button" value="fullhd" class="desktopReso">FHD (1080p,16:9)</button></li>
+                                        </ul>
+                                        <input type="hidden" id="resoDesktopChoose" value="qhd" />
+
+                                    </label>
+                                    <input type="checkbox" id="inputSource1" class="hiddenCheck" />
+                                    <label for="inputSource1" class="float-start inputSource labelDesktop">
+                                        <span>
+                                            <i class="mdi mdi-monitor"></i>
+                                            Écran <i class="mdi mdi-swap-horizontal switchDevice"></i> </span>
+                                        <ul style="display: none"></ul>
+                                    </label>
+                                </div>
+                            </label>
+                        </div>
+
+                        <!--                        <div class="col-12 col-lg-2" style="max-width: 160px;">-->
+                        <div class="col-12 col-lg-2" style="margin-top: 8em">
+                            <input type="radio" name="audio" class="hiddenCheck streamToggle" id="audiostream" autocomplete="off"/>
+                            <label for="audiostream"
+                                   class="mediadevice action audioDevice card card-hover"
+                                   data-title="Partager le microphone"
+                                   data-pseudotext="SHARE_MICROPHONE"
+                                   data-target="audio">
+
+                                <audio id="audio" autoplay muted></audio>
+
+                                <!-- Header visible quand .active -->
+                                <div class="audio-header">
+                                    <span class="audio-mic-badge">
+                                        <i class="mdi mdi-microphone"></i>
+                                    </span>
+                                    <div class="audio-header-info">
+                                        <span class="audio-header-name">Micro</span>
+                                        <span class="audio-header-device labelMicSelect"></span>
+                                    </div>
+                                    <div class="audio-switch-wrap streamControls">
+                                        <input type="checkbox" id="inputSource3" class="hiddenCheck"/>
+                                        <button type="button" class="inputSourceAudio labelAudio audio-switch-btn" id="audioSwitchBtn" aria-expanded="false">
+                                            <i class="mdi mdi-chevron-down audio-switch-caret"></i>
+                                            <ul id="listMicAvailable"></ul>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Icône placeholder visible quand inactif -->
+                                <span class="placeholder">
+                                    <i class="mdi mdi-microphone placeholder-icon"></i>
+                                </span>
+
+                                <!-- Visualiseur audio visible quand .active -->
+                                <div class="audio-viz">
+                                    <canvas id="audioCanvas" width="140" height="80"></canvas>
+                                    <span class="audio-viz-label">Niveau entrée</span>
+                                    <canvas id="audioCanvasLevel" width="140" height="6"></canvas>
+                                </div>
+                            </label>
+                        </div>
+
+                        <div class="col-12 col-lg-5">
+                            <input type="radio" name="video" class="hiddenCheck streamToggle" id="webcamstream" autocomplete="off" />
+                            <label for="webcamstream" class="mediadevice action videoDevice card card-hover" data-title="Partager la webcam" data-pseudotext="SHARE_WEBCAM" data-target="video">
+                                <video id="video" autoplay muted></video>
+                                <span class="placeholder">
+                                    <i class="mdi mdi-webcam"></i>
+                                </span>
+                                <div class="streamControls">
+                                    <input type="checkbox" id="videoResolution" class="hiddenCheck" />
+                                    <label for="videoResolution" class="labelVideoResolution">
+                                        <span></span>
+                                        <ul  id="listResoWebCam">
+                                            <li class="nhd" style="display: none"><button type="button" value="nhd">nHD (360p,16:9)</button></li>
+                                            <li class="vga" style="display: none"><button type="button" value="vga">VGA (480p,4:3)</button></li>
+                                            <li class="qhd" style="display: none"><button type="button" value="qhd">qHD (540p,16:9)</button></li>
+                                            <li class="svga" style="display: none"><button type="button" value="svga">SVGA (600p,4:3)</button></li>
+                                            <li class="hd" style="display: none"><button type="button" value="hd">HD (720p,16:9)</button></li>
+                                            <li class="xga" style="display: none"><button type="button" value="xga">XGA (768p,4:3)</button></li>
+                                            <li class="hdplus" style="display: none"><button type="button" value="hdplus">HD+ (900p,16:9)</button></li>
+                                            <li class="fullhd" style="display: none"><button type="button" value="fullhd">Full HD (1080p, 16:9)</button></li>
+                                        </ul>
+                                        <i class="mdi mdi-swap-horizontal switchDevice"></i>
+                                        <input type="hidden" id="resoWebCamChoose" value="vga" />
+                                    </label>
+                                    <input type="checkbox" id="inputSource2" class="hiddenCheck" />
+                                    <label for="inputSource2" class="float-start inputSource labelWebcam">
+                                        <span>
+                                            <i class="mdi mdi-webcam"></i>
+                                            Webcam <i id="switchWebcam" class="mdi mdi-swap-horizontal switchDevice"></i></span>
+                                        <ul id="listWebCamAvailable"></ul>
+                                    </label>
+                                    <span class="labelCamSelect float-start"></span>
+                                </div>
+                            </label>
+                        </div>
+
                     </div>
-                    <span class="shadow"></span>
-                    <canvas></canvas>
-                </label>
-                <input type="radio" name="video" class="hiddenCheck streamToggle" id="webcamstream" autocomplete="off" />
-                <label for="webcamstream" class="mediadevice action videoDevice card card-hover" data-title="Partager la webcam" data-pseudotext="SHARE_WEBCAM" data-target="video">
-                    <video id="video" autoplay muted></video>
-                    <span class="placeholder"></span>
-                    <span class="shadow"></span>
-                    <div class="streamControls">
-                        <input type="checkbox" id="videoResolution" class="hiddenCheck" />
-                        <label for="videoResolution" class="labelVideoResolution">
-                            <span></span>
-                            <ul  id="listResoWebCam">
-                                <li class="nhd" style="display: none"><button type="button" value="nhd">nHD (360p,16:9)</button></li>
-                                <li class="vga" style="display: none"><button type="button" value="vga">VGA (480p,4:3)</button></li>
-                                <li class="qhd" style="display: none"><button type="button" value="qhd">qHD (540p,16:9)</button></li>
-                                <li class="svga" style="display: none"><button type="button" value="svga">SVGA (600p,4:3)</button></li>
-                                <li class="hd" style="display: none"><button type="button" value="hd">HD (720p,16:9)</button></li>
-                                <li class="xga" style="display: none"><button type="button" value="xga">XGA (768p,4:3)</button></li>
-                                <li class="hdplus" style="display: none"><button type="button" value="hdplus">HD+ (900p,16:9)</button></li>
-                                <li class="fullhd" style="display: none"><button type="button" value="fullhd">Full HD (1080p, 16:9)</button></li>
-                            </ul>
-                            <i class="fas fa-retweet switchDevice"></i>
-                            <input type="hidden" id="resoWebCamChoose" value="vga" />
-                        </label>
-                        <input type="checkbox" id="inputSource2" class="hiddenCheck" />
-                        <label for="inputSource2" class="pull-left inputSource labelWebcam">
-                            <span>Webcam <i id="switchWebcam" class="fas fa-retweet switchDevice"></i></span>
-                            <ul id="listWebCamAvailable"></ul>
-                        </label>
-                        <span class="labelCamSelect pull-left"></span>
+                </div>
+                <div id="recordingControls" class="d-flex flex-column align-items-center text-center">
+                    <span id="recordingTime"></span>
+                    <div class="d-flex align-items-center gap-3 mt-4 pb-2">
+                        <!-- Pause : à gauche, plus petit -->
+                        <button id="pauseRecord" class="mdi mdi-pause">
+                            <span id="pauseTitle">Pause</span>
+                        </button>
+                        <!-- Record : au centre, avec label dessous -->
+                        <div class="d-flex flex-column align-items-center gap-1">
+                            <button id="startRecord" class="rec-btn">
+                                <div class="rec-dot"></div>
+                            </button>
+                            <span class="rec-label" id="startStopTitle">Démarrer</span>
+                        </div>
                     </div>
-                </label>
-                <span id="recordingTime"></span>
-            </div>
-            <div id="recordingControls">
-                <button class="fas fa-pause fa-2x" id="pauseRecord" title="Mettre l'enregistrement en pause" data-translatetitle="PAUSE_RECORDING">
-                    <span id="pauseTitle" style="">Pause</span>
-                </button>
-                <button id="startRecord" title="Démarrer l'enregistrement" data-translatetitle="START_RECORDING">
-                    <span id="startStopTitle" style="">Démarrer</span>
-                </button>
-            </div>
-        </section>
-        <input type="radio" id="edit" class="hiddenCheck" name="view" autocomplete="off" />
-        <section>
-            <label class="backBtn" for="main" title="Retour" data-translatetitle="BACK_TO_MAIN"></label>
-            <div class="card card-60" style="text-align: center">
-                <h3>Générer un live pour OBS Studio</h3><br />
-                <button class="button button-uca-blue" onclick="genLive()">Générer mon live</button>
-                <p id="idStream"></p>
-                <p id="email"></p>
-                <input type='hidden' id='moodle' value='' >
-                <input type='hidden' id='isEtudiant' value='' >
-                <h4>Pour télécharger le logiciel :</h4>
-                <a href="https://obsproject.com/fr/download" target="_blank">Télécharger OBS Studio</a>
+                </div>
             </div>
         </section>
     </div>
 </main>
-<svg xmlns="http://www.w3.org/2000/svg">
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
     <defs>
         <clipPath id="mic">
             <rect x="12" y="0" width="52" height="64" />
@@ -288,84 +418,81 @@
             <rect x="0" y="34" width="12" height="30" />
         </clipPath>
         <clipPath id="micStand">
-            <path d="M 0 0
-                 C 0 29
-                   48 29
-                   48 0
-                 h -6
-                 C 43 22
-                   5 22
-                   5 0" />
+            <path d="M 0 0 C 0 29 48 29 48 0 h -6 C 43 22 5 22 5 0" />
             <rect width="6" height="10" x="21" y="19" />
             <rect height="5" width="38" x="6" y="24" />
         </clipPath>
         <clipPath id="webcamStand">
-            <path d="M 0 48
-                 l 0 -24
-                 l 16 -16
-                 c 0 18
-                   64 18
-                   64 0
-                 l 16 16
-                 l 0 24
-                 h -96
-                 " />
+            <path d="M 0 48 l 0 -24 l 16 -16 c 0 18 64 18 64 0 l 16 16 l 0 24 h -96" />
         </clipPath>
         <filter id="dropshadow">
             <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
             <feOffset dx="0" dy="0" result="offsetblur"/>
-            <feComponentTransfer>
-                <feFuncA type="linear" slope="0.2"/>
-            </feComponentTransfer>
-            <feMerge>
-                <feMergeNode/>
-                <feMergeNode in="SourceGraphic"/>
-            </feMerge>
+            <feComponentTransfer><feFuncA type="linear" slope="0.2"/></feComponentTransfer>
+            <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
         </filter>
     </defs>
 </svg>
-<div id="saveCreation" class="modal" style="display: none">
-    <div class="modalBody">
-        <h1 data-translate="PRODUCTION_MEDIA">Médias</h1>
-        <div id="recordingList">
-                <video
-                        id="screenPreview"
-                        class="video-js card-50"
-                        controls
-                        preload
-                         >
-                    <p class='vjs-no-js'>
-                        Pour consulter ce média, veuillez activer JavaScript et envisagez de passer à un navigateur Web
-                        <a href='https://videojs.com/html5-video-support/' target='_blank'>prenant en charge les vidéos HTML5</a>
-                    </p>
-                </video>
-                <video
-                        id="videoPreview"
-                        class="video-js card-50"
-                        controls
-                        preload
-                        >
-                    <p class='vjs-no-js'>
-                        Pour consulter ce média, veuillez activer JavaScript et envisagez de passer à un navigateur Web
-                        <a href='https://videojs.com/html5-video-support/' target='_blank'> prenant en charge la vidéo HTML5.</a>
-                    </p>
-                </video>
+
+<div id="saveCreation" class="modal" >
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg rounded-3 overflow-hidden">
+
+            <!-- Header -->
+            <div class="modal-header border-bottom px-4 py-3">
+                <h5 class="modal-title fw-bold" data-translate="PRODUCTION_MEDIA">Médias</h5>
+            </div>
+
+            <!-- Body -->
+            <div class="modal-body px-4 py-4">
+
+                <!-- Prévisualisations -->
+                <div id="recordingList" class="d-flex gap-3 justify-content-center flex-wrap mb-2">
+                    <video id="screenPreview" class="video-js rounded-3" controls preload
+                           style="width:48%;min-width:240px">
+                        <p class="vjs-no-js">Pour consulter ce média, veuillez activer JavaScript.</p>
+                    </video>
+                    <video id="videoPreview" class="video-js rounded-3" controls preload
+                           style="width:48%;min-width:240px">
+                        <p class="vjs-no-js">Pour consulter ce média, veuillez activer JavaScript.</p>
+                    </video>
+                </div>
+
+                <!-- Liens téléchargement -->
+                <div class="text-center d-flex flex-column gap-2">
+                    <a href="#" id="saveRecordings" class="text-primary small text-decoration-none">
+                        <i class="mdi mdi-folder-zip-outline me-1"></i>
+                        <span data-translate="PRODUCTION_SAVE">Télécharger une archive (format zip) de vos médias</span>
+                    </a>
+                    <a href="#" id="saveRecordingsFusion" class="linkFusion text-primary small text-decoration-none">
+                        <i class="mdi mdi-merge me-1 mb-2"></i>
+                        <span data-translate="PRODUCTION_SAVE_FUSION">Télécharger une archive et fusionner vos médias <span class="text-muted">(traitement long...)</span></span>
+
+                    </a>
+                </div>
+
+                <!-- Footer -->
+                <div class="modal-footer   px-4 py-3 d-flex justify-content-between align-items-center mt-3">
+                    <a class="managedMyMediaLink text-decoration-none" style="display:none" href="" target="_blank">
+                        <span class="btn btn-primary btn-sm">
+                            <i class="mdi mdi-play-circle-outline me-1"></i>
+                            <span>Gérer mes médias</span>
+                        </span>
+                    </a>
+                    <label for="toggleSaveCreationModal" class="btn btn-info btn-sm ms-auto" id="newRecord">
+                        <i class="mdi mdi-refresh me-1"></i>
+                        <span data-translate="PRODUCTION_DISCARD">Nouvel enregistrement</span>
+                    </label>
+                </div>
+
         </div>
-        <div class="linkToSave">
-            <p><a href="#" id="saveRecordings" data-translate="PRODUCTION_SAVE">Télécharger une archive (format zip) de vos médias</a></p>
-            <p class="linkFusion"><a href="#" id="saveRecordingsFusion" data-translate="PRODUCTION_SAVE_FUSION">Télécharger une archive et fusionner vos médias (traitement long...)</a></p>
-        </div>
-        <input type="hidden" id="debitValue" value="" />
-        <input type="hidden" id="socketissuedValue" value="" />
     </div>
-    <div class="modalFooter">
-        <a class="managedMyMediaLink" style="display: none" href="" target="_blank"><label class="button btn-primary">Gérer mes médias</label></a>
-        <label for="toggleSaveCreationModal" class="button btn-info" data-translate="PRODUCTION_DISCARD">Nouvel enregistrement</label>
-    </div>
+</div>
 </div>
 
 <script src="js/genererStream.js"></script>
 <script src="js/jquery.min.js"></script>
+<script src="https://cdn.uca.fr/v2/js/uca.min.js"></script>
 <script src="js/adapter-latest.js"></script>
 <script src="js/video.min.js"></script>
 <script src="js/FileSaver.min.js"></script>
@@ -381,7 +508,6 @@
 <script src="/socket.io/socket.io.js"></script>
 <script src="js/servercomms.js"></script>
 <script src="js/app.js"></script>
-<link href="css/googlefont.css" rel="stylesheet">
 <script src="js/EBML.js"></script>
 <script src="js/videojs-vjsdownload.js"></script>
 <script src="js/select2.min.js"></script>

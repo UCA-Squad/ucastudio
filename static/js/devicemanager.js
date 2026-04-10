@@ -87,6 +87,9 @@ class DeviceManager extends EventEmitter {
               if (info.deviceId === '') {
                 this.emit('hasNotAlreadyAllowShare', true);
               }
+              else {
+                this.emit('hasAlreadyAllowShare', true);
+              }
 
               result[info.deviceId].on('stream', stream => {
                 this.emit('stream', { id: info.deviceId, stream: stream });

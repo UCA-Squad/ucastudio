@@ -144,8 +144,8 @@ function Communications() {
 
       $('#listseries').append(html);
       $('#listseries').select2({
-        theme: 'bootstrap4',
-        style: 'display: inline-block'
+        theme: 'bootstrap-5',
+        containerCssClass: "form-select",
       });
   });
 

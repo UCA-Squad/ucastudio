@@ -1,4 +1,4 @@
-$(".nextBtn").on('click', function (e) {
+$("#nextBtn").on('click', function (e) {
     if(!$('#titleUpload').val() || !$('#presenterUpload').val() || (document.getElementById('uploadMedia').checked && !$('#listseries').val())){
         e.preventDefault();
         $('#alert').removeClass('hiddenCheck');
@@ -10,12 +10,12 @@ $(".nextBtn").on('click', function (e) {
 });
 
 $(".backToInfo").on('click', function () {
-    $(".nextBtn").closest('section').css("transform", ``);
+    $("#nextBtn").closest('section').css("transform", ``);
 });
 
-$("#alertBrowser > .close, #alertBrowserVersion > .close, #alertNoWebcam > .close, #alertWrongReso > .close, " +
-    "#alertLowDebit > .close, #alertMicNotEnable > .close, #alertTypeDesktopShare > .close, " +
-    "#alertNoOnlyAudio  > .close").on('click', function () {
+$("#alertBrowser > .btn-close.btn-close-sm, #alertBrowserVersion > .btn-close.btn-close-sm, #alertNoWebcam > .btn-close, #alertWrongReso > .btn-close, " +
+    "#alertLowDebit > .btn-close, #alertMicNotEnable > .btn-close, #alertTypeDesktopShare > .btn-close, " +
+    "#alertNoOnlyAudio  > .btn-close").on('click', function () {
     $(this).parent().slideUp("slow");
 });
 
@@ -23,10 +23,10 @@ $( document ).ready(function() {
 
     $('#debitValue').val('');
 
-    $(window).click(function(event) {
-     if(event.target.className != 'fas fa-question-circle fa-2x' && $('#helpList').is(":visible"))
-         document.getElementById('helpList').style.visibility='hidden';
-    });
+    // $(window).click(function(event) {
+    //  if(event.target.className != 'fas fa-question-circle fa-lg' && $('#helpList').is(":visible"))
+    //      document.getElementById('helpList').style.visibility='hidden';
+    // });
 
     var cookieDebitInfo = document.cookie.match(new RegExp('debitValue' + '=([^;]+)'));
     let cookieValueDebit = !!cookieDebitInfo ? cookieDebitInfo[1] : 'null';
@@ -48,6 +48,7 @@ $( document ).ready(function() {
 
     $('#introCover .loader').show();
 
+    buildSourceCards();
     /**
      * Réception debit depuis l'iframe checkSpeedNtwk
      * @param event
@@ -146,6 +147,7 @@ $( document ).ready(function() {
             $('#resoDesktopChoose').val('hd');
 
         $('#debitValue').val(debit);
+        $('#debitValueDisplay').val('~'.debit);
     }
 
     $(document).on('click','label.mediadevice.action.audioDevice.active',function(event){
@@ -159,11 +161,11 @@ $( document ).ready(function() {
         if (document.getElementById('recordingTime').textContent < '00:00:04.000')
             return;
 
-        if(document.getElementById("pauseRecord").className == "fas fa-pause fa-2x") {
+        if(document.getElementById("pauseRecord").className == "mdi mdi-pause mdi-48px") {
             document.getElementById("pauseRecord").title = "Reprendre l'enregistrement";
-            document.getElementById("pauseRecord").className = "fas fa-play fa-2x";
+            document.getElementById("pauseRecord").className = "mdi mdi-play mdi-48px";
         } else {
-            document.getElementById("pauseRecord").className = "fas fa-pause fa-2x";
+            document.getElementById("pauseRecord").className = "mdi mdi-pause mdi-48px";
             document.getElementById("pauseRecord").title = "Mettre l'enregistrement en pause";
         }
         
@@ -175,10 +177,19 @@ $( document ).ready(function() {
     //     $('#live').css('display', 'inline-block');
     // }
     // else
-    $('label.bigButton:first-child')[0].style.marginLeft = "38%";
+    const bigButtons = document.querySelectorAll('.bigButton');
 
-    $('.modal').show();
+    if (bigButtons[1]) {
+        bigButtons[1].style.display = 'none';
+    }
+
+    // $('.modal').show();
     $('main').css("visibility", "visible");
+
+
+    document.getElementById("helpIcon").addEventListener("click", function() {
+        const l = document.getElementById("helpList");
+    });
 
     if(getParameterByName('ent') != null || getParameterByName('courseid') != null ) {
         $('#help').attr('style', 'color:#178F96; position: absolute;left:-3rem !important;z-index:10;');
@@ -256,15 +267,56 @@ $( document ).ready(function() {
         //escape
         if(charCode == 27 && document.getElementById('toggleSaveCreationModal').checked) {
             e.preventDefault();
-            $('.modalFooter label.button.btn-info').trigger('click');
+            $('#newRecord').trigger('click');
         }
 
     });
 
-    $('.modalFooter label.button.btn-info').on('click',  function (e) {
+    $('#newRecord').on('click',  function (e) {
         e.preventDefault(); // stops its action
         location.reload();
     });
+
+    const audioSwitchBtn = document.getElementById('audioSwitchBtn');
+    const audioCard = document.querySelector('#streamsSection .mediadevice.audioDevice');
+
+    audioSwitchBtn?.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const isOpen = this.classList.toggle('open');
+        audioCard?.classList.toggle('dropdown-open', isOpen);
+    });
+
+    document.addEventListener('click', () => {
+        audioSwitchBtn?.classList.remove('open');
+        audioCard?.classList.remove('dropdown-open');
+    });
+
+    document.querySelector('#listMicAvailable')?.addEventListener('click', function(e) {
+        e.stopPropagation();
+        audioSwitchBtn?.classList.remove('open');
+        audioCard?.classList.remove('dropdown-open');
+    });
+
+
+    ['btnDesktopReso', 'btnDesktopSource', 'btnWebcamReso', 'btnWebcamSource'].forEach(id => {
+        const btn = document.getElementById(id);
+        const card = btn?.closest('.mediadevice');
+        btn?.addEventListener('click', e => {
+            e.stopPropagation();
+            const isOpen = btn.classList.toggle('open');
+            card?.classList.toggle('dropdown-open', isOpen);
+        });
+    });
+
+// Fermeture au clic dehors
+    document.addEventListener('click', () => {
+        document.querySelectorAll('#btnDesktopReso, #btnDesktopSource, #btnWebcamReso, #btnWebcamSource')
+            .forEach(btn => {
+                btn.classList.remove('open');
+                btn.closest('.mediadevice')?.classList.remove('dropdown-open');
+            });
+    });
+
 
     $(document).on('click','body *',function(event){
         if(!$(event.target).closest('.streamControls').length) {
@@ -343,6 +395,42 @@ $( document ).ready(function() {
     });
 });
 
+
+// Quand l'audio s'active, déplace le canvas dans la carte
+$('#audiostream').on('change', function () {
+    if (this.checked) {
+        setTimeout(() => {
+            const label = $('.labelMicSelect').text().trim();
+            if (label) $('#micDevLabel').text(label);
+        }, 800);
+    }
+});
+
+// Lie le canvas existant au progress-bar de niveau
+// audioanalyser.js expose l'analyser via window ou un event — on lit la hauteur du canvas
+function syncAudioLevel() {
+    const canvas = document.querySelector('.audioDevice canvas');
+    const bar = document.getElementById('aLevel');
+
+    if (canvas && bar) {
+        try {
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width || 1;
+            const h = canvas.height || 1;
+            const data = ctx.getImageData(0, 0, w, h).data;
+            let bright = 0;
+            for (let i = 0; i < data.length; i += 4) {
+                bright += (data[i] + data[i+1] + data[i+2]) / 3;
+            }
+            const level = Math.min(100, (bright / (data.length / 4)) * 0.8);
+            bar.style.width = Math.max(3, level) + '%';
+        } catch(e) {}
+    }
+    requestAnimationFrame(syncAudioLevel);
+}
+
+syncAudioLevel();
+
 /**
  * @param name
  * @param url
@@ -405,5 +493,101 @@ function shareAndReload() {
                     localStorage.setItem('devices', JSON.stringify([]));
                     location.reload();
                 });
+        });
+}
+
+function toggleDeviceCard(el, streamId) {
+    el.classList.toggle('selected');
+    // Synchronise avec le streamToggle correspondant dans #createTmp
+    const streamInput = document.getElementById(streamId);
+    if (streamInput) {
+        // Si la card est sélectionnée, on active le stream; sinon on le désactive
+        if (el.classList.contains('selected')) {
+            streamInput.checked = true;
+        } else {
+            streamInput.checked = false;
+        }
+    }
+}
+
+function buildSourceCards() {
+    const grid = document.getElementById('deviceGrid');
+    if (!grid) return;
+
+    // Affiche un loader le temps de la détection
+    grid.innerHTML = '<div class="device-detecting">Détection des périphériques…</div>';
+
+    navigator.mediaDevices.enumerateDevices()
+        .then(devices => {
+            const hasVideo  = devices.some(d => d.kind === 'videoinput');
+            const hasAudio  = devices.some(d => d.kind === 'audioinput');
+            const hasScreen = !!navigator.mediaDevices.getDisplayMedia;
+
+            // Pour les labels, on enrichit avec le localStorage si disponible
+            const stored = JSON.parse(localStorage.getItem('devices') || '[]');
+            const getLabel = (kind) => {
+                const live  = devices.find(d => d.kind === kind && d.label);
+                const cache = stored.find(d => d.kind === kind && d.label);
+                return (live || cache)?.label || null;
+            };
+
+            const sources = [
+                {
+                    id: 'dcScreen',
+                    streamId: 'desktopstream',
+                    icon: 'mdi-monitor mdi-48px',
+                    name: 'Écran',
+                    desc: 'Capture du bureau',
+                    available: hasScreen,
+                    label: null,
+                },
+                {
+                    id: 'dcMic',
+                    streamId: 'audiostream',
+                    icon: 'mdi-microphone mdi-48px',
+                    name: 'Microphone',
+                    desc: getLabel('audioinput') || 'Audio ambiant',
+                    available: hasAudio,
+                },
+                {
+                    id: 'dcCam',
+                    streamId: 'webcamstream',
+                    icon: 'mdi-video mdi-48px',
+                    name: 'Webcam',
+                    desc: getLabel('videoinput') || 'Caméra frontale',
+                    available: hasVideo,
+                },
+            ];
+
+            grid.innerHTML = '';
+
+            sources.forEach(src => {
+                const card = document.createElement('div');
+                card.id = src.id;
+
+                if (src.available) {
+                    card.onclick = () => toggleDeviceCard(card, src.streamId);
+                } else {
+                    card.title = 'Périphérique non détecté';
+                }
+
+                const col = document.createElement('div');
+                col.className = 'col-12 col-md-4';
+                card.className = 'device-card h-100' + (src.available ? ' selected' : ' unavailable');
+
+                card.innerHTML = `
+                    <div class="device-check"><i class="mdi mdi-check"></i></div>
+                    <div class="device-icon fs-2 mb-3"><i class="mdi ${src.icon}"></i></div>
+                    <div class="fw-bold small mb-1">${src.name}</div>
+                    <div class="text-muted" style="font-size:.75rem">${src.desc}</div>
+                    ${!src.available ? '<div class="text-muted fst-italic mt-2" style="font-size:.68rem"><i class="mdi mdi-exclamation mdi-48px me-1"></i>Non disponible</div>' : ''}
+                `;
+
+                col.appendChild(card);
+                grid.appendChild(col);
+            });
+        })
+        .catch(() => {
+            grid.innerHTML = '<div class="alert alert-warngin">Impossible d\'accéder aux informations des périphériques.</div>';
         });
 }

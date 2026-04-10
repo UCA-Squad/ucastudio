@@ -32,7 +32,8 @@ function App() {
 
   this.addDeviceToggle = document.getElementById('addDevice');
 
-  this.audioCanvas = document.querySelector('#audio ~ canvas');
+  this.audioCanvas = document.querySelector('#audioCanvas');
+  this.audioCanvasLevel = document.querySelector('#audioCanvasLevel');
 
   this.recordButton = document.getElementById('startRecord');
   this.pauseButton = document.getElementById('pauseRecord');
@@ -148,6 +149,7 @@ App.prototype = {
     }
 
     audAnalyser.attachCanvas(this.audioCanvas);
+    audAnalyser.attachLevelCanvas(this.audioCanvasLevel);
     audAnalyser.ondelegation('subscribe.raf', function() {
       let delFns = Array.prototype.slice.call(arguments);
       let token = rafLoop.subscribe({fn: delFns[0], scope: audAnalyser});
@@ -184,8 +186,7 @@ App.prototype = {
       btn.addEventListener('click', this.chooseResolution.bind(this), false);
     });
 
-    document.querySelector('label.pull-left.inputSource.labelDesktop').addEventListener('click',this.chooseResolution.bind(this), false);
-
+    document.querySelector('label.float-start.inputSource.labelDesktop').addEventListener('click',this.chooseResolution.bind(this), false);
   },
   toggleStream: function(e) {
 
@@ -316,7 +317,7 @@ App.prototype = {
       }
     }
 
-    if (stream.getVideoTracks().length > 0 && mediaContainer && mediaContainer.parentNode.id === 'videoView') {
+    if (stream.getVideoTracks().length > 0 && mediaContainer && mediaContainer.parentNode.parentNode.parentNode.id === 'videoView') {
 
       let videoControls = mediaContainer.querySelector('.streamControls');
 
@@ -554,9 +555,9 @@ App.prototype = {
       let placeholder = utils.createElement('span', {
                           class: 'placeholder'
                         });
-      let shadow = utils.createElement('span', {
-                     class: 'shadow'
-                   });
+      // let shadow = utils.createElement('span', {
+      //                class: 'shadow'
+      //              });
 
       let mediaEl = utils.createElement(deviceType, {
                       data: {
@@ -599,7 +600,7 @@ App.prototype = {
       mediaElContainer.appendChild(mediaBack);
       item.appendChild(mediaElContainer);
       item.appendChild(placeholder);
-      item.appendChild(shadow);
+      // item.appendChild(shadow);
 
       if (!this.mediaElements[devices[key].deviceType].getAttribute('data-id')) {
         this.mediaElements[devices[key].deviceType].setAttribute('data-id', deviceType === 'desktop' ? 'desktop' : key);
@@ -676,7 +677,7 @@ App.prototype = {
         })
 
     inputSourcesAudio.forEach(input => {
-      input.style.maxHeight = (([...input.querySelectorAll('li')].length + 1) * 2) + 'rem';
+      input.style.maxHeight = (([...input.querySelectorAll('li')].length + 1) * 2) + 'rem !important';
     });
   },
 
@@ -885,7 +886,7 @@ App.prototype = {
     }
   },
   setTitle: function(e) {
-    this.title = e.target.value || 'Enregistrement';
+    this.title = e.target.value || 'Enregistrement ';
     [...document.querySelectorAll('#recordingList a')].forEach(anchor => {
       anchor.download = anchor.getAttribute('data-flavor') + ' ' + anchor.getAttribute('data-type') + ' - ' + this.title + '.webm';
     });
@@ -1033,7 +1034,14 @@ deviceMgr.once('enumerated', {
 deviceMgr.once('hasNotAlreadyAllowShare', {
     fn: () => {
       document.getElementById('infoNotAlreadyAllowShare').style.display = 'block';
-      $('.bigButton').hide();
+    }
+});
+
+deviceMgr.once('hasAlreadyAllowShare', {
+    fn: () => {
+      document
+          .getElementById("welcomeSection")
+          .style.setProperty("display", "flex", "important");;
     }
 });
 

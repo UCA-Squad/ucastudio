@@ -40,7 +40,7 @@ var AudioAnalyser = function AudioAnalyserImpl(isNoCanvas) {
 AudioAnalyser.prototype = {
   constructor: AudioAnalyser,
   init: function() {
-    this.analyser.fftSize = 128;
+    this.analyser.fftSize = 256;
   },
   resume: function() {
     this.audioCtx.resume();
@@ -54,13 +54,19 @@ AudioAnalyser.prototype = {
     }
   },
   setCanvasDimensions: function(canvas, isMerged) {
-    this.canvas.width = this.WIDTH = this.canvas.clientWidth;
-    this.canvas.height = this.HEIGHT = this.canvas.clientHeight;
+    if (!canvas) return;
+    // On utilise les attributs width/height posés dans le HTML
+    // CSS s'occupe de l'affichage, JS s'occupe du buffer de dessin
+    this.WIDTH  = this.canvas.width;   // = 140
+    this.HEIGHT = this.canvas.height;  // = 80
     this.canvasCtx = this.canvas.getContext('2d');
-    this.canvasCtx.lineWidth = this.canvas.height - 2;
-    this.canvasCtx.lineCap = 'round';
-    this.canvasCtx.fillStyle = isMerged ? 'rgba(255,255,255,0.3)' : 'white';
-    this.canvasCtx.strokeStyle = '#09f';
+  },
+  attachLevelCanvas: function(canvas) {
+    if (!canvas) return;
+    canvas = canvas[0] || canvas;
+    this.levelCanvas = canvas;
+    // Idem : lit directement les attributs HTML (width=140 height=6)
+    this.levelCtx = canvas.getContext('2d');
   },
   analyse: function(track) {
     this.audioSource = this.audioCtx.createMediaStreamSource(track);
@@ -69,23 +75,23 @@ AudioAnalyser.prototype = {
     this.dataArray = new Uint8Array(this.bufferLength);
     this.analysisState = true;
 
-    if (!this.noCanvas) {
-      this.canvasCtx.fillRect(0, 0, this.WIDTH, this.HEIGHT);
-    }
-
     this.delegate('subscribe.raf', this.performCalc, token => {
       this.rafTokens.performCalc = token;
     });
   },
   performCalc: function(hiPerfTimeStamp) {
     try {
-      this.analyser.getByteTimeDomainData(this.dataArray);
-      let magnitude = Math.sqrt(this.dataArray.reduce((collect, current) => {
-                        return collect + Math.pow((current - 128)/128.0, 2);
-                      }, 0.0));
+      // Fréquentiel au lieu de time-domain → donne les barres
+      this.analyser.getByteFrequencyData(this.dataArray);
+
+      // Magnitude RMS pour les dépendances externes (level meter, etc.)
+      let magnitude = Math.sqrt(
+          this.dataArray.reduce((s, v) => s + Math.pow(v / 255, 2), 0) / this.dataArray.length
+      );
       this.notifyDependencies('magnitude', magnitude);
+
       if (!this.noCanvas) {
-        this.drawFn(magnitude);
+        this.drawFn(this.dataArray); // on passe le tableau complet
       }
     } catch(e) {
       console.log(e);
@@ -95,24 +101,78 @@ AudioAnalyser.prototype = {
     this.analysisState = false;
     this.notify(0);
   },
-  draw: function(magnitude) {
-    this.canvasCtx.fillRect(0, 0, this.WIDTH, this.HEIGHT);
-    this.canvasCtx.beginPath();
-    this.canvasCtx.moveTo(this.HEIGHT/2, this.HEIGHT/2);
+  draw: function(dataArray) {
+    if (!this.canvasCtx || !this.WIDTH || !this.HEIGHT) return; // ← garde
+    const W = this.WIDTH, H = this.HEIGHT;
+    const ctx = this.canvasCtx;
+    ctx.clearRect(0, 0, W, H);
 
+    const barCount = 26;
+    const gap = 2;
+    const barW = Math.max(2, Math.floor((W - gap * (barCount - 1)) / barCount));
+    const step = Math.floor(dataArray.length / barCount);
 
-    let lineWidth = Math.max(magnitude/16*this.WIDTH, this.HEIGHT/2);
-    this.canvasCtx.lineTo(lineWidth, this.HEIGHT/2);
-    this.canvasCtx.stroke();
+    for (let i = 0; i < barCount; i++) {
+      let sum = 0;
+      for (let j = 0; j < step; j++) sum += dataArray[i * step + j];
+      const ratio = (sum / step) / 255;
+      const barH = Math.max(3, ratio * H);
+      const x = i * (barW + gap);
+      const y = H - barH;
+
+      ctx.fillStyle = ratio < 0.45 ? '#22c55e' : ratio < 0.72 ? '#f97316' : '#ef4444';
+      ctx.beginPath();
+      if (ctx.roundRect) {
+        ctx.roundRect(x, y, barW, barH, 2);
+      } else {
+        ctx.rect(x, y, barW, barH);
+      }
+      ctx.fill();
+    }
+
+    // Barre horizontale de niveau
+    if (this.levelCtx && this.levelCanvas) {
+      const lW = this.levelCanvas.width;
+      const lH = this.levelCanvas.height;
+      const avg = dataArray.reduce((s, v) => s + v, 0) / dataArray.length;
+      const ratio = avg / 255;
+      const fillW = ratio * lW;
+
+      this.levelCtx.clearRect(0, 0, lW, lH);
+
+      this.levelCtx.fillStyle = '#e2e8f0';
+      this.levelCtx.beginPath();
+      if (this.levelCtx.roundRect) {
+        this.levelCtx.roundRect(0, 0, lW, lH, lH / 2);
+      } else {
+        this.levelCtx.rect(0, 0, lW, lH);
+      }
+      this.levelCtx.fill();
+
+      if (fillW > 0) {
+        this.levelCtx.fillStyle = ratio < 0.45 ? '#22c55e' : ratio < 0.72 ? '#f97316' : '#ef4444';
+        this.levelCtx.beginPath();
+        if (this.levelCtx.roundRect) {
+          this.levelCtx.roundRect(0, 0, fillW, lH, lH / 2);
+        } else {
+          this.levelCtx.rect(0, 0, fillW, lH);
+        }
+        this.levelCtx.fill();
+      }
+    }
   },
-  drawMerged: function(magnitude) {
-    this.canvasCtx.clearRect(0, 0, this.WIDTH, this.HEIGHT);
-    this.canvasCtx.beginPath();
-    let calcMag = magnitude/16 * this.WIDTH;
-    this.canvasCtx.lineWidth = calcMag;
-    this.canvasCtx.moveTo(this.HEIGHT/2, this.HEIGHT/2);
-    this.canvasCtx.lineTo(this.HEIGHT/2, this.HEIGHT/2);
-    this.canvasCtx.stroke();
+  drawMerged: function(dataArray) {
+    if (!this.canvasCtx) return; // ← garde
+    const ctx = this.canvasCtx;
+    const W = this.WIDTH, H = this.HEIGHT;
+    const avg = dataArray.reduce((s, v) => s + v, 0) / dataArray.length;
+    const ratio = avg / 255;
+
+    ctx.clearRect(0, 0, W, H);
+    ctx.beginPath();
+    ctx.arc(W / 2, H / 2, Math.max(4, ratio * Math.min(W, H) / 2), 0, Math.PI * 2);
+    ctx.fillStyle = ratio < 0.45 ? '#22c55e' : ratio < 0.72 ? '#f97316' : '#ef4444';
+    ctx.fill();
   },
   drawFn: function(magnitude) {
     return this.draw(magnitude);
@@ -129,7 +189,8 @@ AudioAnalyser.prototype = {
     }
   },
   clearCanvas: function() {
-    this.canvasCtx.fillRect(0, 0, this.WIDTH, this.HEIGHT);
+    if (!this.canvasCtx) return; // ← garde
+    this.canvasCtx.clearRect(0, 0, this.WIDTH, this.HEIGHT);
   },
   on: function(ev, fn) {
     if (!this.subscriptions.hasOwnProperty(ev)) {
