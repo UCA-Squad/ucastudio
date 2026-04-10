@@ -779,3 +779,9 @@ body.recording #streamsSection #recordingTime {
 /*  overflow-y: auto !important;*/
 /*  padding: .35rem !important;*/
 /*}*/
+
+
+#streamsSection #videoView .row > .col-12.col-lg-2 {
+  align-self: end !important;
+}
+
