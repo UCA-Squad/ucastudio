@@ -1,5 +1,5 @@
 $("#nextBtn").on('click', function (e) {
-    if(!$('#titleUpload').val() || !$('#presenterUpload').val() || (document.getElementById('uploadMedia').checked && !$('#listseries').val())){
+    if(document.getElementById('uploadMedia').checked && (!$('#titleUpload').val() || !$('#presenterUpload').val()  || !$('#listseries').val())){
         e.preventDefault();
         $('#alert').removeClass('hiddenCheck');
         setTimeout(function(){$('#alert').addClass('hiddenCheck'); }, 5000);
@@ -246,16 +246,13 @@ $( document ).ready(function() {
                 $("#alertBrowserVersion").show();
     }
 
-    if(!$('#uploadMedia').prop("checked"))
-        $("#listseries").prop('disabled', 'disabled');
-
     $('#uploadMedia').on('change',  function () {
-       if(!$(this).prop("checked"))
-           $("#listseries").prop('disabled', 'disabled');
-       else
-           $("#listseries").prop('disabled', '');
+        const isChecked = $(this).prop('checked');
+        $('#listseries').prop('disabled', !isChecked);
+        document.querySelectorAll('.required-field-target').forEach(field => {
+            field.classList.toggle('required-field', isChecked);
+        });
     });
-
 
     $(document).keydown(function (e) {
         var charCode = e.charCode || e.keyCode || e.which;
