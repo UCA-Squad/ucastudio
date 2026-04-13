@@ -677,9 +677,9 @@ class Device extends EventEmitter {
                               .then(supported => {
                                   this.candidates.forEach(cand => {
                                       if (supported.some(r => r.id === cand.id))
-                                          $('.' + cand.id).show();
+                                          $('#listResoWebCam .' + cand.id).show();
                                       else
-                                          $('.' + cand.id).hide();
+                                          $('#listResoWebCam .' + cand.id).hide();
                                   });
                               })
                               .catch(err => console.error(err));
@@ -888,6 +888,8 @@ class Device extends EventEmitter {
           if(!$('#startStopTitle').is(':visible'))
               $('#startStopTitle').show();
           $('#listResoWebCam > li:visible:last').addClass('last-visible-li');
+          $('#listResoWebCam').css('display', '');
+          $('#listResoWebCam').attr('data-ready', 'true');
       }
 
       setTimeout(() => {

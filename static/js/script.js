@@ -21,14 +21,10 @@ $("#alertBrowser > .btn-close.btn-close-sm, #alertBrowserVersion > .btn-close.bt
 
 $( document ).ready(function() {
 
+    managedRequieredField();
     $('#debitValue').val('');
 
-    // $(window).click(function(event) {
-    //  if(event.target.className != 'fas fa-question-circle fa-lg' && $('#helpList').is(":visible"))
-    //      document.getElementById('helpList').style.visibility='hidden';
-    // });
-
-    var cookieDebitInfo = document.cookie.match(new RegExp('debitValue' + '=([^;]+)'));
+    const cookieDebitInfo = document.cookie.match(new RegExp('debitValue' + '=([^;]+)'));
     let cookieValueDebit = !!cookieDebitInfo ? cookieDebitInfo[1] : 'null';
 
     if(document.cookie.indexOf('debitValue=') != -1 && cookieValueDebit != 'null') {
@@ -147,15 +143,16 @@ $( document ).ready(function() {
             $('#resoDesktopChoose').val('hd');
 
         $('#debitValue').val(debit);
-        $('#debitValueDisplay').val('~'.debit);
     }
 
     $(document).on('click','label.mediadevice.action.audioDevice.active',function(event){
-        if($(event.target).attr('class') === 'streamControls' || $(event.target).attr('class') == 'mediadevice action audioDevice active')
+        if($(event.target).attr('class') === 'streamControls' ||
+            $(event.target).attr('class') == 'mediadevice action audioDevice active' ||
+            $(event.target).attr('id') == 'audioCanvas') {
             event.preventDefault();
+            }
     });
 
-    //Add by lylblaud
     $(document).on('click', '#pauseRecord', function(){
 
         if (document.getElementById('recordingTime').textContent < '00:00:04.000')
@@ -183,13 +180,8 @@ $( document ).ready(function() {
         bigButtons[1].style.display = 'none';
     }
 
-    // $('.modal').show();
     $('main').css("visibility", "visible");
 
-
-    document.getElementById("helpIcon").addEventListener("click", function() {
-        const l = document.getElementById("helpList");
-    });
 
     if(getParameterByName('ent') != null || getParameterByName('courseid') != null ) {
         $('#help').attr('style', 'color:#178F96; position: absolute;left:-3rem !important;z-index:10;');
@@ -214,8 +206,8 @@ $( document ).ready(function() {
     else {
         isFirefox = navigator.userAgent.includes('Firefox');
     }
-    // var isChrome = !!window.chrome && (!!window.chrome.webstore || !!window.chrome.runtime);
-    var isChrome = !!window.chrome && (navigator.userAgent.indexOf("Chrome") > -1);
+
+    const isChrome = !!window.chrome && (navigator.userAgent.indexOf("Chrome") > -1);
 
     if(!isFirefox && !isChrome)
         $("#alertBrowser").show();
@@ -247,15 +239,11 @@ $( document ).ready(function() {
     }
 
     $('#uploadMedia').on('change',  function () {
-        const isChecked = $(this).prop('checked');
-        $('#listseries').prop('disabled', !isChecked);
-        document.querySelectorAll('.required-field-target').forEach(field => {
-            field.classList.toggle('required-field', isChecked);
-        });
+        managedRequieredField();
     });
 
     $(document).keydown(function (e) {
-        var charCode = e.charCode || e.keyCode || e.which;
+        const charCode = e.charCode || e.keyCode || e.which;
 
         if (charCode == 9) {  //tab pressed
             e.preventDefault();
@@ -274,6 +262,23 @@ $( document ).ready(function() {
         location.reload();
     });
 
+    function closeAll() {
+        // Audio mic
+        audioSwitchBtn?.classList.remove('open');
+        audioCard?.classList.remove('dropdown-open');
+
+        // Listes dropdown
+        $('#listWebCamAvailable, #listResoWebCam, #listResoDesktop').removeClass('open');
+        document.querySelectorAll('.switch-caret.open').forEach(c => c.classList.remove('open'));
+
+        // Boutons card
+        ['btnDesktopReso', 'btnDesktopSource', 'btnWebcamReso', 'btnWebcamSource'].forEach(id => {
+            const btn = document.getElementById(id);
+            btn?.classList.remove('open');
+            btn?.closest('.mediadevice')?.classList.remove('dropdown-open');
+        });
+    }
+
     const audioSwitchBtn = document.getElementById('audioSwitchBtn');
     const audioCard = document.querySelector('#streamsSection .mediadevice.audioDevice');
 
@@ -283,52 +288,43 @@ $( document ).ready(function() {
         audioCard?.classList.toggle('dropdown-open', isOpen);
     });
 
-    document.addEventListener('click', () => {
-        audioSwitchBtn?.classList.remove('open');
-        audioCard?.classList.remove('dropdown-open');
-    });
-
-    document.querySelector('#listMicAvailable')?.addEventListener('click', function(e) {
+    document.querySelector('#listMicAvailable')?.addEventListener('click', (e) => {
         e.stopPropagation();
-        audioSwitchBtn?.classList.remove('open');
-        audioCard?.classList.remove('dropdown-open');
+        closeAll();
     });
 
-
-    ['btnDesktopReso', 'btnDesktopSource', 'btnWebcamReso', 'btnWebcamSource'].forEach(id => {
-        const btn = document.getElementById(id);
-        const card = btn?.closest('.mediadevice');
-        btn?.addEventListener('click', e => {
-            e.stopPropagation();
-            const isOpen = btn.classList.toggle('open');
-            card?.classList.toggle('dropdown-open', isOpen);
+    // ── Dropdowns génériques ─────────────────────────────────────────────────────
+    [
+        { trigger: '.webcam-header-info label.device-switch-btn',            list: '#listWebCamAvailable' },
+        { trigger: '.resolution-header-info label.device-switch-btn',        list: '#listResoWebCam'      },
+        { trigger: '.resolution-desktop-header-info label.device-switch-btn',list: '#listResoDesktop'     },
+    ].forEach(({ trigger, list }) => {
+        document.querySelectorAll(trigger).forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                $(list).toggleClass('open');
+                btn.querySelector('.switch-caret')?.classList.toggle('open');
+            });
         });
     });
 
-// Fermeture au clic dehors
-    document.addEventListener('click', () => {
-        document.querySelectorAll('#btnDesktopReso, #btnDesktopSource, #btnWebcamReso, #btnWebcamSource')
-            .forEach(btn => {
-                btn.classList.remove('open');
-                btn.closest('.mediadevice')?.classList.remove('dropdown-open');
-            });
+    ['btnDesktopReso', 'btnDesktopSource', 'btnWebcamReso', 'btnWebcamSource'].forEach(id => {
+        const btn = document.getElementById(id);
+        btn?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isOpen = btn.classList.toggle('open');
+            btn.closest('.mediadevice')?.classList.toggle('dropdown-open', isOpen);
+        });
     });
 
+    document.addEventListener('click', closeAll);
 
-    $(document).on('click','body *',function(event){
-        if(!$(event.target).closest('.streamControls').length) {
-
-            if ($("#listWebCamAvailable").outerHeight(true) > 1)
-                $('.labelWebcam').trigger('click');
-
-            if ($("#listMicAvailable").outerHeight(true) > 1)
-                $('.labelAudio').trigger('click');
-
-            if ($("#listResoWebCam").outerHeight(true) > 1)
-                $('.labelVideoResolution').trigger('click');
-
-            if ($("#listResoDesktop").outerHeight(true) > 1)
-                $('.labelDesktopResolution').trigger('click');
+    $(document).on('click', 'body *', function(event) {
+        if (!$(event.target).closest('.streamControls').length) {
+            if ($("#listWebCamAvailable").outerHeight(true) > 1)  $('.labelWebcam').trigger('click');
+            if ($("#listMicAvailable").outerHeight(true) > 1)     $('.labelAudio').trigger('click');
+            if ($("#listResoWebCam").outerHeight(true) > 1)       $('.labelVideoResolution').trigger('click');
+            if ($("#listResoDesktop").outerHeight(true) > 1)      $('.labelDesktopResolution').trigger('click');
         }
     });
 
@@ -361,7 +357,7 @@ $( document ).ready(function() {
     });
 
 
-    var players = [videojs('#videoPreview'), videojs('#screenPreview')];
+    const players = [videojs('#videoPreview'), videojs('#screenPreview')];
 
     players.forEach(function(player) {
         player.on('play', function() {
@@ -392,6 +388,13 @@ $( document ).ready(function() {
     });
 });
 
+function managedRequieredField() {
+    const isChecked = document.getElementById('uploadMedia').checked;
+    $('#listseries').prop('disabled', !isChecked);
+    document.querySelectorAll('.required-field-target').forEach(field => {
+        field.classList.toggle('required-field', isChecked);
+    });
+}
 
 // Quand l'audio s'active, déplace le canvas dans la carte
 $('#audiostream').on('change', function () {
@@ -436,7 +439,7 @@ syncAudioLevel();
 function getParameterByName(name, url) {
     if (!url) url = window.location.href;
     name = name.replace(/[\[\]]/g, '\\$&');
-    var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+    const regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
         results = regex.exec(url);
     if (!results) return null;
     if (!results[2]) return '';
@@ -448,8 +451,8 @@ function getParameterByName(name, url) {
  */
 function getVersionOfBrowser()
 {
-    var ua= navigator.userAgent, tem,
-        M= ua.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];
+    let ua = navigator.userAgent, tem,
+        M = ua.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];
     if(/trident/i.test(M[1])){
         tem=  /\brv[ :]+(\d+)/g.exec(ua) || [];
         return 'IE '+(tem[1] || '');
@@ -499,11 +502,7 @@ function toggleDeviceCard(el, streamId) {
     const streamInput = document.getElementById(streamId);
     if (streamInput) {
         // Si la card est sélectionnée, on active le stream; sinon on le désactive
-        if (el.classList.contains('selected')) {
-            streamInput.checked = true;
-        } else {
-            streamInput.checked = false;
-        }
+        streamInput.checked = el.classList.contains('selected');
     }
 }
 

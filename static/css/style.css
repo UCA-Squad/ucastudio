@@ -692,11 +692,9 @@ label, button {
 }
 
 .streamControls label {
-    width: 7rem;
     height: 2rem;
     line-height: 2rem;
     display: inline-block;
-    color: white;
     font-size: 0.8rem;
     text-align: center;
     transition: color 0.3s;
@@ -718,7 +716,6 @@ label, button {
 .streamControls label[for^=inputSource] {
     float: left;
     width: auto;
-    padding: 0 0.5rem;
     max-width: 40%;
 }
 
@@ -750,8 +747,13 @@ label, button {
     padding-right: 5px;
 }
 
-input[id^=inputSource]:not(:checked) ~ label[for^=inputSource] ul {
+.labelWebcam ul {
     max-height: 0 !important;
+    transition: max-height 0.5s;
+}
+
+#inputSource2:checked ~ .labelWebcam ul {
+    max-height: 6rem !important;
 }
 
 .streamControls label[for^=inputSource] ul li button {
@@ -772,10 +774,10 @@ input[id^=inputSource]:not(:checked) ~ label[for^=inputSource] ul {
     color: black;
 }
 
-.streamControls label ul {
+.streamControls label ul, #listWebCamAvailable {
     position: absolute;
     right: -0.5rem;
-    top: calc(100% + 0.5rem);
+    top: calc(100% + 0.2rem);
     background: rgba(48, 48, 48, 0.9);
     overflow: hidden;
     max-height: 0;
@@ -785,21 +787,15 @@ input[id^=inputSource]:not(:checked) ~ label[for^=inputSource] ul {
     transition: max-height 0.5s;
 }
 
-.streamControls label.pull-left ul {
-    right: auto;
-    left: 0;
-    min-width: 100%;
-}
-
 .streamControls input:nth-of-type(1):checked ~ label:nth-of-type(1) ul {
     max-height: 10rem;
 }
 
-.streamControls input:nth-of-type(2):checked ~ label:nth-of-type(2) ul {
-    max-height: 6rem;
+#listWebCamAvailable {
+    min-width: 15rem;
 }
 
-.streamControls label ul li {
+.streamControls label ul li, #listWebCamAvailable li {
     line-height: 1.3rem;
     display: block;
     overflow: hidden;
@@ -808,11 +804,22 @@ input[id^=inputSource]:not(:checked) ~ label[for^=inputSource] ul {
     text-align: right;
 }
 
-.streamControls label ul li:hover {
+#inputSource2:checked ~ #listWebCamAvailable li {
+    background: transparent !important;
+    pointer-events: none; /* le label ne capte plus les events */
+}
+
+#inputSource2:checked ~ #listWebCamAvailable ,
+#inputSource2:checked ~ #listWebCamAvailable li {
+    pointer-events: auto;
+}
+
+
+.streamControls label ul li:hover, #listWebCamAvailable  li:hover {
     background: rgba(255, 255, 255, 0.7);
 }
 
-.streamControls label ul li button {
+.streamControls label ul li button, #listWebCamAvailable li button{
     background: none;
     border: none;
     color: white;
@@ -824,19 +831,9 @@ input[id^=inputSource]:not(:checked) ~ label[for^=inputSource] ul {
     padding-right: 1.5em;
 }
 
-.streamControls label ul {
+.streamControls label ul, #listWebCamAvailable  {
     margin-left: -0.6em;
     overflow-y: auto;
-}
-
-.labelAudio ul, .labelWebcam ul {
-    max-height: 10em !important;
-}
-
-.streamControls label:hover, .labelWebcam:hover, .streamControls label[for^="inputSource"]:hover {
-    background: #efefef !important;
-    color: black !important;
-    border-radius: 0.5em;
 }
 
 #advancedUserView:checked ~ .mediadevice.active .streamControls,
@@ -844,11 +841,6 @@ input[id^=inputSource]:not(:checked) ~ label[for^=inputSource] ul {
     opacity: 1;
     visibility: visible;
     transition: opacity 0.3s, visibility 0s;
-}
-
-.labelWebcam:hover, .labelDesktop:hover {
-    background: none !important;
-    color: white !important;
 }
 
 .midSplit {
@@ -2278,8 +2270,8 @@ section {
 }
 
 #listMicAvailable {
-    height: 6em;
-    overflow-y: auto;
+    overflow-y: auto !important;
+    max-height: 7rem !important;
 }
 
 ul#listMicAvailable li:last-child {
@@ -2314,11 +2306,11 @@ ul#listMicAvailable li:last-child {
     display: none;
 }
 
-#listResoDesktop li, #listResoWebCam li {
+#listResoDesktop li, #listResoWebCam li, #listWebCamAvailable li {
     border-bottom: 1px solid #FAF8F5;
 }
 
-#listResoDesktop li:last-child, #listResoWebCam li.last-visible-li {
+#listResoDesktop li:last-child, #listResoWebCam li.last-visible-li, #listWebCamAvailable li:last-child {
     border-bottom: none;
 }
 

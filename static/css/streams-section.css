@@ -86,10 +86,6 @@
   box-shadow: 0 8px 30px rgba(0,109,130,.15) !important;
 }
 
-#streamsSection .mediadevice.active:not(.audioDevice) {
-  border-color: var(--bs-primary, #006d82) !important;
-  background: #0d1117 !important;
-}
 
 #streamsSection .mediadevice.active::after {
   opacity: 0 !important;
@@ -300,8 +296,40 @@ body.recording #streamsSection #recordingTime {
 
 #listWebCamAvailable {
   right: auto;
-  left: 7px;
-  top: 3.45em;
+  top: 3.1em;
+  left: 0.5em;
+  display: none;
+  max-height: 7.5rem;
+}
+
+#listWebCamAvailable.open {
+  display: block;
+}
+
+#listResoWebCam.open {
+  display: block;
+  max-height: 9rem;
+}
+
+#listResoDesktop.open {
+  display: block;
+  max-height: 9rem;
+}
+
+
+#listWebCamAvailable:before {
+  content: 'Choisir une webcam';
+  display: block;
+  font-size: .68rem;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  padding: .3rem .4rem .45rem;
+}
+
+#listResoWebCam, #listResoDesktop {
+  display: none;
 }
 
 /* ══════════════════════════════════════════════
@@ -370,7 +398,7 @@ body.recording #streamsSection #recordingTime {
 }
 
 /* Badge rond micro */
-#streamsSection .audio-mic-badge {
+#streamsSection .audio-mic-badge, #streamsSection .webcam-badge {
   width: 36px;
   height: 36px;
   border-radius: 50%;
@@ -379,10 +407,17 @@ body.recording #streamsSection #recordingTime {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+
+  i {
+    font-size: 1.15rem;
+    color: var(--bs-primary, #006d82);
+  }
 }
-#streamsSection .audio-mic-badge i {
-  font-size: 1.15rem;
-  color: var(--bs-primary, #006d82);
+
+#streamsSection  .webcam-header-info, #streamsSection  .resolution-header-info {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 /* Nom + device */
@@ -393,14 +428,16 @@ body.recording #streamsSection #recordingTime {
   min-width: 0;
   overflow: hidden;
 }
-#streamsSection .audio-header-name {
+#streamsSection .audio-header-name, #streamsSection .webcam-header-name {
   font-size: .8rem !important;
   font-weight: 700 !important;
   color: #1e293b !important;
   white-space: nowrap !important;
 }
 #streamsSection .audio-header-device,
-#streamsSection .audio-header-device.labelMicSelect {
+#streamsSection .audio-header-device.labelMicSelect,
+#streamsSection .webcam-header-device,
+#streamsSection .webcam-header-device.labelCamSelect {
   font-size: .7rem !important;
   color: #64748b !important;
   font-weight: 500 !important;
@@ -435,7 +472,7 @@ body.recording #streamsSection #recordingTime {
 }
 
 /* Bouton chevron */
-#streamsSection .audio-switch-btn {
+#streamsSection .audio-switch-btn, .device-switch-btn {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -458,24 +495,32 @@ body.recording #streamsSection #recordingTime {
 }
 
 #streamsSection .audio-switch-btn ul#listMicAvailable {
-  width: 300px !important;
+  width: 15rem !important;
 }
 
-#streamsSection .audio-switch-btn:hover {
+#streamsSection .audio-switch-btn:hover, #streamsSection .device-switch-btn:hover {
   background: rgba(0,109,130,.2) !important;
   color: black !important;
   border-radius: 50% !important;
 }
 
 /* Icône chevron */
-#streamsSection .audio-switch-caret {
+#streamsSection .audio-switch-caret, #streamsSection .switch-caret {
   font-size: .9rem;
   color: var(--bs-primary, #006d82);
   transition: transform .25s;
   line-height: 1;
   pointer-events: none;
 }
-#streamsSection .audio-switch-wrap input:checked ~ .audio-switch-btn .audio-switch-caret {
+#streamsSection .audio-switch-wrap input:checked ~ .audio-switch-btn .audio-switch-caret,
+#streamsSection .videoDevice  input:checked ~ .device-switch-btn .switch-caret {
+  transform: rotate(180deg);
+}
+
+.switch-caret {
+  transition: transform .2s;
+}
+.switch-caret.open {
   transform: rotate(180deg);
 }
 
@@ -483,7 +528,7 @@ body.recording #streamsSection #recordingTime {
    position:fixed pour échapper au overflow:hidden de la carte
    → positionné dynamiquement par JS (voir app.js)
 ── */
-#streamsSection .audio-switch-btn ul {
+#streamsSection .audio-switch-btn ul, #streamsSection .device-switch-btn ul  {
   display: none !important;
   position: absolute !important;
   width: 160px !important;
@@ -508,17 +553,8 @@ body.recording #streamsSection #recordingTime {
   transform: rotate(180deg);
 }
 
-#streamsSection .audio-switch-btn.open ul {
-  display: block !important;
-  max-height: 200px !important;
-  overflow-y: auto !important;
-  padding: .35rem !important;
-}
-
 #listMicAvailable {
   top: calc(100% + 6px) !important;  /* colle juste sous le bouton */
-  left: 0 !important;
-  right: auto !important;
   min-width: 200px !important;        /* assez large pour les labels de micros */
 }
 
@@ -531,17 +567,19 @@ body.recording #streamsSection #recordingTime {
   text-transform: uppercase;
   letter-spacing: .04em;
   padding: .3rem .4rem .45rem;
+  text-align: left;
 }
 
-#streamsSection .audio-switch-btn ul li {
+#streamsSection .audio-switch-btn ul li, #inputSource2:checked ~ .labelWebcam ul li {
   display: block !important;
   padding: 0 !important;
   margin-bottom: .3rem !important;
 }
-#streamsSection .audio-switch-btn ul li button {
+
+#streamsSection .audio-switch-btn ul li button, #inputSource2:checked ~ .labelWebcam ul li button {
   width: 100%;
   border: 1px solid transparent;
-  background: #f8fafc;
+  background: none;
   border-radius: .55rem;
   padding: .45rem .6rem;
   text-align: left;
@@ -619,7 +657,7 @@ body.recording #streamsSection #recordingTime {
   text-align: center;
 }
 
-#streamsSection .audio-switch-btn {
+#streamsSection .audio-switch-btn, #streamsSection .device-switch-btn {
   position: relative !important;
   top: auto !important;
   left: auto !important;
@@ -629,157 +667,94 @@ body.recording #streamsSection #recordingTime {
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*#streamsSection .mediadevice.desktopDevice .streamControls,*/
-/*#streamsSection .mediadevice.videoDevice .streamControls {*/
-/*  background: rgba(255,255,255,.97) !important;*/
-/*  border-bottom: 1px solid #f0f4f8 !important;*/
-/*  height: auto !important;*/
-/*  min-height: 2.75rem !important;*/
-/*  padding: .4rem .6rem !important;*/
-/*  text-align: left !important;*/
-/*  display: flex !important;*/
-/*  align-items: center !important;*/
-/*  gap: .5rem !important;*/
-/*}*/
-
-/*!* Uniquement les labels DIRECTS — pas ceux dans les ul *!*/
-/*#streamsSection .mediadevice.desktopDevice .streamControls > label,*/
-/*#streamsSection .mediadevice.videoDevice .streamControls > label {*/
-/*  display: inline-flex !important;*/
-/*  align-items: center !important;*/
-/*  gap: .3rem !important;*/
-/*  height: auto !important;*/
-/*  line-height: 1.4 !important;*/
-/*  width: auto !important;*/
-/*  color: var(--bs-primary, #006d82) !important;*/
-/*  background: rgba(0,109,130,.08) !important;*/
-/*  border: 1px solid rgba(0,109,130,.2) !important;*/
-/*  border-radius: .7rem !important;*/
-/*  padding: .25rem .6rem !important;*/
-/*  font-size: .78rem !important;*/
-/*  font-weight: 600 !important;*/
-/*  white-space: nowrap !important;*/
-/*  text-align: left !important;*/
-/*  cursor: pointer !important;*/
-/*}*/
+#streamsSection .mediadevice.desktopDevice .streamControls,
+#streamsSection .mediadevice.videoDevice .streamControls {
+  background: rgba(255,255,255,.97) !important;
+  border-bottom: 1px solid #f0f4f8 !important;
+  height: auto !important;
+  min-height: 2.75rem !important;
+  padding: 12px !important;
+  text-align: left !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: .5rem !important;
+}
 
 /*!* Pill résolution — fond gris, poussée à droite *!*/
 #streamsSection .mediadevice.desktopDevice .streamControls > .labelDesktopResolution,
 #streamsSection .mediadevice.videoDevice .streamControls > .labelVideoResolution {
-  /*background: #f1f5f9 !important;*/
-  /*border-color: #e2e8f0 !important;*/
-  /*color: #334155 !important;*/
-  /*margin-left: auto !important;*/
   position: absolute !important;
   right: 8px !important;
 }
 
-/*!* labelCamSelect — texte discret sans fond *!*/
-/*#streamsSection .labelCamSelect {*/
-/*  background: transparent !important;*/
-/*  border: none !important;*/
-/*  border-radius: 0 !important;*/
-/*  color: #64748b !important;*/
-/*  font-size: .72rem !important;*/
-/*  font-weight: 400 !important;*/
-/*  margin: 0 !important;*/
-/*  padding: 0 .2rem !important;*/
-/*}*/
+ /*labelCamSelect — texte discret sans fond */
+#streamsSection .labelCamSelect {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  color: #64748b !important;
+  font-size: .72rem !important;
+  font-weight: 400 !important;
+  margin: 0 !important;
+  padding: 0 .2rem !important;
+}
 
-/*!* Icônes *!*/
-/*#streamsSection .mediadevice.desktopDevice .streamControls > label .switchDevice,*/
-/*#streamsSection .mediadevice.videoDevice .streamControls > label .switchDevice {*/
-/*  font-size: .82rem !important;*/
-/*  color: currentColor !important;*/
-/*  flex-shrink: 0 !important;*/
-/*}*/
+ /*Icônes */
+#streamsSection .mediadevice.desktopDevice .streamControls > label .switchDevice,
+#streamsSection .mediadevice.videoDevice .streamControls > label .switchDevice {
+  font-size: .82rem !important;
+  color: currentColor !important;
+  flex-shrink: 0 !important;
+}
 
-/*!* Boutons dans les dropdowns — reset du style pill *!*/
-/*#streamsSection .mediadevice.desktopDevice .streamControls label ul li button,*/
-/*#streamsSection .mediadevice.videoDevice .streamControls label ul li button {*/
-/*  width: 100% !important;*/
-/*  border: 1px solid transparent !important;*/
-/*  border-radius: .55rem !important;*/
-/*  padding: .4rem .6rem !important;*/
-/*  text-align: left !important;*/
-/*  font-size: .78rem !important;*/
-/*  color: #334155 !important;*/
-/*  cursor: pointer !important;*/
-/*  display: block !important;*/
-/*  font-weight: 400 !important;*/
-/*}*/
-/*#streamsSection .mediadevice.desktopDevice .streamControls label ul li button:hover,*/
-/*#streamsSection .mediadevice.videoDevice .streamControls label ul li button:hover {*/
-/*  background: rgba(0,109,130,.07) !important;*/
-/*  border-color: rgba(0,109,130,.2) !important;*/
-/*  color: var(--bs-primary, #006d82) !important;*/
-/*}*/
+ /*Boutons dans les dropdowns — reset du style pill */
+#streamsSection .mediadevice.desktopDevice .streamControls ul li button,
+#streamsSection .mediadevice.videoDevice .streamControls ul li button {
+  width: 100% !important;
+  border: 1px solid transparent !important;
+  border-radius: .55rem !important;
+  padding: .4rem .6rem !important;
+  text-align: left !important;
+  font-size: .78rem !important;
+  color: #334155 !important;
+  cursor: pointer !important;
+  display: block !important;
+  font-weight: 400 !important;
+}
+#streamsSection .mediadevice.desktopDevice .streamControls ul li button:hover,
+#streamsSection .mediadevice.videoDevice .streamControls ul li button:hover {
+  background: rgba(0,109,130,.07) !important;
+  border-color: rgba(0,109,130,.2) !important;
+  color: var(--bs-primary, #006d82) !important;
+}
 
-/*#streamsSection .mediadevice.desktopDevice .streamControls,*/
-/*#streamsSection .mediadevice.videoDevice .streamControls {*/
-/*  border-radius: 1rem 1rem 0 0 !important; !* même radius que la carte *!*/
-/*}*/
+#streamsSection .mediadevice.desktopDevice .streamControls,
+#streamsSection .mediadevice.videoDevice .streamControls {
+  border-radius: 1rem 1rem 0 0 !important; /* même radius que la carte */
+}
 
+#streamsSection .mediadevice.desktopDevice .streamControls ul,
+#streamsSection .mediadevice.videoDevice .streamControls ul,
+#streamsSection .audio-switch-btn.open ul{
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: .75rem !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,.12) !important;
+  padding: .35rem !important;
+  list-style: none !important;
+}
 
-
-
-/*#streamsSection .mediadevice.desktopDevice .streamControls label ul,*/
-/*#streamsSection .mediadevice.videoDevice .streamControls label ul {*/
-/*  background: #ffffff !important;*/
-/*  border: 1px solid #e2e8f0 !important;*/
-/*  border-radius: .75rem !important;*/
-/*  box-shadow: 0 8px 24px rgba(0,0,0,.12) !important;*/
-/*  padding: .35rem !important;*/
-/*  list-style: none !important;*/
-
-/*}*/
-
-/*!* Texte "Basculer vers :" en gris discret *!*/
-/*#streamsSection .mediadevice.desktopDevice .streamControls label ul::before,*/
-/*#streamsSection .mediadevice.videoDevice .streamControls label ul::before {*/
-/*  color: #94a3b8 !important;*/
-/*  font-size: .68rem !important;*/
-/*  font-weight: 700 !important;*/
-/*}*/
-
-/*!* Boutons dans la liste *!*/
-/*#streamsSection .mediadevice.desktopDevice .streamControls label ul li,*/
-/*#streamsSection .mediadevice.videoDevice .streamControls label ul li {*/
-/*  background: transparent !important;*/
-/*  color: #334155 !important;*/
-/*}*/
-
-/*#streamsSection .streamControls input:nth-of-type(1):checked ~ label:nth-of-type(1) ul,*/
-/*#streamsSection .streamControls input:nth-of-type(2):checked ~ label:nth-of-type(2) ul {*/
-/*  max-height: 200px !important;*/
-/*  overflow-y: auto !important;*/
-/*  padding: .35rem !important;*/
-/*}*/
+#streamsSection .audio-switch-btn.open ul {
+  display: block !important;
+}
 
 
-/*#streamsSection .streamControls button.open ul {*/
-/*  display: block !important;*/
-/*  max-height: 200px !important;*/
-/*  overflow-y: auto !important;*/
-/*  padding: .35rem !important;*/
-/*}*/
-
+#streamsSection .mediadevice.desktopDevice .streamControls ul::before,
+#streamsSection .mediadevice.videoDevice .streamControls ul::before {
+  color: #94a3b8 !important;
+  font-size: .68rem !important;
+  font-weight: 700 !important;
+}
 
 #streamsSection #videoView .row > .col-12.col-lg-2 {
   align-self: end !important;

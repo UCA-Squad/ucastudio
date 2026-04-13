@@ -146,20 +146,20 @@
                     <div class="card mx-auto p-4" style="width:min(760px,92%)">
                         <!-- Bibliothèque -->
                         <div class="mb-3 " id="dropdownlistserie">
-                            <label for="listseries" class="form-label required-field">Bibliothèque</label>
+                            <label for="listseries" class="form-label required-field required-field-target">Bibliothèque</label>
                             <select id="listseries" class="form-select"></select>
                         </div>
 
                         <!-- Titre + Auteur côte à côte -->
                         <div class="form-row">
                             <div class="mb-3">
-                                <label for="titleUpload" class="form-label required-field">Titre</label>
+                                <label for="titleUpload" class="form-label required-field required-field-target">Titre</label>
                                 <input type="text" id="titleUpload" name="title"
                                        class="form-control"
                                        placeholder="Titre de votre média">
                             </div>
                             <div class="mb-3">
-                                <label for="presenterUpload" class="form-label required-field">Auteur</label>
+                                <label for="presenterUpload" class="form-label required-field required-field-target">Auteur</label>
                                 <input type="text" id="presenterUpload" name="presenter"
                                        class="form-control"
                                        placeholder="Nom / Prénom">
@@ -283,31 +283,40 @@
                                 <div class="streamControls">
                                     <input type="checkbox" id="desktopResolution" class="hiddenCheck" />
                                     <label for="desktopResolution" class="labelDesktopResolution">
-                                        <span></span>
-                                        <i class="mdi mdi-swap-horizontal switchDevice"></i>
-                                        <ul id="listResoDesktop">
-                                            <li class="vga"><button type="button" value="vga" class="desktopReso">VGA (480p,4:3)</button></li>
-                                            <li class="qhd"><button type="button" value="qhd" class="desktopReso">qHD (540p,16:9)</button></li>
-                                            <li class="svga"><button type="button" value="svga" class="desktopReso">SVGA (600p,4:3)</button></li>
-                                            <li class="hd"><button type="button" value="hd" class="desktopReso">HD (720p,16:9)</button></li>
-                                            <li class="hdplus"><button type="button" value="hdplus" class="desktopReso">HD+ (900p,16:9)</button></li>
-                                            <li class="fullhd"><button type="button" value="fullhd" class="desktopReso">FHD (1080p,16:9)</button></li>
-                                        </ul>
-                                        <input type="hidden" id="resoDesktopChoose" value="qhd" />
+                                        <div class="resolution-desktop-header-info">
+                                            <span></span>
+                                            <ul id="listResoDesktop">
+                                                <li class="vga"><button type="button" value="vga" class="desktopReso">VGA (480p,4:3)</button></li>
+                                                <li class="qhd"><button type="button" value="qhd" class="desktopReso">qHD (540p,16:9)</button></li>
+                                                <li class="svga"><button type="button" value="svga" class="desktopReso">SVGA (600p,4:3)</button></li>
+                                                <li class="hd"><button type="button" value="hd" class="desktopReso">HD (720p,16:9)</button></li>
+                                                <li class="hdplus"><button type="button" value="hdplus" class="desktopReso">HD+ (900p,16:9)</button></li>
+                                                <li class="fullhd"><button type="button" value="fullhd" class="desktopReso">FHD (1080p,16:9)</button></li>
+                                            </ul>
 
+                                            <label class="device-switch-btn">
+                                                <i class="mdi mdi-chevron-down switch-caret"></i>
+                                            </label>
+                                        </div>
+                                        <input type="hidden" id="resoDesktopChoose" value="qhd" />
                                     </label>
                                     <input type="checkbox" id="inputSource1" class="hiddenCheck" />
-                                    <label for="inputSource1" class="float-start inputSource labelDesktop">
-                                        <span>
+
+                                    <div class="webcam-header-info labelDesktop">
+                                        <span class="webcam-badge">
                                             <i class="mdi mdi-monitor"></i>
-                                            Écran <i class="mdi mdi-swap-horizontal switchDevice"></i> </span>
+                                        </span>
+                                        Écran
+                                    <label for="inputSource1" class="float-start inputSource labelDesktop">
+                                        <span></span>
+                                        <i class="mdi mdi-swap-horizontal switchDevice"></i>
                                         <ul style="display: none"></ul>
                                     </label>
+                                    </div>
                                 </div>
                             </label>
                         </div>
 
-                        <!--                        <div class="col-12 col-lg-2" style="max-width: 160px;">-->
                         <div class="col-12 col-lg-2">
                             <input type="radio" name="audio" class="hiddenCheck streamToggle" id="audiostream" autocomplete="off"/>
                             <label for="audiostream"
@@ -359,29 +368,40 @@
                                 </span>
                                 <div class="streamControls">
                                     <input type="checkbox" id="videoResolution" class="hiddenCheck" />
-                                    <label for="videoResolution" class="labelVideoResolution">
-                                        <span></span>
-                                        <ul  id="listResoWebCam">
-                                            <li class="nhd" style="display: none"><button type="button" value="nhd">nHD (360p,16:9)</button></li>
-                                            <li class="vga" style="display: none"><button type="button" value="vga">VGA (480p,4:3)</button></li>
-                                            <li class="qhd" style="display: none"><button type="button" value="qhd">qHD (540p,16:9)</button></li>
-                                            <li class="svga" style="display: none"><button type="button" value="svga">SVGA (600p,4:3)</button></li>
-                                            <li class="hd" style="display: none"><button type="button" value="hd">HD (720p,16:9)</button></li>
-                                            <li class="xga" style="display: none"><button type="button" value="xga">XGA (768p,4:3)</button></li>
-                                            <li class="hdplus" style="display: none"><button type="button" value="hdplus">HD+ (900p,16:9)</button></li>
-                                            <li class="fullhd" style="display: none"><button type="button" value="fullhd">Full HD (1080p, 16:9)</button></li>
-                                        </ul>
-                                        <i class="mdi mdi-swap-horizontal switchDevice"></i>
-                                        <input type="hidden" id="resoWebCamChoose" value="vga" />
-                                    </label>
+                                        <label for="videoResolution" class="labelVideoResolution">
+                                            <div class="resolution-header-info">
+                                                <span></span>
+                                                <ul id="listResoWebCam">
+                                                    <li class="nhd" style="display: none"><button type="button" value="nhd">nHD (360p,16:9)</button></li>
+                                                    <li class="vga" style="display: none"><button type="button" value="vga">VGA (480p,4:3)</button></li>
+                                                    <li class="qhd" style="display: none"><button type="button" value="qhd">qHD (540p,16:9)</button></li>
+                                                    <li class="svga" style="display: none"><button type="button" value="svga">SVGA (600p,4:3)</button></li>
+                                                    <li class="hd" style="display: none"><button type="button" value="hd">HD (720p,16:9)</button></li>
+                                                    <li class="xga" style="display: none"><button type="button" value="xga">XGA (768p,4:3)</button></li>
+                                                    <li class="hdplus" style="display: none"><button type="button" value="hdplus">HD+ (900p,16:9)</button></li>
+                                                    <li class="fullhd" style="display: none"><button type="button" value="fullhd">Full HD (1080p, 16:9)</button></li>
+                                                </ul>
+                                                <label class="device-switch-btn">
+                                                    <i class="mdi mdi-chevron-down switch-caret"></i>
+                                                </label>
+                                            </div>
+                                            <input type="hidden" id="resoWebCamChoose" value="vga" />
+                                        </label>
                                     <input type="checkbox" id="inputSource2" class="hiddenCheck" />
-                                    <label for="inputSource2" class="float-start inputSource labelWebcam">
-                                        <span>
+                                    <label class="float-start inputSource labelWebcam">
+                                        <span class="webcam-badge">
                                             <i class="mdi mdi-webcam"></i>
-                                            Webcam <i id="switchWebcam" class="mdi mdi-swap-horizontal switchDevice"></i></span>
-                                        <ul id="listWebCamAvailable"></ul>
+                                        </span>
                                     </label>
-                                    <span class="labelCamSelect float-start"></span>
+                                    <ul id="listWebCamAvailable"></ul>
+
+                                    <div class="webcam-header-info">
+                                        <span class="webcam-header-name">Webcam</span>
+                                        <span class="webcam-header-device labelCamSelect"></span>
+                                        <label  class="device-switch-btn">
+                                            <i class="mdi mdi-chevron-down switch-caret"></i>
+                                        </label>
+                                    </div>
                                 </div>
                             </label>
                         </div>

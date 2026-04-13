@@ -186,7 +186,7 @@ App.prototype = {
       btn.addEventListener('click', this.chooseResolution.bind(this), false);
     });
 
-    document.querySelector('label.float-start.inputSource.labelDesktop').addEventListener('click',this.chooseResolution.bind(this), false);
+    document.querySelector('.webcam-header-info.labelDesktop').addEventListener('click',this.chooseResolution.bind(this), false);
   },
   toggleStream: function(e) {
 
@@ -608,62 +608,44 @@ App.prototype = {
     }
   },
   listAsSource: function(details) {
-    let inputSources = document.querySelectorAll('.inputSource.labelWebcam ul');
+    let inputSources = document.querySelectorAll('#listWebCamAvailable');
 
     Object.keys(details)
-      .filter(key => details[key].deviceType === 'video')
-      .forEach(key => {
-        if (!inputSources[0].querySelector(`li[data-id="${key}"]`)) {
-          let item = utils.createElement('li', {
-                       data: {
-                         id: key
-                       }
-                     });
-          let deviceBtn = utils.createElement('button', {
-                            text: details[key].info.label,
-                            value: key,
-                            data: {
-                              label: details[key].info.label
-                            }
-                          });
+        .filter(key => details[key].deviceType === 'video')
+        .forEach(key => {
+          if (!inputSources[0].querySelector(`li[data-id="${key}"]`)) {
+            let item = utils.createElement('li', { data: { id: key } });
+            let deviceBtn = utils.createElement('button', {
+              text: details[key].info.label,
+              value: key,
+              data: { label: details[key].info.label }
+            });
 
-          if (details[key].source === 'peer') {
-            let streamType = details[key].info.type;
-            deviceBtn.setAttribute('data-peer', streamType);
+            if (details[key].source === 'peer') {
+              deviceBtn.setAttribute('data-peer', details[key].info.type);
+            }
+
+            item.appendChild(deviceBtn);
+
+            inputSources.forEach(input => {
+              let cloned = item.cloneNode(true);
+              input.appendChild(cloned);
+              cloned.addEventListener('click', this.switchStream.bind(this), false);
+            });
           }
+        });
 
-          item.appendChild(deviceBtn);
-
-          inputSources.forEach(input => {
-            let cloned = item.cloneNode(true);
-            input.appendChild(cloned);
-            cloned.addEventListener('click', this.switchStream.bind(this), false);
-          });
-        }
-      })
-
-    inputSources.forEach(input => {
-      input.style.maxHeight = (([...input.querySelectorAll('li')].length + 1) * 2) + 'rem';
-    });
-
-
-    //on ajoute un event click sur le switch de l'audio et ont créé la liste
+    // Audio — inchangé
     let inputSourcesAudio = document.querySelectorAll('.inputSourceAudio ul');
     Object.keys(details)
         .filter(key => details[key].deviceType === 'audio')
         .forEach(key => {
-          if (!inputSourcesAudio[0].querySelector(`li[data-id="${key}"]`) && key != "") {
-            let item = utils.createElement('li', {
-              data: {
-                id: key
-              }
-            });
+          if (!inputSourcesAudio[0].querySelector(`li[data-id="${key}"]`) && key !== "") {
+            let item = utils.createElement('li', { data: { id: key } });
             let deviceBtn = utils.createElement('button', {
               text: details[key].info.label,
               value: key,
-              data: {
-                label: details[key].info.label
-              }
+              data: { label: details[key].info.label }
             });
 
             item.appendChild(deviceBtn);
@@ -674,11 +656,7 @@ App.prototype = {
               cloned.addEventListener('click', this.switchStream.bind(this), false);
             });
           }
-        })
-
-    inputSourcesAudio.forEach(input => {
-      input.style.maxHeight = (([...input.querySelectorAll('li')].length + 1) * 2) + 'rem !important';
-    });
+        });
   },
 
   minimiseStreamView: function(e) {
