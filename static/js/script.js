@@ -49,100 +49,66 @@ $( document ).ready(function() {
      * Réception debit depuis l'iframe checkSpeedNtwk
      * @param event
      */
-    function receiveMessage(event){
+    window.addEventListener('message', function(event) {
+        const debit = Number(event.data);
 
-        if(document.getElementById("debitBar") !== null) {
-            document.getElementById("debitBar").className = 'c100 p100 big center';
-            document.getElementById("debitPercent").innerHTML = "100%";
+        if (document.getElementById('debitBar')) {
+            document.getElementById('debitBar').className = 'c100 p100 big center';
+            document.getElementById('debitPercent').innerHTML = '100%';
         }
 
-        setTimeout(function () {
+        setTimeout(() => {
             $('body').removeClass('loading');
             $('.debitCircle').remove();
-            document.cookie = "debitValue="+Number(event.data);
-            setInformationsRelatedToDebitSpeed(Number(event.data))
-
-        }, 200)
-    }
-    window.addEventListener("message", receiveMessage, false);
+            document.cookie = 'debitValue=' + debit;
+            setInformationsRelatedToDebitSpeed(debit);
+        }, 200);
+    }, false);
 
 
-    function setInformationsRelatedToDebitSpeed(debit, estimation = false){
-
-        if(estimation)
-            comms.emit('debitValue', '~'+debit);
-        else
-            comms.emit('debitValue', debit);
-
-        if(debit <= 1) {
-            if(debit <= 0.5) {
-                $('#resoWebCamChoose').val('nhd');
-                $('.videoDevice').removeClass('quartretiers').addClass('seizeneuvieme');
-            }
-            $('#resoDesktopChoose').val('vga');
-        }
-
-        if(debit < 3)
-        {
-            $('#listResoDesktop li.hd').attr("title", "Résolution non conseillée pour votre débit");
-            $('#listResoDesktop li.hd').css("background-color", "rgb(127, 26, 26)");
-            $('#listResoDesktop li.hdplus').css("background-color", "rgb(127, 26, 26)");
-            $('#listResoDesktop li.hdplus').attr("title", "Résolution non conseillée pour votre débit");
-            $('#listResoDesktop li.fullhd').css("background-color", "rgb(127, 26, 26)");
-            $('#listResoDesktop li.fullhd').attr("title", "Résolution non conseillée pour votre débit");
-
-            $('#listResoWebCam li.hd').css("background-color", "red");
-            $('#listResoWebCam li.hd').attr("title", "Résolution non conseillée pour votre débit");
-            $('#listResoWebCam li.fullhd').css("background-color", "rgb(127, 26, 26)");
-            $('#listResoWebCam li.fullhd').attr("title", "Résolution non conseillée pour votre débit");
-
-            $(document).on('click', '#listResoDesktop li.hd, #listResoDesktop li.hdplus, #listResoWebCam li.fullhd', function() {
-                document.getElementById("alertWrongReso").style.display = "block";
-            });
-            $(document).on('click', '#listResoDesktop li.qhd, #listResoDesktop li.vga, #listResoDesktop li.svga', function() {
-                document.getElementById("alertWrongReso").style.display = "none";
-            });
-
-            document.getElementById("alertLowDebit").style.display = "block";
-        }
-        else if(debit < 4 && debit >= 3)
-        {
-            $('#resoDesktopChoose').val('hd');
-            $('#listResoDesktop li.hdplus').css("background-color", "rgb(127, 26, 26)");
-            $('#listResoDesktop li.hdplus').attr("title", "Résolution non conseillée pour votre débit");
-            $('#listResoDesktop li.fullhd').css("background-color", "rgb(127, 26, 26)");
-            $('#listResoDesktop li.fullhd').attr("title", "Résolution non conseillée pour votre débit");
-
-            $('#listResoWebCam li.fullhd').css("background-color", "rgb(127, 26, 26)");
-            $('#listResoWebCam li.fullhd').attr("title", "Résolution non conseillée pour votre débit");
-
-            $(document).on('click', '#listResoDesktop li.hdplus, #listResoWebCam li.fullhd', function() {
-                document.getElementById("alertWrongReso").style.display = "block";
-            });
-            $(document).on('click', '#listResoDesktop li.hd, #listResoDesktop li.qhd, #listResoDesktop li.vga, #listResoDesktop li.svga', function() {
-                document.getElementById("alertWrongReso").style.display = "none";
-            });
-        }
-        else if(debit < 5 &&  debit >= 4)
-        {
-            $('#resoDesktopChoose').val('hd');
-            $('#listResoDesktop li.fullhd').css("background-color", "rgb(127, 26, 26)");
-            $('#listResoDesktop li.fullhd').attr("title", "Résolution non conseillée pour votre débit");
-
-            $('#listResoWebCam li.fullhd').css("background-color", "rgb(127, 26, 26)");
-            $('#listResoWebCam li.fullhd').attr("title", "Résolution non conseillée pour votre débit");
-
-            $(document).on('click', '#listResoWebCam li.fullhd', function() {
-                document.getElementById("alertWrongReso").style.display = "block";
-            });
-            $(document).on('click', '#listResoDesktop li.hdplus, #listResoDesktop li.hd, #listResoDesktop li.qhd, #listResoDesktop li.vga, #listResoDesktop li.svga', function() {
-                document.getElementById("alertWrongReso").style.display = "none";
-            });
-        }
-        else if(debit > 5)
-            $('#resoDesktopChoose').val('hd');
-
+    function setInformationsRelatedToDebitSpeed(debit, estimation = false) {
+        comms.emit('debitValue', estimation ? '~' + debit : debit);
         $('#debitValue').val(debit);
+
+        // Résolutions déconseillées par seuil de débit
+        const warnings = {
+            1: ['#listResoDesktop li.hd', '#listResoDesktop li.hdplus', '#listResoDesktop li.fullhd',
+                '#listResoWebCam li.hd', '#listResoWebCam li.fullhd'],
+            3: ['#listResoDesktop li.hdplus', '#listResoDesktop li.fullhd', '#listResoWebCam li.fullhd'],
+            4: ['#listResoDesktop li.fullhd', '#listResoWebCam li.fullhd'],
+        };
+
+        const threshold = debit <= 1 ? 1 : debit < 3 ? 1 : debit < 4 ? 3 : debit < 5 ? 4 : null;
+
+        if (threshold) {
+            warnings[threshold].forEach(sel => {
+                $(sel).css('background-color', 'rgb(127, 26, 26)')
+                    .attr('title', 'Résolution non conseillée pour votre débit');
+            });
+        }
+
+        // Résolution par défaut selon débit
+        if (debit <= 0.5) {
+            $('#resoWebCamChoose').val('nhd');
+            $('.videoDevice').removeClass('quartretiers').addClass('seizeneuvieme');
+        }
+        if (debit <= 1) $('#resoDesktopChoose').val('vga');
+        if (debit >= 3) $('#resoDesktopChoose').val('hd');
+
+        // Alerte débit faible
+        if (debit < 3) {
+            document.getElementById('alertLowDebit').style.display = 'block';
+        }
+
+        // Listeners alerte résolution — namespace pour éviter les doublons
+        $(document)
+            .off('click.wrongReso')
+            .on('click.wrongReso', '[title="Résolution non conseillée pour votre débit"]', () => {
+                document.getElementById('alertWrongReso').style.display = 'block';
+            })
+            .on('click.wrongReso', '#listResoDesktop li:not([title]), #listResoWebCam li:not([title])', () => {
+                document.getElementById('alertWrongReso').style.display = 'none';
+            });
     }
 
     $(document).on('click','label.mediadevice.action.audioDevice.active',function(event){
