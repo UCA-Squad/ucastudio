@@ -727,52 +727,26 @@ function getAclNewEvent(uid)
  * @param location
  * @returns {string}
  */
-function getMetadatasNewEvent(usermediainfosToUpload, desc, startDate, startTime, duration, location)
-{
+function getMetadatasNewEvent(usermediainfosToUpload, desc, startDate, startTime, duration, location) {
 
-	return '[\n' +
-		'  {\n' +
-		'    "flavor": "dublincore/episode",\n' +
-		'    "fields": [\n' +
-		'      {\n' +
-		'        "id": "title",\n' +
-		'        "value": "' + usermediainfosToUpload.titleUpload.replace(/"/g, '\\"') + '"\n' +
-		'      },\n' +
-		'      {\n' +
-		'        "id": "description",\n' +
-		'        "value": "' + desc.replace(/"/g, '\\"') + '"\n' +
-		'      },\n' +
-		'      {\n' +
-		'        "id": "creator",\n' +
-		'        "value": ["' + usermediainfosToUpload.presenterUpload.replace(/"/g, '\\"')  + '"]\n' +
-		'      },\n' +
-		'      {\n' +
-		'        "id": "isPartOf",\n' +
-		'        "value": "' + usermediainfosToUpload.idSerie + '"\n' +
-		'      },\n' +
-		'      {\n' +
-		'        "id": "startDate",\n' +
-		'        "value": "' + startDate + '"\n' +
-		'      },\n' +
-		'      {\n' +
-		'        "id": "startTime",\n' +
-		'        "value": "' + startTime + '"\n' +
-		'      },\n' +
-		'      {\n' +
-		'        "id": "duration",\n' +
-		'        "value": "' + duration + '"\n' +
-		'      },\n' +
-		'      {\n' +
-		'        "id": "location",\n' +
-		'        "value": "' + location + '"\n' +
-		'      },\n' +
-		'      {\n' +
-		'        "id": "source",\n' +
-		'        "value": "UCAStudio"\n' +
-		'      }\n' +
-		'    ]\n' +
-		'  }\n' +
-		']';
+	const metadata = [
+		{
+			flavor: "dublincore/episode",
+			fields: [
+				{id: "title", value: usermediainfosToUpload.titleUpload},
+				{id: "description", value: desc},
+				{id: "creator", value: [usermediainfosToUpload.presenterUpload]},
+				{id: "isPartOf", value: usermediainfosToUpload.idSerie},
+				{id: "startDate", value: startDate},
+				{id: "startTime", value: startTime},
+				{id: "duration", value: duration},
+				{id: "location", value: location},
+				{id: "source", value: "UCAStudio"}
+			]
+		}
+	];
+
+	return JSON.stringify(metadata, null, 2);
 }
 
 /**
