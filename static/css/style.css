@@ -631,6 +631,10 @@ label, button {
     cursor: pointer;
 }
 
+.recording #streamsSection #videoView * {
+    cursor: not-allowed !important;
+}
+
 .mediadevice {
     background: #efefef;
     box-shadow: 0 2px 4px #efefef;
@@ -761,9 +765,8 @@ label, button {
     line-height: 2.5rem;
 }
 
-.recording .streamControls label {
+.recording #videoView .streamControls label,  .recording #videoView .streamControls .labelDesktop {
     pointer-events: none !important;
-    background: #d60550;
 }
 
 .recording .streamControls label:nth-of-type(1) * {
@@ -1539,14 +1542,14 @@ svg {
     opacity: 0;
     visibility: hidden;
     text-align: center;
-    width: 15rem;
-    height: 15rem;
+    width: 20rem;
+    height: 25rem;
     transition: opacity 0.5s 0.5s, visibility 0s 1s;
 }
 
 .loader svg {
-    width: 100%;
-    height: 100%;
+    width: 20rem;
+    height: 20rem;
     position: absolute;
     top: 0;
     left: 0;
@@ -1572,15 +1575,11 @@ svg {
 
 .loader .loaderText {
     position: absolute;
-    text-align: center;
-    max-width: 80%;
-    max-height: 80%;
     transform: translate(-50%, -50%);
-    top: 4.5em;
+    top: 7.5em;
     left: 50%;
     font-style: italic;
     font-size: 1.25rem;
-    color: #666;
 }
 
 .loading .loader, .connecting .loader, #uploadProgress .loader {

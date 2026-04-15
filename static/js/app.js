@@ -686,7 +686,7 @@ App.prototype = {
       if(!this.getTypeOfRec(deviceMgr.devices['desktop'].stream) && window.navigator.userAgent.indexOf("Linux") == -1 &&
           window.navigator.userAgent.indexOf("Ubuntu") == -1 && window.navigator.userAgent.indexOf("X11") == -1)
       {
-        alert('Attention, l\'enregistrement d\'une fenêtre n\'est pas autorisé, merci de selectionner l\'intégralité de votre écran (cliquez sur "Écran" pour changer)');
+        alert('Attention, l\'enregistrement d\'une fenêtre n\'est pas autorisé, merci de sélectionner l\'intégralité de votre écran (cliquez sur "Écran" pour changer)');
         return false;
       }
     }
@@ -741,7 +741,7 @@ App.prototype = {
     [...document.querySelectorAll('#recordingList a')].forEach(anchor => anchor.parentNode.removeChild(anchor));
 
     document.querySelector('#listWebCamAvailable').style.display = 'none';
-
+    document.getElementById('audioSwitchBtn').disabled = true;
   },
   pauseRecord: function() {
     if (!this.isRecording || this.timeEl.textContent < '00:00:04.000') {
@@ -780,9 +780,9 @@ App.prototype = {
     // if(document.getElementById('uploadMedia').checked || !$('#dropdownlistserie').is(':visible')) {
       $('#uploadProgress').show();
       if(document.getElementById('uploadMedia').checked)
-        this.addLoader(document.getElementById('uploadProgress'), 'Transfert en cours...', {fontSize: '1.5rem'});
+        this.addLoader(document.getElementById('uploadProgress'), 'Transfert en cours \n\r veuillez ne pas fermer \n\r votre navigateur');
       else
-        this.addLoader(document.getElementById('uploadProgress'), 'Traitement en cours...', {fontSize: '1.5rem'});
+        this.addLoader(document.getElementById('uploadProgress'), 'Traitement en cours \n\r veuillez ne pas fermer \n\r votre navigateur');
     // }
 
     document.getElementById('toggleSaveCreationModal').checked = true;

@@ -55,7 +55,7 @@
 <div id="introCover">
     <div class="loader" >
         <div class="statutLoading" style="display:none">
-            <svg width="240" height="240">
+            <svg viewBox="0 0 240 240" width="240" height="240">
                 <circle r="82" cx="120" cy="120" fill="none" stroke="#00bdc4" stroke-width="8" stroke-dashoffset="0" stroke-dasharray="515"></circle>
                 <circle r="82" cx="120" cy="120" fill="none" stroke="white" stroke-width="14" stroke-dashoffset="20" stroke-dasharray="515"></circle>
             </svg>
@@ -492,16 +492,16 @@
                 </div>
 
                 <!-- Footer -->
-                <div class="modal-footer   px-4 py-3 d-flex justify-content-between align-items-center mt-3">
+                <div class="modal-footer px-4 py-3 d-flex justify-content-center align-items-center gap-2 mt-3">
                     <a class="managedMyMediaLink text-decoration-none" style="display:none" href="" target="_blank">
                         <span class="btn btn-primary btn-sm">
                             <i class="mdi mdi-play-circle-outline me-1"></i>
                             <span>Gérer mes médias</span>
                         </span>
                     </a>
-                    <label for="toggleSaveCreationModal" class="btn btn-info btn-sm ms-auto" id="newRecord">
+                    <label for="toggleSaveCreationModal" class="btn btn-info btn-sm" id="newRecord">
                         <i class="mdi mdi-refresh me-1"></i>
-                        <span data-translate="PRODUCTION_DISCARD">Nouvel enregistrement</span>
+                        <span>Nouvel enregistrement</span>
                     </label>
                 </div>
                 <input type="hidden" id="debitValue" value="" />
