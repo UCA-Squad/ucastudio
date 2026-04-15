@@ -1,8 +1,8 @@
 @media only screen and (max-width:1300px) {
-	.labelMicSelect, .labelCamSelect {
-	    white-space: nowrap;
-	    overflow: hidden;
-	    text-overflow: ellipsis;
+	#streamsSection #videoView .labelMicSelect, #streamsSection #videoView .labelCamSelect {
+	    white-space: nowrap !important;
+	    overflow: hidden !important;
+	    text-overflow: ellipsis !important;
 	 }
 
 	.active.audioDevice .placeholder, .active.audioDevice .shadow {
@@ -24,8 +24,23 @@
 }
 
 @media only screen and (max-width:1100px) {
-	.streamControls label[for^=inputSource] {
+	#streamsSection #videoView .streamControls label[for^=inputSource],
+	#streamsSection #videoView .labelCamSelect,
+	#streamsSection #videoView .labelMicSelect {
  		max-width: 25%;
 	}
 
 }
+
+
+@media only screen and (max-width:480px) {
+	#mainSection h1, #streamsSection h1 {
+		margin-top: 1em !important;
+	}
+
+	#alertBrowser, #alertBrowserVersion {
+		top: 3em !important;
+	}
+}
+
+

@@ -2364,3 +2364,11 @@ span.labelMicSelect.pull-Micleft {
     left: 320px;
     transform: translateX(-50%);
 }
+
+.debitCircle {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
