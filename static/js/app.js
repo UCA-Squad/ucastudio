@@ -780,9 +780,9 @@ App.prototype = {
     // if(document.getElementById('uploadMedia').checked || !$('#dropdownlistserie').is(':visible')) {
       $('#uploadProgress').show();
       if(document.getElementById('uploadMedia').checked)
-        this.addLoader(document.getElementById('uploadProgress'), 'Transfert en cours \n\r veuillez ne pas fermer \n\r votre navigateur');
+        this.addLoader(document.getElementById('uploadProgress'), 'Transfert en cours, veuillez ne pas fermer votre navigateur');
       else
-        this.addLoader(document.getElementById('uploadProgress'), 'Traitement en cours \n\r veuillez ne pas fermer \n\r votre navigateur');
+        this.addLoader(document.getElementById('uploadProgress'), 'Traitement en cours, veuillez ne pas fermer votre navigateur');
     // }
 
     document.getElementById('toggleSaveCreationModal').checked = true;
@@ -1075,6 +1075,7 @@ if (window.chrome && (navigator.userAgent.indexOf("Chrome") > -1 )) {
   if (!navigator.mediaDevices || !('getDisplayMedia' in navigator.mediaDevices)) {
     //on active l'alert navigateur pas compatible
     $("#alertBrowserVersion").show();
+
   }
 }
 
