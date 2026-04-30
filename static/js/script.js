@@ -21,6 +21,26 @@ $("#alertBrowser > .btn-close.btn-close-sm, #alertBrowserVersion > .btn-close.bt
 
 $( document ).ready(function() {
 
+    /*********** disable transition on first screen ***********/
+    const createLabel = document.querySelector('label[for="create"]');
+    const backBtn = document.querySelector('label.backBtn[for="main"]');
+
+    function skipNextTransition() {
+        document.querySelectorAll('section').forEach(s => s.style.transition = 'none');
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                document.querySelectorAll('section').forEach(s => s.style.transition = '');
+            });
+        });
+    }
+
+    createLabel?.addEventListener('click', () => {
+        skipNextTransition();
+    });
+
+    backBtn?.addEventListener('click', skipNextTransition);
+    /*************************************************************/
+
     managedRequieredField();
     $('#debitValue').val('');
 
