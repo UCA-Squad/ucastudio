@@ -1529,7 +1529,7 @@ svg {
 .loading #introCover {
     z-index: 1000;
     opacity: 1;
-    background: white;
+    background: #006d82;
     visibility: visible;
 }
 
