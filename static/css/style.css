@@ -276,6 +276,16 @@ input:checked + section {
     animation: blink 1.8s ease-in-out infinite;
 }
 
+.welcome-badge-warning {
+    background: rgba(255, 193, 7, 0.1);
+    color: var(--bs-warning);
+    border: 1px solid rgba(255, 193, 7, 0.4);
+}
+
+.welcome-badge-warning::before {
+    background: var(--bs-warning, #ffc107);
+}
+
 @keyframes blink {
     0%, 100% {
         opacity: 1;

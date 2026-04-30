@@ -27,17 +27,22 @@ class DeviceManager extends EventEmitter {
 
     Object.defineProperty(this, 'devices', {
       get: function() {
-        let devices = {desktop: this.desktop};
+        let devices = {};
+        // ✅ N'inclure desktop que si le partage d'écran est disponible
+        const hasScreenCapture = window.isSecureContext &&
+            typeof navigator.mediaDevices?.getDisplayMedia === 'function';
+
+        if (hasScreenCapture) {
+          devices['desktop'] = this.desktop;
+        }
+
         for (let key in this.video) {
-          if (key !== 'default') {
-            devices[key] = this.video[key];
-          }
+          if (key !== 'default') devices[key] = this.video[key];
         }
         for (let key in this.audio) {
-          if (key !== 'default') {
-            devices[key] = this.audio[key];
-          }
+          if (key !== 'default') devices[key] = this.audio[key];
         }
+
         return devices;
       }
     });

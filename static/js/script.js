@@ -44,7 +44,6 @@ $( document ).ready(function() {
 
     $('#introCover .loader').show();
 
-    buildSourceCards();
     /**
      * Réception debit depuis l'iframe checkSpeedNtwk
      * @param event
@@ -175,22 +174,28 @@ $( document ).ready(function() {
 
     const isChrome = !!window.chrome && (navigator.userAgent.indexOf("Chrome") > -1);
 
-    if(!isFirefox && !isChrome)
+    if(!isFirefox && !isChrome) {
         $("#alertBrowser").show();
+        $(".welcome-badge").addClass('welcome-badge-warning');
+    }
     else if(!('mediaDevices' in navigator) || !('getUserMedia' in navigator.mediaDevices) || (window.MediaRecorder == undefined)){
         $("#alertBrowser").show();
+        $(".welcome-badge").addClass('welcome-badge-warning');
     }
     else{
         let infoBrowser = getVersionOfBrowser();
         //on check la version
         if(isFirefox) {
             if (infoBrowser[1] !== undefined){
-                if(infoBrowser[1] < 60)
+                if(infoBrowser[1] < 60) {
                     $("#alertBrowserVersion").show();
+                    $(".welcome-badge").addClass('welcome-badge-warning');
+                }
 
                 if(infoBrowser[1] == 87) //bug audio seul FF87
                 {
                     $("#alertNoOnlyAudio").show();
+                    $(".welcome-badge").addClass('welcome-badge-warning');
                     $(".audioDevice").click(function (){
                         if(!$(".desktopDevice").hasClass('active'))
                             return false;
@@ -199,9 +204,12 @@ $( document ).ready(function() {
             }
         }
 
-        if(isChrome)
-            if(infoBrowser[1] !== undefined && infoBrowser[1] < 65)
+        if(isChrome) {
+            if (infoBrowser[1] !== undefined && infoBrowser[1] < 65) {
                 $("#alertBrowserVersion").show();
+                $(".welcome-badge").addClass('welcome-badge-warning');
+            }
+        }
     }
 
     $('#uploadMedia').on('change',  function () {
@@ -352,6 +360,45 @@ $( document ).ready(function() {
             }, 2000);
         }
     });
+
+    const canShareScreen = window.isSecureContext &&
+        typeof navigator.mediaDevices?.getDisplayMedia === 'function';
+
+    if (!canShareScreen) {
+
+        const desktopInput = document.getElementById('desktopstream');
+        const desktopCard  = document.querySelector('label.desktopDevice');
+        const desktopCol   = desktopCard?.closest('.col-12');
+
+        if (desktopInput) desktopInput.disabled = true;
+
+        if (desktopCard) {
+            desktopCard.style.opacity       = '0.4';
+            desktopCard.style.filter        = 'grayscale(1)';
+            desktopCard.style.pointerEvents = 'none';
+            desktopCard.addEventListener('click', e => e.preventDefault(), true);
+        }
+
+        if (desktopCol) {
+            // Le col devient le conteneur de référence
+            desktopCol.style.position = 'relative';
+
+            const notice = document.createElement('div');
+            notice.textContent = 'Non disponible sur mobile';
+            notice.style.cssText = `
+            position: absolute;
+            bottom: 5rem;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-style: italic;
+            color: #e28700;
+            z-index: 10;
+            pointer-events: none;
+        `;
+            desktopCol.appendChild(notice);
+        }
+    }
 });
 
 function managedRequieredField() {
@@ -459,97 +506,5 @@ function shareAndReload() {
                     localStorage.setItem('devices', JSON.stringify([]));
                     location.reload();
                 });
-        });
-}
-
-function toggleDeviceCard(el, streamId) {
-    el.classList.toggle('selected');
-    // Synchronise avec le streamToggle correspondant dans #createTmp
-    const streamInput = document.getElementById(streamId);
-    if (streamInput) {
-        // Si la card est sélectionnée, on active le stream; sinon on le désactive
-        streamInput.checked = el.classList.contains('selected');
-    }
-}
-
-function buildSourceCards() {
-    const grid = document.getElementById('deviceGrid');
-    if (!grid) return;
-
-    // Affiche un loader le temps de la détection
-    grid.innerHTML = '<div class="device-detecting">Détection des périphériques…</div>';
-
-    navigator.mediaDevices.enumerateDevices()
-        .then(devices => {
-            const hasVideo  = devices.some(d => d.kind === 'videoinput');
-            const hasAudio  = devices.some(d => d.kind === 'audioinput');
-            const hasScreen = !!navigator.mediaDevices.getDisplayMedia;
-
-            // Pour les labels, on enrichit avec le localStorage si disponible
-            const stored = JSON.parse(localStorage.getItem('devices') || '[]');
-            const getLabel = (kind) => {
-                const live  = devices.find(d => d.kind === kind && d.label);
-                const cache = stored.find(d => d.kind === kind && d.label);
-                return (live || cache)?.label || null;
-            };
-
-            const sources = [
-                {
-                    id: 'dcScreen',
-                    streamId: 'desktopstream',
-                    icon: 'mdi-monitor mdi-48px',
-                    name: 'Écran',
-                    desc: 'Capture du bureau',
-                    available: hasScreen,
-                    label: null,
-                },
-                {
-                    id: 'dcMic',
-                    streamId: 'audiostream',
-                    icon: 'mdi-microphone mdi-48px',
-                    name: 'Microphone',
-                    desc: getLabel('audioinput') || 'Audio ambiant',
-                    available: hasAudio,
-                },
-                {
-                    id: 'dcCam',
-                    streamId: 'webcamstream',
-                    icon: 'mdi-video mdi-48px',
-                    name: 'Webcam',
-                    desc: getLabel('videoinput') || 'Caméra frontale',
-                    available: hasVideo,
-                },
-            ];
-
-            grid.innerHTML = '';
-
-            sources.forEach(src => {
-                const card = document.createElement('div');
-                card.id = src.id;
-
-                if (src.available) {
-                    card.onclick = () => toggleDeviceCard(card, src.streamId);
-                } else {
-                    card.title = 'Périphérique non détecté';
-                }
-
-                const col = document.createElement('div');
-                col.className = 'col-12 col-md-4';
-                card.className = 'device-card h-100' + (src.available ? ' selected' : ' unavailable');
-
-                card.innerHTML = `
-                    <div class="device-check"><i class="mdi mdi-check"></i></div>
-                    <div class="device-icon fs-2 mb-3"><i class="mdi ${src.icon}"></i></div>
-                    <div class="fw-bold small mb-1">${src.name}</div>
-                    <div class="text-muted" style="font-size:.75rem">${src.desc}</div>
-                    ${!src.available ? '<div class="text-muted fst-italic mt-2" style="font-size:.68rem"><i class="mdi mdi-exclamation mdi-48px me-1"></i>Non disponible</div>' : ''}
-                `;
-
-                col.appendChild(card);
-                grid.appendChild(col);
-            });
-        })
-        .catch(() => {
-            grid.innerHTML = '<div class="alert alert-warngin">Impossible d\'accéder aux informations des périphériques.</div>';
         });
 }

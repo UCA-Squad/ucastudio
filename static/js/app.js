@@ -1075,7 +1075,7 @@ if (window.chrome && (navigator.userAgent.indexOf("Chrome") > -1 )) {
   if (!navigator.mediaDevices || !('getDisplayMedia' in navigator.mediaDevices)) {
     //on active l'alert navigateur pas compatible
     $("#alertBrowserVersion").show();
-
+    $(".welcome-badge").addClass('welcome-badge-warning');
   }
 }
 
