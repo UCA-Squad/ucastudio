@@ -2,6 +2,12 @@ class DeviceManager extends EventEmitter {
 
   constructor() {
     super();
+    Object.defineProperty(this, '_deviceLabels', {
+      value: new Map(),
+      writable: true,
+      enumerable: false,
+      configurable: true
+    });
     this.video = {};
     this.audio = {};
     this.desktop = new Device({
@@ -21,17 +27,22 @@ class DeviceManager extends EventEmitter {
 
     Object.defineProperty(this, 'devices', {
       get: function() {
-        let devices = {desktop: this.desktop};
+        let devices = {};
+        // ✅ N'inclure desktop que si le partage d'écran est disponible
+        const hasScreenCapture = window.isSecureContext &&
+            typeof navigator.mediaDevices?.getDisplayMedia === 'function';
+
+        if (hasScreenCapture) {
+          devices['desktop'] = this.desktop;
+        }
+
         for (let key in this.video) {
-          if (key !== 'default') {
-            devices[key] = this.video[key];
-          }
+          if (key !== 'default') devices[key] = this.video[key];
         }
         for (let key in this.audio) {
-          if (key !== 'default') {
-            devices[key] = this.audio[key];
-          }
+          if (key !== 'default') devices[key] = this.audio[key];
         }
+
         return devices;
       }
     });
@@ -63,14 +74,26 @@ class DeviceManager extends EventEmitter {
     // Si des périphériques sauvegardés sont disponibles, utilisez-les
     const devicesToProcess = savedDevices.length > 0 ? savedDevices : null;
     const processDevices = (devices) => {
+      // ✅ Stocker tous les labels au moment de l'énumération
+      devices.forEach(device => {
+        if (device.deviceId) {
+          this._deviceLabels.set(device.deviceId, {
+            label: device.label,
+            kind: device.kind
+          });
+        }
+      });
+
       ['audio', 'video'].forEach(deviceType => {
         this[deviceType] = devices.filter(device => device.kind === `${deviceType}input` && device.deviceId !== `communications`)
             .reduce((result, info) => {
-              result[info.deviceId] = new Device(info);
+              result[info.deviceId] = new Device(info, this._deviceLabels);
 
-              // console.log(info.deviceId);
               if (info.deviceId === '') {
                 this.emit('hasNotAlreadyAllowShare', true);
+              }
+              else {
+                this.emit('hasAlreadyAllowShare', true);
               }
 
               result[info.deviceId].on('stream', stream => {
@@ -79,7 +102,7 @@ class DeviceManager extends EventEmitter {
                   result[info.deviceId].record();
                 }
 
-                if (stream.getAudioTracks().length > 0) {
+                if (stream.getAudioTracks().length > 0 && deviceType === 'audio') {
                   this.desktop.attachAudioTrack(stream);
                 }
               });
@@ -126,7 +149,7 @@ class DeviceManager extends EventEmitter {
 
   connect(id, opts, idAudio=null) {
     if (id === 'desktop') {
-      return this.desktop.connect();
+      return this.desktop.connect(opts, idAudio);
     }
 
     if (this.video.hasOwnProperty(id)) {
@@ -142,7 +165,7 @@ class DeviceManager extends EventEmitter {
   }
 
   record() {
-    for (var dev in this.devices) {
+    for (const dev in this.devices) {
       if (this.devices[dev].stream) {
         this.devices[dev].record();
       }
@@ -151,7 +174,7 @@ class DeviceManager extends EventEmitter {
   }
 
   pauseRecording() {
-    for (var dev in this.devices) {
+    for (const dev in this.devices) {
       if (this.devices[dev].stream)
         if(this.devices[dev].stream.active)
           this.devices[dev].pauseRecording();
@@ -159,7 +182,7 @@ class DeviceManager extends EventEmitter {
   }
 
   stopRecording() {
-    for (var dev in this.devices) {
+    for (const dev in this.devices) {
       if (this.devices[dev].stream) {
         this.devices[dev].stopRecording();
         let tracks = this.devices[dev].stream.getTracks();
@@ -172,27 +195,24 @@ class DeviceManager extends EventEmitter {
   }
 
   changeResolution(id, res) {
-    return new Promise((resolve, reject) => {
-      if (this.devices.hasOwnProperty(id)) {
-        this.devices[id].changeResolution(res)
-          .then(stream => resolve({id: id, stream: stream}))
-          .catch(err => reject(err));
-      }
-      else {
-        reject("no such device");
-      }
-    });
+    if (!this.devices.hasOwnProperty(id)) {
+      return Promise.reject("no such device");
+    }
+    return this.devices[id].changeResolution(res)
+        .then(stream => ({ id, stream }));
   }
 }
 
 class Device extends EventEmitter {
 
-  constructor(device) {
+  constructor(device, deviceLabels = null) {
     super();
 
     let _stream = null;
     this.recorder = null;
     this.cachedAudioTracks = [];
+    this.captureSystemAudio = false;
+    this._deviceLabels = deviceLabels;
 
     let _candidates = [
       {
@@ -267,6 +287,10 @@ class Device extends EventEmitter {
         return _stream;
       },
       set: function(stream) {
+        if (stream === null) {
+          _stream = null;
+          return;
+        }
         if (stream instanceof MediaStream) {
           _stream = stream;
           this.emit('stream', _stream);
@@ -286,8 +310,7 @@ class Device extends EventEmitter {
     this.deviceType = device.deviceType || (device.kind === 'audioinput' ? 'audio' : 'video');
 
     let _audConstraints = {audio: {exact: device.deviceId}};
-    let _vidConstraints = {audio: true, video: { exact: device.deviceId, width: {exact: 640}, height: {exact: 480}, facingMode: "user" , frameRate: { ideal :20, max: 30 } } };
-
+    let _vidConstraints = { audio: true, video: { deviceId: { exact: device.deviceId }, width: { exact: 640 }, height: { exact: 480 }, facingMode: "user", frameRate: { ideal: 20, max: 30 } }};
     let desktopValue = { width: {ideal: 1280}, height: {ideal: 720} , frameRate: { ideal :25, max: 30 } };
     let _desktop = {
       firefox: {
@@ -300,11 +323,28 @@ class Device extends EventEmitter {
       },
       other: null
     }
-    let _browser = window.hasOwnProperty('InstallTrigger') ? 'firefox' : (
-                     window.hasOwnProperty('chrome') && chrome.app ? 'chrome' : 'other'
-                   );
+
+    const isChromiumBased = () => {
+      if (navigator.userAgentData) {
+        return navigator.userAgentData.brands.some(b =>
+            b.brand === 'Chromium' || b.brand === 'Google Chrome'
+        );
+      }
+      return /Chrome|Chromium/.test(navigator.userAgent);
+    };
+
+    const _browser = window.hasOwnProperty('InstallTrigger') ? 'firefox'
+        : isChromiumBased() ? 'chrome'
+            : 'other';
 
     this.isChrome = _browser === 'chrome';
+
+    const isWindows = navigator.platform.toLowerCase().includes('win');
+    const isChromeOS = navigator.userAgent.includes('CrOS');
+
+    this.captureSystemAudio = this.deviceType === 'desktop'
+        && _browser === 'chrome'
+        && (isWindows || isChromeOS);
 
     Object.defineProperty(this, 'browser', {
       get: function() {
@@ -341,7 +381,7 @@ class Device extends EventEmitter {
   connect(opts, idAudio) {
 
     if (this.deviceType === 'desktop' && 'getDisplayMedia' in navigator.mediaDevices) {
-      return this.connectDisplayMedia(opts);
+      return this.connectDisplayMedia(opts, this.captureSystemAudio);
     }
     else if (this.deviceType === 'desktop' && this.isChrome) {
       return this.connectChromeDesktop(opts);
@@ -360,18 +400,19 @@ class Device extends EventEmitter {
     }
 
     return new Promise((resolve, reject) => {
+      let exactAudio;
       opts = opts || {};
 
-      var videoTmp = document.getElementById("video");
-      var deviceVideoIdTmp = videoTmp.getAttribute('data-id');
+      const videoTmp = document.getElementById("video");
+      const deviceVideoIdTmp = videoTmp.getAttribute('data-id');
 
-      var audioTmp = document.getElementById("audio");
-      var deviceAudioIdTmp = audioTmp.getAttribute('data-id');
+      const audioTmp = document.getElementById("audio");
+      const deviceAudioIdTmp = audioTmp.getAttribute('data-id');
 
       if(opts === 'isSwitch' || opts === 'isOnlyChangeMic')
       {
-        var audio = document.querySelector('#audio');
-        var video = document.querySelector('#video');
+        const audio = document.querySelector('#audio');
+        const video = document.querySelector('#video');
 
         if ( $(".videoDevice").hasClass('active'))
         {
@@ -381,8 +422,10 @@ class Device extends EventEmitter {
           else if(deviceAudioIdTmp != null) //new add
             constraintAudio = {deviceId: {exact: deviceAudioIdTmp}}
 
-          //new add
-          var constraintMedia = {audio: constraintAudio, video: { deviceId: { exact: this.constraints.video.exact, facingMode: "user"} } };
+          let constraintMedia = {
+            audio: constraintAudio,
+            video: {deviceId: {exact: this.constraints.video.deviceId?.exact, facingMode: "user"}}
+          };
 
           if(opts === 'isOnlyChangeMic' && deviceVideoIdTmp != null) {
             constraintMedia = {audio: constraintAudio, video: {deviceId: {exact: deviceVideoIdTmp, facingMode: "user"}}};
@@ -391,22 +434,25 @@ class Device extends EventEmitter {
           navigator.mediaDevices.getUserMedia(constraintMedia)
               .then(stream => {
 
+                let i;
+                let tracks;
                 if(opts !== 'isOnlyChangeMic')
                   $('.labelWebcam').trigger('click');
 
                 if(opts === 'isOnlyChangeMic') {
                   $('.labelAudio').trigger('click');
 
-                  var tracks = stream.getTracks();
-                  for(var i = 0; i < tracks.length; i++){
-                    if(tracks[i].kind === 'audio')
+                  tracks = stream.getTracks();
+                  for(i = 0; i < tracks.length; i++){
+                    if(tracks[i].kind === 'audio') {
                       this.getDevice(tracks[i].getSettings().deviceId)
+                    }
                   }
                 }
                 else
                 {
-                  var tracks = stream.getTracks();
-                  for(var i = 0; i < tracks.length; i++){
+                  tracks = stream.getTracks();
+                  for(i = 0; i < tracks.length; i++){
                     this.getDevice(tracks[i].getSettings().deviceId)
                   }
                 }
@@ -416,8 +462,8 @@ class Device extends EventEmitter {
 
                 //manque foreac
                 navigator.mediaDevices.enumerateDevices().then(devices => {
-                  for (var key in devices) {
-                    if (this.deviceType === 'video' && devices[key].kind === 'videoinput' && this.constraints.video.exact == devices[key].deviceId) {
+                  for (const key in devices) {
+                    if (this.deviceType === 'video' && devices[key].kind === 'videoinput' && this.constraints.video.deviceId?.exact == devices[key].deviceId) {
                         // var labelWebcam = (devices[key].label.includes(worToExclude) ? devices[key].label.replace(worToExclude, '') : devices[key].label);
                         let camera = {};
                         camera.id = devices[key].deviceId;
@@ -470,8 +516,8 @@ class Device extends EventEmitter {
                   $('#webcamstream').val(deviceVideoIdTmp);
                 }
                 else {
-                  $('#video').attr('data-id', this.constraints.video.exact);
-                  $('#webcamstream').val(this.constraints.video.exact);
+                  $('#video').attr('data-id', this.constraints.video.deviceId?.exact);
+                  $('#webcamstream').val(this.constraints.video.deviceId?.exact);
                 }
 
                 resolve(stream);
@@ -486,9 +532,13 @@ class Device extends EventEmitter {
         {
           //new add
           if(idAudio != null)
-            var exactAudio = idAudio;
+            {
+              exactAudio = idAudio;
+            }
           else
-            var exactAudio = this.constraints.audio.exact;
+            {
+              exactAudio = this.constraints.audio.exact;
+            }
           //new add
           navigator.mediaDevices.getUserMedia({ audio: { deviceId: { exact: exactAudio } }})
               .then(stream => {
@@ -499,8 +549,8 @@ class Device extends EventEmitter {
 
                 $('.labelAudio').trigger('click');
 
-                var tracks = stream.getTracks();
-                for(var i = 0; i < tracks.length; i++){
+                const tracks = stream.getTracks();
+                for(let i = 0; i < tracks.length; i++){
                   this.getDevice(tracks[i].getSettings().deviceId)
                 }
 
@@ -515,7 +565,8 @@ class Device extends EventEmitter {
       }
       else
       {
-        for (var key in opts) {
+        let key;
+        for (key in opts) {
           if (this.deviceType === 'desktop') {
             this.constraints.video[key] = opts[key];
           }
@@ -524,7 +575,7 @@ class Device extends EventEmitter {
           }
         }
 
-        let constraintMedia = this.constraints;
+        let constraintMedia;
         if(opts === "mustListReso") {
 
           if($("#debitValue").val() <= 1  && $('#resoWebCamChoose').val() === 'nhd')
@@ -566,7 +617,7 @@ class Device extends EventEmitter {
           if(deviceAudioIdTmp != null)
             this.constraints['audio'] = {deviceId: {exact: deviceAudioIdTmp}};
 
-          for (var key in opts) {
+          for (key in opts) {
             if (this.deviceType === 'desktop') {
               this.constraints.video[key] = opts[key];
             }
@@ -591,9 +642,10 @@ class Device extends EventEmitter {
 
               this.stream = stream;
 
-              var tracks = stream.getTracks();
-              for(var i = 0; i < tracks.length; i++)
+              const tracks = stream.getTracks();
+              for(let i = 0; i < tracks.length; i++) {
                 this.getDevice(tracks[i].getSettings().deviceId)
+              }
 
               resolve(stream);
 
@@ -601,7 +653,7 @@ class Device extends EventEmitter {
               $('#audiostream').val(deviceAudioIdTmp);
 
               navigator.mediaDevices.enumerateDevices().then(devices => {
-                for (var key in devices.filter(device => device.kind  !== 'audiooutput')) {
+                for (const key in devices.filter(device => device.kind  !== 'audiooutput')) {
                   if ($('.labelWebcam').find('li[data-id="' + devices[key].deviceId + '"]').length != 0) {
                     $('.labelWebcam').find('li[data-id="' + devices[key].deviceId + '"]').find('button').attr('data-label', devices[key].label);
                     $('.labelWebcam').find('li[data-id="' + devices[key].deviceId + '"]').find('button').html(devices[key].label.replace(/\s*\(.{4}:.{4}\)\s*/g, ''));
@@ -611,7 +663,7 @@ class Device extends EventEmitter {
                     $('.labelAudio').find('li[data-id="' + devices[key].deviceId + '"]').find('button').html(devices[key].label.replace(/\s*\(.{4}:.{4}\)\s*/g, ''));
                   }
 
-                  if(opts === "mustListReso" && this.deviceType === 'video' && devices[key].kind === 'videoinput' && this.constraints.video.exact ==  devices[key].deviceId) {
+                  if(opts === "mustListReso" && this.deviceType === 'video' && devices[key].kind === 'videoinput' && this.constraints.video.deviceId?.exact ==  devices[key].deviceId) {
                     let camera = {};
                     camera.id = devices[key].deviceId;
                     camera.label = devices[key].label;
@@ -630,9 +682,9 @@ class Device extends EventEmitter {
                               .then(supported => {
                                   this.candidates.forEach(cand => {
                                       if (supported.some(r => r.id === cand.id))
-                                          $('.' + cand.id).show();
+                                          $('#listResoWebCam .' + cand.id).show();
                                       else
-                                          $('.' + cand.id).hide();
+                                          $('#listResoWebCam .' + cand.id).hide();
                                   });
                               })
                               .catch(err => console.error(err));
@@ -655,145 +707,231 @@ class Device extends EventEmitter {
     });
   }
 
-  connectDisplayMedia(opts) {
-    return new Promise((resolve, reject) => {
-      var constraints = this.constraints;
-      if(typeof opts != 'undefined')
-        constraints = { audio: false, video: { width: opts.width, height: opts.height, frameRate: { ideal :25, max: 30 } } };
-      else if($("#debitValue").val() < 2.5 && $("#debitValue").val() > 0.6 )
-        constraints = { audio: false, video: { width: {ideal: 960}, height: {ideal: 540} , frameRate: { ideal :20, max: 30 } } };
-      else if($("#debitValue").val() <= 0.6  )
-        constraints = { audio: false, video: { width: {ideal: 640}, height: {ideal: 480} , frameRate: { ideal :20, max: 30 } } };
+  async connectDisplayMedia(opts, captureAudio = false) {
+    let constraints;
 
-      return navigator.mediaDevices.getDisplayMedia(constraints)
-               .then(stream => {
-                 this.stream = stream;
-                 this.cachedAudioTracks.forEach(track => this.stream.addTrack(track));
-                 resolve(stream);
-               })
-               .catch(err => reject(err));
-    });
+    const audioConstraints = captureAudio ? { audio: true } : { audio: false };
+
+    if (typeof opts !== 'undefined') {
+      constraints = {
+        ...audioConstraints,
+        video: {
+          width: opts.width,
+          height: opts.height,
+          frameRate: { ideal: 25, max: 30 }
+        }
+      };
+    } else {
+      const debit = parseFloat($("#debitValue").val());
+
+      if (debit > 0.6 && debit < 2.5) {
+        constraints = {
+          ...audioConstraints,
+          video: { width: { ideal: 960 }, height: { ideal: 540 }, frameRate: { ideal: 20, max: 30 } }
+        };
+      } else if (debit <= 0.6) {
+        constraints = {
+          ...audioConstraints,
+          video: { width: { ideal: 640 }, height: { ideal: 480 }, frameRate: { ideal: 20, max: 30 } }
+        };
+      } else {
+        constraints = { ...audioConstraints, ...this.constraints.video };
+      }
+    }
+
+    try {
+      const screenStream = await navigator.mediaDevices.getDisplayMedia(constraints);
+
+      const hasSystemAudio = screenStream.getAudioTracks().length > 0;
+
+      // Rassembler : audio système + éventuels tracks mic mis en cache
+      const allAudioTracks = [
+        ...(hasSystemAudio ? screenStream.getAudioTracks() : []),
+        ...this.cachedAudioTracks
+      ];
+      this.cachedAudioTracks = []; // vider le cache
+
+      let finalAudioTrack = null;
+      if (allAudioTracks.length > 1) {
+        finalAudioTrack = this._mixAudioTracks(allAudioTracks);
+      } else if (allAudioTracks.length === 1) {
+        finalAudioTrack = allAudioTracks[0];
+      }
+
+      const mergedStream = new MediaStream([
+        ...screenStream.getVideoTracks(),
+        ...(finalAudioTrack ? [finalAudioTrack] : [])
+      ]);
+
+      $('#desktopAudioIndicator').css(
+          'display',
+          hasSystemAudio ? 'inline-block' : 'none'
+      );
+      screenStream.getVideoTracks()[0].onended = () => {
+        $('#desktopAudioIndicator').hide();
+      };
+
+      this.stream = mergedStream;
+      return mergedStream;
+
+    } catch (err) {
+      throw err;
+    }
   }
 
   connectChromeDesktop(opts) {
     return new Promise((resolve, reject) => {
-      this.once('streamId', {
-        fn: function(id) {
-          this.constraints.video.mandatory.chromeMediaSourceId = id;
-          opts = opts || {};
-          for (var key in opts) {
-            this.constraints.video.mandatory['max' + key.charAt(0).toUpperCase() + key.substring(1)] = opts[key];
-          }
-          navigator.mediaDevices.getUserMedia(this.constraints)
+      this.once('streamId', (id) => {
+        this.constraints.video.mandatory.chromeMediaSourceId = id;
+        opts = opts || {};
+        for (const key in opts) {
+          this.constraints.video.mandatory['max' + key.charAt(0).toUpperCase() + key.substring(1)] = opts[key];
+        }
+        navigator.mediaDevices.getUserMedia(this.constraints)
             .then(stream => {
               this.stream = stream;
               this.cachedAudioTracks.forEach(track => this.stream.addTrack(track));
               resolve(stream);
             })
             .catch(err => reject(err));
-        },
-        scope: this
       });
       window.postMessage({
         type: 'SS_UI_REQUEST',
         text: 'start',
-         url: location.origin
+        url: location.origin
       }, '*');
     });
   }
 
-  attachAudioTrack(streamOrTrack) {
-    if (!(streamOrTrack instanceof MediaStream) &&
-        !(streamOrTrack instanceof MediaStreamTrack)) {
-      return;
+  _mixAudioTracks(tracks) {
+    if (!tracks || tracks.length === 0) return null;
+    if (tracks.length === 1) return tracks[0];
+
+    // ✅ Réutiliser l'AudioContext existant au lieu de le recréer
+    if (!this._audioContext) {
+      this._audioContext = new AudioContext();
+      this._audioContext.resume(); // fire-and-forget
     }
 
+    // Nouvelle destination à chaque mix (obligatoire)
+    const destination = this._audioContext.createMediaStreamDestination();
+
+    tracks.forEach(track => {
+      const source = this._audioContext.createMediaStreamSource(new MediaStream([track]));
+      source.connect(destination);
+    });
+
+    return destination.stream.getAudioTracks()[0];
+  }
+
+  attachAudioTrack(streamOrTrack) {
+    if (!(streamOrTrack instanceof MediaStream) &&
+        !(streamOrTrack instanceof MediaStreamTrack)) return;
+
     try {
-      let audioTrack = streamOrTrack instanceof MediaStreamTrack ?
-                         streamOrTrack :
-                         streamOrTrack.getAudioTracks()[0];
+      const audioTrack = streamOrTrack instanceof MediaStreamTrack
+          ? streamOrTrack
+          : streamOrTrack.getAudioTracks()[0];
+
+      if (!audioTrack) return;
+
+      // ✅ Pré-créer et résumer l'AudioContext ICI pendant le clic utilisateur
+      // pour éviter la suspension Chrome au moment du mix
+      if (!this._audioContext) {
+        this._audioContext = new AudioContext();
+        this._audioContext.resume();
+      }
 
       if (!this.stream) {
         this.cachedAudioTracks.push(audioTrack);
+        return;
       }
-      else {
-        //correction pb share son chrome ?
-        /*
-        if (this.isChrome) {
-          this.stream.addTrack(audioTrack);
-        }
-        else {*/
-          this.stream = new MediaStream([audioTrack, ...this.stream.getVideoTracks(), ...this.stream.getAudioTracks()])
-        //}
-        this.emit('stream.mute');
+
+      const existing = this.stream.getAudioTracks();
+
+      // ✅ Construire la piste finale mixée
+      const mixed = existing.length > 0
+          ? this._mixAudioTracks([...existing, audioTrack])
+          : audioTrack;
+
+      // ✅ Modifier le stream EN PLACE → pas d'émission 'stream', pas de cascade
+      existing.forEach(t => this.stream.removeTrack(t));
+      if (mixed) {
+        this.stream.addTrack(mixed);
       }
+
+      this.emit('stream.mute');
     } catch(e) {
-      //MediaStream has no audio tracks
+      console.error('attachAudioTrack error:', e);
     }
   }
-    gum(candidate, device, cmpt = 1) {
 
-        let constraints = {
-            audio: false,
-            video: {
-                deviceId: device.id ? { exact: device.id } : undefined,
-                width: { ideal: candidate.width },
-                height: { ideal: candidate.height }
-            }
-        };
+  gum(candidate, device, cmpt = 1) {
 
-        if (cmpt == 1) {
-            //durant le check de reso, on desactive la possiblite de lancer un rec
-            $('#startRecord').addClass('cantRecord');
-            document.getElementById("startRecord").disabled = true;
-            if($('#startStopTitle').is(':visible'))
-                $('#startStopTitle').hide();
-            $('main').append('<input type="hidden" id="gumRunning" />');
-        }
-        else if (cmpt >= this.candidates.length) {
-            $('#startRecord').removeClass('cantRecord');
-            $('#startRecord').addClass('canRecord');
-            document.getElementById("startRecord").disabled = false;
-            $('#gumRunning').remove();
-            if(!$('#startStopTitle').is(':visible'))
-                $('#startStopTitle').show();
-            $('#listResoWebCam > li:visible:last').addClass('last-visible-li');
-        }
+      let constraints = {
+          audio: false,
+          video: {
+              deviceId: device.id ? { exact: device.id } : undefined,
+              width: { ideal: candidate.width },
+              height: { ideal: candidate.height }
+          }
+      };
 
-        setTimeout(() => {
-            navigator.mediaDevices.getUserMedia(constraints)
-                .then(stream => {
-                    const track = stream.getVideoTracks()[0];
-                    const settings = track.getSettings();
+      if (cmpt == 1) {
+          //durant le check de reso, on désactive la possibilité de lancer un rec
+          $('#startRecord').addClass('cantRecord');
+          document.getElementById("startRecord").disabled = true;
+          if($('#startStopTitle').is(':visible'))
+              $('#startStopTitle').hide();
+          $('main').append('<input type="hidden" id="gumRunning" />');
+      }
+      else if (cmpt >= this.candidates.length) {
+          $('#startRecord').removeClass('cantRecord');
+          $('#startRecord').addClass('canRecord');
+          document.getElementById("startRecord").disabled = false;
+          $('#gumRunning').remove();
+          if(!$('#startStopTitle').is(':visible'))
+              $('#startStopTitle').show();
+          $('#listResoWebCam > li:visible:last').addClass('last-visible-li');
+          $('#listResoWebCam').css('display', '');
+          $('#listResoWebCam').attr('data-ready', 'true');
+      }
 
-                    // Vérifie si la résolution obtenue correspond vraiment
-                    if(settings.width === candidate.width &&
-                        settings.height === candidate.height) {
-                        if(candidate.id) $('.' + candidate.id).show();
-                    } else {
-                        if(candidate.id) $('#listResoWebCam .' + candidate.id).hide();
-                    }
+      setTimeout(() => {
+          navigator.mediaDevices.getUserMedia(constraints)
+              .then(stream => {
+                  const track = stream.getVideoTracks()[0];
+                  const settings = track.getSettings();
 
-                    stream.getTracks().forEach(track => track.stop());
+                  // Vérifie si la résolution obtenue correspond vraiment
+                  if(settings.width === candidate.width &&
+                      settings.height === candidate.height) {
+                      if(candidate.id) $('.' + candidate.id).show();
+                  } else {
+                      if(candidate.id) $('#listResoWebCam .' + candidate.id).hide();
+                  }
 
-                    if (cmpt < this.candidates.length)
-                        this.gum(this.candidates[cmpt++], device, cmpt);
-                })
-                .catch(err => {
-                    if(candidate.id)
-                        $('#listResoWebCam .' + candidate.id).hide();
+                  stream.getTracks().forEach(track => track.stop());
 
-                    if (cmpt < this.candidates.length)
-                        this.gum(this.candidates[cmpt++], device, cmpt);
-                });
-        }, (this.stream ? 200 : 0));
-    }
+                  if (cmpt < this.candidates.length)
+                      this.gum(this.candidates[cmpt++], device, cmpt);
+              })
+              .catch(err => {
+                  if(candidate.id)
+                      $('#listResoWebCam .' + candidate.id).hide();
+
+                  if (cmpt < this.candidates.length)
+                      this.gum(this.candidates[cmpt++], device, cmpt);
+              });
+      }, (this.stream ? 200 : 0));
+  }
 
   changeResolution(res) {
-    var objectOpts;
+    let i;
+    let objectOpts;
     if (typeof res === 'string' && this.deviceType === 'desktop') {
       // res = {width: parseInt(res) * 4 / 3, height: parseInt(res)};
-      for(var i = 0; i < this.candidates.length; i++) {
+      for(i = 0; i < this.candidates.length; i++) {
         if(this.candidates[i].id == res) {
           objectOpts = {width: {ideal: this.candidates[i].width }, height: {ideal: this.candidates[i].height }, frameRate: { ideal :25, max: 30 } };
           break;
@@ -802,7 +940,7 @@ class Device extends EventEmitter {
       $("#resoDesktopChoose").val(res);
     }
     else {
-      for(var i = 0; i < this.candidates.length; i++) {
+      for(i = 0; i < this.candidates.length; i++) {
         if(this.candidates[i].id == res) {
 
           if (res === 'nhd' ||res === 'hd' || res === 'fullhd')
@@ -828,8 +966,7 @@ class Device extends EventEmitter {
         throw new Error("Can't record as stream is not active");
       }
 
-      if(this.stream.active != false)
-      {
+      if(this.stream.active != false) {
         this.recorder = new Recorder(this.stream, this.deviceType);
         this.recorder.on('record.complete', media => {
           this.emit('record.complete', media);
@@ -849,6 +986,11 @@ class Device extends EventEmitter {
       this.recorder.stop();
       this.emit('record.prepare', this.info.label);
     }
+
+    if (this._audioContext) {
+      this._audioContext.close();
+      this._audioContext = null;
+    }
   }
 
   pauseRecording() {
@@ -856,20 +998,14 @@ class Device extends EventEmitter {
   }
 
   getDevice(id)  {
-    navigator.mediaDevices.enumerateDevices()
-        .then(function(devices) {
-          devices.forEach(function(device) {
-              if (device.deviceId === id) {
-                if (device.kind === 'audioinput')
-                  $('.labelMicSelect').html(trimLabelDevice(device.label), 'audio');
-                if (device.kind === 'videoinput')
-                  $('.labelCamSelect').html(trimLabelDevice(device.label), 'video');
-              }
-          });
-        })
-        .catch(function(err) {
-          console.log(err.name + ": " + err.message);
-        });
+      if (!this._deviceLabels) return;
+
+      const device = this._deviceLabels.get(id);
+      if (!device) return;
+
+      const label = trimLabelDevice(device.label);
+      if (device.kind === 'audioinput') $('.labelMicSelect').html(label);
+      if (device.kind === 'videoinput') $('.labelCamSelect').html(label);
     }
 
 
@@ -934,17 +1070,16 @@ class Device extends EventEmitter {
 /**
  *
  * @param deviceLabelTmp
- * @param type
  */
-function trimLabelDevice(deviceLabelTmp, type)
+function trimLabelDevice(deviceLabelTmp)
 {
-  var length = 50;
-  var wordsToExclude = ['Par défaut -', "Microphone", "Webcam", "LifeCam"];
+  const length = 50;
+  const wordsToExclude = ['Par défaut -', "Microphone", "Webcam", "LifeCam"];
 
-  for(var i = 0; i < wordsToExclude.length; i++)
+  for(let i = 0; i < wordsToExclude.length; i++)
     deviceLabelTmp = deviceLabelTmp.replace(wordsToExclude[i], '');
 
-  var trimmedString = deviceLabelTmp.length > length ?
+  const trimmedString = deviceLabelTmp.length > length ?
       deviceLabelTmp.substring(0, length - 3) + "..." :
       deviceLabelTmp;
 

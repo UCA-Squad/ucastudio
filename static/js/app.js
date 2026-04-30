@@ -4,6 +4,16 @@ const compositor = new Compositor();
 const rafLoop = new RAFLoop();
 const audAnalyser = new AudioAnalyser();
 const peers = {};
+const _browser = (() => {
+  let isFirefox;
+  if (navigator.userAgentData) {
+    isFirefox = navigator.userAgentData.brands.some(brand => brand.brand === 'Firefox');
+  } else {
+    isFirefox = navigator.userAgent.includes('Firefox');
+  }
+  const isChrome = !!window.chrome && navigator.userAgent.indexOf("Chrome") > -1;
+  return { isFirefox, isChrome };
+})();
 
 
 function App() {
@@ -21,9 +31,9 @@ function App() {
                         }, {});
 
   this.addDeviceToggle = document.getElementById('addDevice');
-  this.cover = document.getElementById('cover');
 
-  this.audioCanvas = document.querySelector('#audio ~ canvas');
+  this.audioCanvas = document.querySelector('#audioCanvas');
+  this.audioCanvasLevel = document.querySelector('#audioCanvasLevel');
 
   this.recordButton = document.getElementById('startRecord');
   this.pauseButton = document.getElementById('pauseRecord');
@@ -127,7 +137,7 @@ App.prototype = {
         this.mediaToggles[deviceType].value = (deviceMgr[deviceType].info || {}).deviceId ||
             Object.keys(deviceMgr[deviceType])
                 .filter(device => device !== 'default')
-                .reduce((id, current) => id = id || current, null);
+                .reduce((id, current) => id || current, null);
       }
     });
 
@@ -139,6 +149,7 @@ App.prototype = {
     }
 
     audAnalyser.attachCanvas(this.audioCanvas);
+    audAnalyser.attachLevelCanvas(this.audioCanvasLevel);
     audAnalyser.ondelegation('subscribe.raf', function() {
       let delFns = Array.prototype.slice.call(arguments);
       let token = rafLoop.subscribe({fn: delFns[0], scope: audAnalyser});
@@ -175,18 +186,7 @@ App.prototype = {
       btn.addEventListener('click', this.chooseResolution.bind(this), false);
     });
 
-    document.querySelector('label.pull-left.inputSource.labelDesktop').addEventListener('click',this.chooseResolution.bind(this), false);
-
-  },
-  detectBrowser: function() {
-    let isFirefox;
-    if (navigator.userAgentData) {
-      isFirefox = navigator.userAgentData.brands.some(brand => brand.brand === 'Firefox');
-    } else {
-      isFirefox = navigator.userAgent.includes('Firefox');
-    }
-    const isChrome = !!window.chrome && navigator.userAgent.indexOf("Chrome") > -1;
-    return { isFirefox, isChrome };
+    document.querySelector('.webcam-header-info.labelDesktop').addEventListener('click',this.chooseResolution.bind(this), false);
   },
   toggleStream: function(e) {
 
@@ -222,7 +222,7 @@ App.prototype = {
            if (e.target.value !== 'desktop')
              $('#alertNoWebcam').show();
            else {
-             const { isFirefox, isChrome } = this.detectBrowser();
+             const { isFirefox} = _browser;
              if (isFirefox) {  // Ne l'afficher que si l'indication a déjà été bloquée une fois
                this.afficherIndicationSuppressionBlocage();
              }
@@ -271,7 +271,7 @@ App.prototype = {
     }, 10000);
   },
   getTypeOfRec: function(mediaStream) {
-    const { isFirefox, isChrome } = this.detectBrowser();
+    const { isFirefox, isChrome } = _browser;
     const videoTrack = mediaStream.getVideoTracks()[0];
 
     if (isFirefox) {
@@ -311,11 +311,13 @@ App.prototype = {
     let audioContainer = this.mediaElements.audio.parentNode;
     if (stream.getAudioTracks().length > 0){
       // (!audioContainer.classList.contains('active') || stream.getVideoTracks().length === 0) ) {
-      audioContainer.classList.add('active');
-      audAnalyser.analyse(stream);
+      if (value !== 'desktop') {
+        audioContainer.classList.add('active');
+        audAnalyser.analyse(stream);
+      }
     }
 
-    if (stream.getVideoTracks().length > 0 && mediaContainer && mediaContainer.parentNode.id === 'videoView') {
+    if (stream.getVideoTracks().length > 0 && mediaContainer && mediaContainer.parentNode.parentNode.parentNode.id === 'videoView') {
 
       let videoControls = mediaContainer.querySelector('.streamControls');
 
@@ -431,7 +433,7 @@ App.prototype = {
     else //swich de mic ou de video, les deux run
     {
       //on vérifie si c'est just un switch de mic
-      var isOnlyChangeMic = false;
+      let isOnlyChangeMic = false;
       if(parent.parentNode.parentNode.classList.contains('labelAudio'))
         isOnlyChangeMic = true;
 
@@ -553,9 +555,9 @@ App.prototype = {
       let placeholder = utils.createElement('span', {
                           class: 'placeholder'
                         });
-      let shadow = utils.createElement('span', {
-                     class: 'shadow'
-                   });
+      // let shadow = utils.createElement('span', {
+      //                class: 'shadow'
+      //              });
 
       let mediaEl = utils.createElement(deviceType, {
                       data: {
@@ -598,7 +600,7 @@ App.prototype = {
       mediaElContainer.appendChild(mediaBack);
       item.appendChild(mediaElContainer);
       item.appendChild(placeholder);
-      item.appendChild(shadow);
+      // item.appendChild(shadow);
 
       if (!this.mediaElements[devices[key].deviceType].getAttribute('data-id')) {
         this.mediaElements[devices[key].deviceType].setAttribute('data-id', deviceType === 'desktop' ? 'desktop' : key);
@@ -606,62 +608,44 @@ App.prototype = {
     }
   },
   listAsSource: function(details) {
-    let inputSources = document.querySelectorAll('.inputSource.labelWebcam ul');
+    let inputSources = document.querySelectorAll('#listWebCamAvailable');
 
     Object.keys(details)
-      .filter(key => details[key].deviceType === 'video')
-      .forEach(key => {
-        if (!inputSources[0].querySelector(`li[data-id="${key}"]`)) {
-          let item = utils.createElement('li', {
-                       data: {
-                         id: key
-                       }
-                     });
-          let deviceBtn = utils.createElement('button', {
-                            text: details[key].info.label,
-                            value: key,
-                            data: {
-                              label: details[key].info.label
-                            }
-                          });
+        .filter(key => details[key].deviceType === 'video')
+        .forEach(key => {
+          if (!inputSources[0].querySelector(`li[data-id="${key}"]`)) {
+            let item = utils.createElement('li', { data: { id: key } });
+            let deviceBtn = utils.createElement('button', {
+              text: details[key].info.label,
+              value: key,
+              data: { label: details[key].info.label }
+            });
 
-          if (details[key].source === 'peer') {
-            let streamType = details[key].info.type;
-            deviceBtn.setAttribute('data-peer', streamType);
+            if (details[key].source === 'peer') {
+              deviceBtn.setAttribute('data-peer', details[key].info.type);
+            }
+
+            item.appendChild(deviceBtn);
+
+            inputSources.forEach(input => {
+              let cloned = item.cloneNode(true);
+              input.appendChild(cloned);
+              cloned.addEventListener('click', this.switchStream.bind(this), false);
+            });
           }
+        });
 
-          item.appendChild(deviceBtn);
-
-          inputSources.forEach(input => {
-            let cloned = item.cloneNode(true);
-            input.appendChild(cloned);
-            cloned.addEventListener('click', this.switchStream.bind(this), false);
-          });
-        }
-      })
-
-    inputSources.forEach(input => {
-      input.style.maxHeight = (([...input.querySelectorAll('li')].length + 1) * 2) + 'rem';
-    });
-
-
-    //on ajoute un event click sur le switch de l'audio et on créer la liste
+    // Audio — inchangé
     let inputSourcesAudio = document.querySelectorAll('.inputSourceAudio ul');
     Object.keys(details)
         .filter(key => details[key].deviceType === 'audio')
         .forEach(key => {
-          if (!inputSourcesAudio[0].querySelector(`li[data-id="${key}"]`) && key != "") {
-            let item = utils.createElement('li', {
-              data: {
-                id: key
-              }
-            });
+          if (!inputSourcesAudio[0].querySelector(`li[data-id="${key}"]`) && key !== "") {
+            let item = utils.createElement('li', { data: { id: key } });
             let deviceBtn = utils.createElement('button', {
               text: details[key].info.label,
               value: key,
-              data: {
-                label: details[key].info.label
-              }
+              data: { label: details[key].info.label }
             });
 
             item.appendChild(deviceBtn);
@@ -672,11 +656,7 @@ App.prototype = {
               cloned.addEventListener('click', this.switchStream.bind(this), false);
             });
           }
-        })
-
-    inputSourcesAudio.forEach(input => {
-      input.style.maxHeight = (([...input.querySelectorAll('li')].length + 1) * 2) + 'rem';
-    });
+        });
   },
 
   minimiseStreamView: function(e) {
@@ -699,19 +679,6 @@ App.prototype = {
           .forEach(input => input.checked = false);
     }
   },
-  chromeInstall: function() {
-    if (chrome && chrome.app) {
-      chrome.webstore.install(
-        this.chromeStoreLink,
-        function() {
-          location.reload();
-        },
-        function(e) {
-          console.log('error installing', e);
-        }
-      );
-    }
-  },
   startRecord: function() {
 
     if($(".desktopDevice").hasClass('active'))
@@ -719,7 +686,7 @@ App.prototype = {
       if(!this.getTypeOfRec(deviceMgr.devices['desktop'].stream) && window.navigator.userAgent.indexOf("Linux") == -1 &&
           window.navigator.userAgent.indexOf("Ubuntu") == -1 && window.navigator.userAgent.indexOf("X11") == -1)
       {
-        alert('Attention, l\'enregistrement d\'une fenêtre n\'est pas autorisé, merci de selectionner l\'intégralité de votre écran (cliquez sur "Écran" pour changer)');
+        alert('Attention, l\'enregistrement d\'une fenêtre n\'est pas autorisé, merci de sélectionner l\'intégralité de votre écran (cliquez sur "Écran" pour changer)');
         return false;
       }
     }
@@ -751,8 +718,8 @@ App.prototype = {
     $('#startRecord').attr("title", "Arrêter l'enregistrement");
     $('#pauseTitle').show();
 
-    var resDesktop = $('#resoDesktopChoose').val();
-    var resWebCam = $('#resoWebCamChoose').val();
+    const resDesktop = $('#resoDesktopChoose').val();
+    const resWebCam = $('#resoWebCamChoose').val();
 
     if ($(".videoDevice").hasClass('active') && $(".desktopDevice").hasClass('active'))
       comms.emit('start', 'video-and-desktop', resDesktop, resWebCam);
@@ -774,7 +741,7 @@ App.prototype = {
     [...document.querySelectorAll('#recordingList a')].forEach(anchor => anchor.parentNode.removeChild(anchor));
 
     document.querySelector('#listWebCamAvailable').style.display = 'none';
-
+    document.getElementById('audioSwitchBtn').disabled = true;
   },
   pauseRecord: function() {
     if (!this.isRecording || this.timeEl.textContent < '00:00:04.000') {
@@ -813,9 +780,9 @@ App.prototype = {
     // if(document.getElementById('uploadMedia').checked || !$('#dropdownlistserie').is(':visible')) {
       $('#uploadProgress').show();
       if(document.getElementById('uploadMedia').checked)
-        this.addLoader(document.getElementById('uploadProgress'), 'Transfert en cours...', {fontSize: '1.5rem'});
+        this.addLoader(document.getElementById('uploadProgress'), 'Transfert en cours, veuillez ne pas fermer votre navigateur');
       else
-        this.addLoader(document.getElementById('uploadProgress'), 'Traitement en cours...', {fontSize: '1.5rem'});
+        this.addLoader(document.getElementById('uploadProgress'), 'Traitement en cours, veuillez ne pas fermer votre navigateur');
     // }
 
     document.getElementById('toggleSaveCreationModal').checked = true;
@@ -897,7 +864,7 @@ App.prototype = {
     }
   },
   setTitle: function(e) {
-    this.title = e.target.value || 'Enregistrement';
+    this.title = e.target.value || 'Enregistrement ';
     [...document.querySelectorAll('#recordingList a')].forEach(anchor => {
       anchor.download = anchor.getAttribute('data-flavor') + ' ' + anchor.getAttribute('data-type') + ' - ' + this.title + '.webm';
     });
@@ -927,13 +894,13 @@ App.prototype = {
     this.locationEl.dispatchEvent(keyupEvent)
   },
   uploadMedia: function() {
-      var infos = {};
+      const infos = {};
       infos['titleUpload'] = document.getElementById('titleUpload').value;
       infos['presenterUpload'] = document.getElementById('presenterUpload').value;
       infos['locationUpload'] = document.getElementById('locationUpload').value;
       infos['descUpload'] = document.getElementById('descUpload').value;
       infos['mustBeUpload'] = document.getElementById('uploadMedia').checked;
-      var select = document.getElementById('listseries');
+      const select = document.getElementById('listseries');
       infos['idSerie'] = select.options[select.selectedIndex].value;
       comms.emit('infos', JSON.stringify(infos));
   },
@@ -1045,7 +1012,14 @@ deviceMgr.once('enumerated', {
 deviceMgr.once('hasNotAlreadyAllowShare', {
     fn: () => {
       document.getElementById('infoNotAlreadyAllowShare').style.display = 'block';
-      $('.bigButton').hide();
+    }
+});
+
+deviceMgr.once('hasAlreadyAllowShare', {
+    fn: () => {
+      document
+          .getElementById("welcomeSection")
+          .style.setProperty("display", "flex", "important");;
     }
 });
 
@@ -1075,7 +1049,7 @@ deviceMgr.once('hasNotAlreadyAllowShare', {
     if (streamObj.stream.getVideoTracks().length > 0) {
       compositor.addStream(streamObj);
     }
-    else if (streamObj.stream.getVideoTracks().length > 0) {
+    else if (streamObj.stream.getAudioTracks().length > 0) {
       compositor.addAudioTrack(streamObj.stream.getAudioTracks()[0]);
     }
   });
@@ -1101,6 +1075,7 @@ if (window.chrome && (navigator.userAgent.indexOf("Chrome") > -1 )) {
   if (!navigator.mediaDevices || !('getDisplayMedia' in navigator.mediaDevices)) {
     //on active l'alert navigateur pas compatible
     $("#alertBrowserVersion").show();
+    $(".welcome-badge").addClass('welcome-badge-warning');
   }
 }
 
