@@ -45,8 +45,7 @@
   -o-border-radius: 50%;
   border-radius: 50%;
   float: left;
-  margin: 0 0.1em 0.1em 0;
-  background-color: #9C9C9C;
+  background-color: #6d6d6c;
 }
 .c100 *, .c100 *:before, .c100 *:after {
   -webkit-box-sizing: content-box;
@@ -72,7 +71,7 @@
   width: 5em;
   line-height: 5em;
   font-size: 0.2em;
-  color: #5E5C5C;
+  color: #6d6d6c;
   display: block;
   text-align: center;
   white-space: nowrap;
@@ -100,7 +99,7 @@
   -ms-border-radius: 50%;
   -o-border-radius: 50%;
   border-radius: 50%;
-  background-color: whitesmoke;
+  background-color: #efefef;
   width: 0.84em;
   height: 0.84em;
   -webkit-transition-property: all;
@@ -829,7 +828,7 @@
   width: 3.33em;
   line-height: 3.33em;
   font-size: 0.3em;
-  color: #307bbb;
+  color: #17a2b8;
 }
 .c100:hover:after {
   top: 0.04em;

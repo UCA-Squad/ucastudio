@@ -5,6 +5,9 @@ class Compositor extends EventEmitter {
 
     this.streams = {};
     this.streamOrder = [];
+    this._audioContext = null;
+    this._audioDestination = null;
+    this._audioSourcesMap = new Map();
 
     this.codecs = ('MediaRecorder' in window) ?
                     [
@@ -90,6 +93,18 @@ class Compositor extends EventEmitter {
     if (this.streams.hasOwnProperty(streamObj.id)) {
       this.streams[streamObj.id].active = true;
       if (this.streams[streamObj.id].stream.id != streamObj.stream.id) {
+
+        // ✅ Détecter les nouvelles tracks audio
+        if (this.stream) {
+          const existingAudioIds = new Set(
+              Object.values(this.streams)
+                  .flatMap(s => s.stream.getAudioTracks().map(t => t.id))
+          );
+          streamObj.stream.getAudioTracks()
+              .filter(t => !existingAudioIds.has(t.id))
+              .forEach(t => this.addAudioTrack(t));
+        }
+
         this.streams[streamObj.id].stream = streamObj.stream;
         this.streams[streamObj.id].video.srcObject = streamObj.stream;
       }
@@ -129,8 +144,26 @@ class Compositor extends EventEmitter {
       video.play();
     }
 
-    if (this.stream && streamObj.stream.getAudioTracks().length) {
-      this.addAudioTrack(streamObj.stream.getAudioTracks()[0]);
+    // if (this.stream && streamObj.stream.getAudioTracks().length) {
+    //   this.addAudioTrack(streamObj.stream.getAudioTracks()[0]);
+    // }
+
+    if (streamObj.stream.getAudioTracks().length) {
+      streamObj.stream.getAudioTracks().forEach(track => {
+        if (this.stream) {
+          // Compositor déjà démarré → ajouter directement
+          this.addAudioTrack(track, streamObj.stream);
+        } else {
+          // Compositor pas encore démarré → mettre en attente
+          this._pendingAudioTracks = this._pendingAudioTracks || [];
+          if (!this._pendingAudioTracks.some(item => {
+            const t = item instanceof MediaStreamTrack ? item : item.track;
+            return t.id === track.id;
+          })) {
+            this._pendingAudioTracks.push({ track, sourceStream: streamObj.stream });
+          }
+        }
+      });
     }
   }
 
@@ -142,6 +175,7 @@ class Compositor extends EventEmitter {
       }
 
       delete this.streams[id];
+      resolve();
     });
   }
 
@@ -196,33 +230,46 @@ class Compositor extends EventEmitter {
       });
   }
 
-  start() {
-    this.emit('subscribe.raf', this.draw, function(token) {
-      this.rafToken = token;
-    });
+  _getOrCreateMixer() {
+    if (!this._audioContext) {
+      this._audioContext = new AudioContext();
+      this._audioDestination = this._audioContext.createMediaStreamDestination();
+  }
+    return this._audioDestination;
+  }
 
-    this.stream = this.canvas.captureStream(30);
-    for (let key in this.streams) {
-      let streamObj = this.streams[key];
-      if (streamObj.stream.getAudioTracks().length) {
-        this.addAudioTrack(streamObj.stream.getAudioTracks()[0]);
+  addAudioTrack(track, sourceStream = null) {
+    // ✅ Sécurité : rejeter si c'est un objet au lieu d'un MediaStreamTrack
+    if (!track || !(track instanceof MediaStreamTrack)) {
+      console.warn('[addAudioTrack] track invalide:', track);
+      return;
+    }
+
+    if (!this.stream) {
+      this._pendingAudioTracks = this._pendingAudioTracks || [];
+      if (!this._pendingAudioTracks.some(item => {
+        const t = item instanceof MediaStreamTrack ? item : item.track;
+        return t.id === track.id;
+      })) {
+        this._pendingAudioTracks.push({ track, sourceStream });
       }
+      return;
     }
-  }
 
-  stop() {
-    this.emit('unsubscribe.raf', this.rafToken, () => this.rafToken = null);
-    this.stream = null;
-    this.emit('stream.remove', 'composite');
-  }
+    if (this._audioSourcesMap.has(track.id)) return;
 
-  addAudioTrack(track) {
-    if (this.isChrome) {
-      this.stream.addTrack(track);
+    const destination = this._getOrCreateMixer();
+    const source = this._audioContext.createMediaStreamSource(new MediaStream([track]));
+    source.connect(destination);
+    this._audioSourcesMap.set(track.id, source);
+
+    const mixedTrack = destination.stream.getAudioTracks()[0];
+    const alreadyInStream = this.stream.getAudioTracks().some(t => t.id === mixedTrack.id);
+    if (!alreadyInStream) {
+      this.stream.getAudioTracks().forEach(t => this.stream.removeTrack(t));
+      this.stream.addTrack(mixedTrack);
     }
-    else {
-      this.stream = new MediaStream([track, ...this.stream.getVideoTracks(), ...this.stream.getAudioTracks()])
-    }
+
     this.emit('stream.mute');
   }
 
