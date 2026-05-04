@@ -141,6 +141,11 @@
   object-fit: cover !important;
   background: transparent !important;
 }
+  
+
+#streamsSection .mediadevice:not(.audioDevice) {
+  min-height: 350px !important;
+}
 
 #streamsSection .mediadevice.desktopDevice video {
   object-fit: contain !important;
