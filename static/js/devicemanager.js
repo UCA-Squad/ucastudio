@@ -346,6 +346,19 @@ class Device extends EventEmitter {
         && _browser === 'chrome'
         && (isWindows || isChromeOS);
 
+    if(!this.captureSystemAudio) {
+      document.querySelector('.browser-badge').style.display = 'inline-flex';
+      document.getElementById('alertCantShareAudioDesktop').style.display = 'flex';
+      const alertEl = document.getElementById('alertCantShareAudioDesktop');
+      if (alertEl) {
+        setTimeout(() => {
+          alertEl.style.transition = 'opacity .4s ease';
+          alertEl.style.opacity = '0';
+          setTimeout(() => alertEl.remove(), 400);
+        }, 30000);
+      }
+    }
+
     Object.defineProperty(this, 'browser', {
       get: function() {
         return _browser;

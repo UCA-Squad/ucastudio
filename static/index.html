@@ -66,7 +66,7 @@
                 <span id="debitPercent">0%</span>
                 <div class="slice"><div class="bar"></div><div class="fill"></div></div>
             </div>
-            <span style="text-align:center;color:white;display: block">Test de votre débit en cours…<br>Merci de patienter</span>
+            <span style="text-align:center;color:#3d3d3c;display: block">Test de votre débit en cours…<br>Merci de patienter</span>
         </div>
     </div>
 </div>
@@ -125,13 +125,23 @@
                     <i class="mdi mdi-arrow-left mdi-36px"></i> Retour
                 </label>
 
-                <div id="alertBrowser" class="alert alert-danger" style="max-width:700px;margin:.5rem auto">
-                    <button type="button" class="btn-close btn-close-sm"></button>
+                <div id="alertCantShareAudioDesktop" class="alert alert-warning alert-dismissible" style="max-width:700px;margin:.5rem auto;display:none">
+                    <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert" aria-label="Fermer"></button>
+                    <span>
+                        <i class="mdi mdi-lightbulb-on"></i>
+                        <strong>Enregistrement audio du bureau non disponible.</strong><br>
+                        Si vous souhaitez enregistrer le son de l'écran, utilisez un navigateur Chromium
+                        (Chrome, Edge, Brave…).
+                    </span>
+                </div>
+
+                <div id="alertBrowser" class="alert alert-danger  alert-dismissible" style="max-width:700px;margin:.5rem auto">
+                    <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert" aria-label="Fermer"></button>
                     Le support de votre navigateur est actuellement en cours d'amélioration.<br>
                     Veuillez utiliser <strong>Firefox</strong> ou <strong>Google Chrome</strong> pour de meilleurs résultats.
                 </div>
-                <div id="alertBrowserVersion" class="alert alert-danger" style="max-width:700px;margin:.5rem auto">
-                    <button type="button" class="btn-close btn-close-sm"></button>
+                <div id="alertBrowserVersion" class="alert alert-danger alert-dismissible" style="max-width:700px;margin:.5rem auto">
+                    <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert"></button>
                     Le support de votre navigateur n'est pas disponible dans cette version.<br>
                     Veuillez mettre à jour votre navigateur.
                 </div>
@@ -276,6 +286,9 @@
                         <div class="col-12 col-lg-5">
                             <input type="radio" name="desktop" class="hiddenCheck streamToggle" id="desktopstream" autocomplete="off" />
                             <label for="desktopstream" class="mediadevice action desktopDevice card card-hover" data-title="Partager l'écran" data-pseudotext="SHARE_DESKTOP" data-target="desktop">
+                                <span class="browser-badge">
+                                    <i class="mdi mdi-volume-off"></i> Son du bureau : indisponible avec ce navigateur
+                                </span>
                                 <video id="desktop" autoplay muted></video>
                                 <span class="placeholder">
                                     <i class="mdi mdi-monitor"></i>
