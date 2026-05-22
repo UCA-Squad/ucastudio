@@ -2271,6 +2271,11 @@ input:focus {
     white-space: nowrap;
 }
 
+
+#streamsSection .desktopDevice.active .browser-badge {
+    display: none !important;
+}
+
 .seizeneuvieme::before {
     margin-top: 56.25% !important;
 }
