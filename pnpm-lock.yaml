@@ -33,8 +33,8 @@ importers:
         specifier: ^8.2.0
         version: 8.2.0
       nodemailer:
-        specifier: ^8.0.11
-        version: 8.0.11
+        specifier: ^9.1.1
+        version: 9.1.1
       socket.io:
         specifier: ^4.8.3
         version: 4.8.3
@@ -329,8 +329,8 @@ packages:
     resolution: {integrity: sha512-+EUsqGPLsM+j/zdChZjsnX51g4XrHFOIXwfnCVPGlQk/k5giakcKsuxCObBRu6DSm9opw/O6slWbJdghQM4bBg==}
     engines: {node: '>= 0.6'}
 
-  nodemailer@8.0.11:
-    resolution: {integrity: sha512-nrO/pDAUKl+wXX+lx16tDLbnm0fW6sK/x8mgohaCpg+CdCEl482bD4tCuAZk2DyliruiNTIZxRCoWkDqJEnAiA==}
+  nodemailer@9.1.1:
+    resolution: {integrity: sha512-izw9mVKFix6YSnC9eLgV6g1opl9DUlRio9ZNcq+Wu9Ujn2UwF+8Nl0B8nz22kEC+CTZCvinkxwJ0DeFbb6NwcQ==}
     engines: {node: '>=6.0.0'}
 
   object-assign@4.1.1:
@@ -843,7 +843,7 @@ snapshots:
 
   negotiator@0.6.3: {}
 
-  nodemailer@8.0.11: {}
+  nodemailer@9.1.1: {}
 
   object-assign@4.1.1: {}
 
