@@ -346,7 +346,7 @@ class Device extends EventEmitter {
         && _browser === 'chrome'
         && (isWindows || isChromeOS);
 
-    if(!this.captureSystemAudio) {
+    if(this.deviceType === 'desktop' && !this.captureSystemAudio) {
       document.querySelector('.browser-badge').style.display = 'inline-flex';
       document.getElementById('alertCantShareAudioDesktop').style.display = 'flex';
       const alertEl = document.getElementById('alertCantShareAudioDesktop');
