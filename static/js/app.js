@@ -326,7 +326,8 @@ App.prototype = {
         //calcul resolutio
 
         let typeRec = this.getTypeOfRec(stream);
-        if(!typeRec)
+        const isMobile = window.matchMedia('(pointer: coarse)').matches;
+        if(!typeRec && !isMobile)
           $("#alertTypeDesktopShare").show();
         else
           $("#alertTypeDesktopShare").hide();
@@ -683,8 +684,9 @@ App.prototype = {
 
     if($(".desktopDevice").hasClass('active'))
     {
+      const isMobile = window.matchMedia('(pointer: coarse)').matches;
       if(!this.getTypeOfRec(deviceMgr.devices['desktop'].stream) && window.navigator.userAgent.indexOf("Linux") == -1 &&
-          window.navigator.userAgent.indexOf("Ubuntu") == -1 && window.navigator.userAgent.indexOf("X11") == -1)
+          window.navigator.userAgent.indexOf("Ubuntu") == -1 && window.navigator.userAgent.indexOf("X11") == -1 && !isMobile)
       {
         alert('Attention, l\'enregistrement d\'une fenêtre n\'est pas autorisé, merci de sélectionner l\'intégralité de votre écran (cliquez sur "Écran" pour changer)');
         return false;
