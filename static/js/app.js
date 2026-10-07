@@ -326,8 +326,15 @@ App.prototype = {
         //calcul resolutio
 
         let typeRec = this.getTypeOfRec(stream);
-        const isMobile =  navigator.maxTouchPoints > 0 ||
+        const isMobileOS =
+            /Android.*Mobile|iPhone|iPod/i.test(navigator.userAgent);
+
+        const hasTouch =
+            navigator.maxTouchPoints > 0 ||
             window.matchMedia('(pointer: coarse)').matches;
+
+        const isMobile = isMobileOS || hasTouch;
+
         if(!typeRec && !isMobile)
           $("#alertTypeDesktopShare").show();
         else
@@ -685,7 +692,14 @@ App.prototype = {
 
     if($(".desktopDevice").hasClass('active'))
     {
-      const isMobile = window.matchMedia('(pointer: coarse)').matches;
+      const isMobileOS =
+          /Android.*Mobile|iPhone|iPod/i.test(navigator.userAgent);
+
+      const hasTouch =
+          navigator.maxTouchPoints > 0 ||
+          window.matchMedia('(pointer: coarse)').matches;
+
+      const isMobile = isMobileOS || hasTouch;
       if(!this.getTypeOfRec(deviceMgr.devices['desktop'].stream) && window.navigator.userAgent.indexOf("Linux") == -1 &&
           window.navigator.userAgent.indexOf("Ubuntu") == -1 && window.navigator.userAgent.indexOf("X11") == -1 && !isMobile)
       {
