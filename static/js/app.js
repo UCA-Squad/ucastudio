@@ -326,7 +326,8 @@ App.prototype = {
         //calcul resolutio
 
         let typeRec = this.getTypeOfRec(stream);
-        const isMobile = window.matchMedia('(pointer: coarse)').matches;
+        const isMobile =  navigator.maxTouchPoints > 0 ||
+            window.matchMedia('(pointer: coarse)').matches;
         if(!typeRec && !isMobile)
           $("#alertTypeDesktopShare").show();
         else
