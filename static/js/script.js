@@ -384,17 +384,7 @@ $( document ).ready(function() {
     const canShareScreen = window.isSecureContext &&
         typeof navigator.mediaDevices?.getDisplayMedia === 'function';
 
-
-    const isMobileOS =
-        /Android.*Mobile|iPhone|iPod/i.test(navigator.userAgent);
-
-    const hasTouch =
-        navigator.maxTouchPoints > 0 ||
-        window.matchMedia('(pointer: coarse)').matches;
-
-    const isMobile = isMobileOS || hasTouch;
-    
-    if (!canShareScreen  && !isMobile) {
+    if (!canShareScreen) {
 
         const desktopInput = document.getElementById('desktopstream');
         const desktopCard  = document.querySelector('label.desktopDevice');
