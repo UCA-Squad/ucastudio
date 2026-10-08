@@ -404,7 +404,7 @@ $( document ).ready(function() {
             desktopCol.style.position = 'relative';
 
             const notice = document.createElement('div');
-            notice.textContent = 'Non disponible sur mobile';
+            notice.textContent = 'Non disponible sur cet appareil ou ce navigateur';
             notice.style.cssText = `
             position: absolute;
             bottom: 5rem;
