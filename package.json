@@ -12,7 +12,7 @@
     "js2xmlparser": "^5.0.0",
     "jszip": "^3.10.2",
     "ldapts": "^8.2.0",
-    "nodemailer": "^10.0.15",
+    "nodemailer": "^10.1.7",
     "socket.io": "^4.8.4",
     "ua-parser-js": "^1.0.41"
   }
